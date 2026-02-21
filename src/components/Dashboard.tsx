@@ -4,6 +4,7 @@ import ProfileEditor from './editors/ProfileEditor';
 import UserEditor from './editors/UserEditor';
 import TruckEditor from './editors/TruckEditor';
 import GarageEditor from './editors/GarageEditor';
+import AboutModal from './AboutModal';
 
 type TabId = 'overview' | 'bank' | 'skills' | 'garage';
 
@@ -73,6 +74,7 @@ export default function Dashboard({ data, onSave, saving, onBack, profileId }: D
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [editableData, setEditableData] = useState<GameData>({ ...data });
   const [hasChanges, setHasChanges] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   const handleChange = (updates: Partial<GameData>) => {
     setEditableData((prev) => {
@@ -162,6 +164,18 @@ export default function Dashboard({ data, onSave, saving, onBack, profileId }: D
               <span className="text-gold font-medium">{editableData.experiencePoints.toLocaleString()}</span>
             </div>
           </div>
+        </div>
+
+        {/* About Button */}
+        <div className="p-3 border-t border-border">
+          <button
+            onClick={() => setShowAbout(true)}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all
+                       cursor-pointer text-text-secondary hover:bg-bg-card hover:text-text-primary"
+          >
+            <span className="text-base">ℹ️</span>
+            <span>About</span>
+          </button>
         </div>
       </aside>
 
@@ -334,6 +348,9 @@ export default function Dashboard({ data, onSave, saving, onBack, profileId }: D
           </p>
         </footer>
       </main>
+
+      {/* About Modal */}
+      {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
     </div>
   );
 }
