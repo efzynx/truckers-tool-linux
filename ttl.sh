@@ -21,7 +21,7 @@ REPO_NAME="truckers-tool-linux"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 INSTALL_DIR="$HOME/.truckers-tool-linux"
 MIN_NODE_VERSION=18
-CURRENT_VERSION="0.1.0"
+CURRENT_VERSION="0.1.1"
 
 # ─── Colors ───────────────────────────────────────────────────────
 RED='\033[0;31m'
