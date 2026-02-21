@@ -64,7 +64,7 @@ check_node_version() {
 get_latest_version() {
   local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest"
   local version
-  version=$(curl -fsSL "$api_url" 2>/dev/null | grep '"tag_name"' | head -1 | sed 's/.*"tag_name":\s*"[vV]\?\(.*\)".*/\1/')
+  version=$(curl -fsSL "$api_url" 2>/dev/null | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":\s*"[vV]?([^"]+)".*/\1/')
   echo "$version"
 }
 
@@ -72,7 +72,7 @@ get_latest_version() {
 get_latest_prerelease() {
   local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases"
   local version
-  version=$(curl -fsSL "$api_url" 2>/dev/null | grep -A2 '"prerelease": true' | grep '"tag_name"' | head -1 | sed 's/.*"tag_name":\s*"[vV]\?\(.*\)".*/\1/')
+  version=$(curl -fsSL "$api_url" 2>/dev/null | grep -A2 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":\s*"[vV]?([^"]+)".*/\1/')
   echo "$version"
 }
 
