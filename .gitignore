@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+.env.local
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Decrypted save files (sensitive game data)
+decrypted_game.sii
+*.sii
+
+# Test / debug scripts
+test.js
+
+# Logs
+*.log
+npm-debug.log*
