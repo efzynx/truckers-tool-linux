@@ -20,25 +20,44 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 - **npm** v9 or higher
 - **ETS2/ATS** installed (native Linux, Wine, or Proton)
 
-## 🚀 Installation
+## 🚀 Quick Install (Recommended)
+
+Download and run the installer script:
 
 ```bash
-# Clone the repository
-git clone https://github.com/efzynx/truckers-tool-linux.git
-cd truckers-tool-linux
+# Download the installer
+curl -fsSL https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/ttl.sh -o ttl.sh
+chmod +x ttl.sh
 
-# Install dependencies
-npm install
-```
+# Install (clone repo + npm install)
+./ttl.sh -i
 
-## ▶️ Usage
-
-```bash
-# Start the development server (frontend + backend)
-npm run dev
+# Start the web app
+./ttl.sh -S
 ```
 
 Open your browser at **http://localhost:5173**
+
+### Script Commands
+
+| Command | Deskripsi |
+|---|---|
+| `./ttl.sh -i` | Install (clone + npm install) |
+| `./ttl.sh -S` | Start / jalankan web app |
+| `./ttl.sh -u` | Cek apakah ada update |
+| `./ttl.sh -UI` | Update ke versi terbaru |
+| `./ttl.sh -h` | Tampilkan bantuan |
+
+### Manual Install (Alternative)
+
+```bash
+git clone https://github.com/efzynx/truckers-tool-linux.git
+cd truckers-tool-linux
+npm install
+npm run dev
+```
+
+## ▶️ Usage
 
 ### Step-by-step:
 
