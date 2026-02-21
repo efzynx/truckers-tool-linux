@@ -3,14 +3,25 @@
 # Truckers Tool Linux (TTL) — Installer & Launcher
 # https://github.com/efzynx/truckers-tool-linux
 #
+# Usage:
+#   ./ttl.sh install     Install app (clone + npm install)
+#   ./ttl.sh start       Start web app
+#   ./ttl.sh -IS         Install + langsung start
+#   ./ttl.sh update      Update ke versi terbaru
+#   ./ttl.sh check       Cek update dari GitHub Releases
+#   ./ttl.sh version     Tampilkan versi saat ini
+#   ./ttl.sh node        Install Node.js via nvm
+#
 
 set -e
 
 # ─── Config ───────────────────────────────────────────────────────
-REPO_URL="https://github.com/efzynx/truckers-tool-linux.git"
+REPO_OWNER="efzynx"
+REPO_NAME="truckers-tool-linux"
+REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 INSTALL_DIR="$HOME/.truckers-tool-linux"
-SCRIPT_NAME="ttl.sh"
 MIN_NODE_VERSION=18
+CURRENT_VERSION="0.1.0"
 
 # ─── Colors ───────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -18,12 +29,13 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
-NC='\033[0m' # No Color
+DIM='\033[2m'
+NC='\033[0m'
 
 print_banner() {
   echo -e "${CYAN}"
   echo "  ╔══════════════════════════════════════════╗"
-  echo "  ║     🚛  Truckers Tool Linux  v2.0       ║"
+  echo "  ║     🚛  Truckers Tool Linux  v${CURRENT_VERSION}      ║"
   echo "  ║     ETS2 / ATS Save Editor for Linux    ║"
   echo "  ╚══════════════════════════════════════════╝"
   echo -e "${NC}"
@@ -36,19 +48,77 @@ error()   { echo -e "${RED}[ERROR]${NC} $1"; }
 # ─── Helpers ──────────────────────────────────────────────────────
 
 check_command() {
-  if ! command -v "$1" &>/dev/null; then
-    error "$1 tidak ditemukan. Silahkan install terlebih dahulu."
-    exit 1
-  fi
+  command -v "$1" &>/dev/null
 }
 
 check_node_version() {
   local node_ver
   node_ver=$(node -v 2>/dev/null | sed 's/v//' | cut -d. -f1)
   if [ -z "$node_ver" ] || [ "$node_ver" -lt "$MIN_NODE_VERSION" ]; then
-    error "Node.js v${MIN_NODE_VERSION}+ diperlukan. Versi saat ini: $(node -v 2>/dev/null || echo 'tidak terinstall')"
-    exit 1
+    return 1
   fi
+  return 0
+}
+
+# Fetch latest release version from GitHub API
+get_latest_version() {
+  local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest"
+  local version
+  version=$(curl -fsSL "$api_url" 2>/dev/null | grep '"tag_name"' | head -1 | sed 's/.*"tag_name":\s*"v\?\(.*\)".*/\1/')
+  echo "$version"
+}
+
+# Fetch latest pre-release version from GitHub API
+get_latest_prerelease() {
+  local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases"
+  local version
+  version=$(curl -fsSL "$api_url" 2>/dev/null | grep -A2 '"prerelease": true' | grep '"tag_name"' | head -1 | sed 's/.*"tag_name":\s*"v\?\(.*\)".*/\1/')
+  echo "$version"
+}
+
+# Compare semantic versions: returns 0 if $1 < $2
+version_lt() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$1" ] && [ "$1" != "$2" ]
+}
+
+# ─── Install Node.js ─────────────────────────────────────────────
+
+do_install_node() {
+  print_banner
+
+  if check_command node && check_node_version; then
+    info "Node.js sudah terinstall: $(node -v)"
+    read -rp "Install ulang via nvm? (y/N): " confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+      return 0
+    fi
+  fi
+
+  info "Menginstall Node.js via nvm..."
+  echo ""
+
+  # Install nvm
+  if [ ! -d "$HOME/.nvm" ]; then
+    info "Downloading nvm..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+  else
+    info "nvm sudah terinstall."
+  fi
+
+  # Load nvm
+  export NVM_DIR="$HOME/.nvm"
+  # shellcheck disable=SC1091
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+  # Install Node.js
+  info "Downloading dan installing Node.js..."
+  nvm install 24
+  echo ""
+
+  info "✅ Node.js terinstall!"
+  echo -e "  Node: ${BOLD}$(node -v)${NC}"
+  echo -e "  npm:  ${BOLD}$(npm -v)${NC}"
+  echo ""
 }
 
 # ─── Install ──────────────────────────────────────────────────────
@@ -60,11 +130,27 @@ do_install() {
 
   # Check prerequisites
   info "Memeriksa prasyarat..."
-  check_command git
-  check_command node
-  check_command npm
-  check_node_version
-  info "✅ Semua prasyarat terpenuhi (Node $(node -v), npm $(npm -v))"
+
+  if ! check_command git; then
+    error "git tidak ditemukan. Install dengan: sudo apt install git"
+    exit 1
+  fi
+
+  if ! check_command node || ! check_node_version; then
+    warn "Node.js v${MIN_NODE_VERSION}+ tidak ditemukan."
+    echo ""
+    echo -e "  Jalankan ${BOLD}./ttl.sh node${NC} untuk install Node.js via nvm."
+    echo -e "  Atau install manual dari ${CYAN}https://nodejs.org${NC}"
+    echo ""
+    read -rp "Install Node.js sekarang via nvm? (Y/n): " confirm
+    if [[ ! "$confirm" =~ ^[Nn]$ ]]; then
+      do_install_node
+    else
+      exit 1
+    fi
+  fi
+
+  info "✅ Prasyarat terpenuhi (Node $(node -v), npm $(npm -v))"
   echo ""
 
   # Clone repo
@@ -89,16 +175,10 @@ do_install() {
   npm install
   echo ""
 
-  # Copy script to install dir
-  cp "$INSTALL_DIR/$SCRIPT_NAME" "$INSTALL_DIR/$SCRIPT_NAME" 2>/dev/null || true
-
-  info "✅ Instalasi selesai!"
+  info "✅ Instalasi selesai! (v${CURRENT_VERSION})"
   echo ""
-  echo -e "  ${BOLD}Lokasi:${NC}  $INSTALL_DIR"
-  echo -e "  ${BOLD}Jalankan:${NC} $0 -S"
-  echo ""
-  echo -e "  ${CYAN}Atau masuk ke direktori dan jalankan manual:${NC}"
-  echo -e "  cd $INSTALL_DIR && npm run dev"
+  echo -e "  ${BOLD}Lokasi:${NC}    $INSTALL_DIR"
+  echo -e "  ${BOLD}Jalankan:${NC}  ./ttl.sh start"
   echo ""
 }
 
@@ -108,15 +188,26 @@ do_start() {
   print_banner
 
   if [ ! -d "$INSTALL_DIR" ]; then
-    error "Truckers Tool belum terinstall. Jalankan: $0 -i"
+    error "Truckers Tool belum terinstall."
+    echo -e "  Jalankan: ${BOLD}./ttl.sh install${NC}"
     exit 1
   fi
 
-  info "Menjalankan Truckers Tool Linux..."
-  info "Frontend: http://localhost:5173"
-  info "Backend:  http://localhost:3001"
+  # Load nvm if available
+  export NVM_DIR="$HOME/.nvm"
+  # shellcheck disable=SC1091
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 2>/dev/null
+
+  if ! check_command node; then
+    error "Node.js tidak ditemukan. Jalankan: ./ttl.sh node"
+    exit 1
+  fi
+
+  info "Menjalankan Truckers Tool Linux v${CURRENT_VERSION}..."
+  info "🌐 Web App: ${BOLD}http://localhost:5173${NC}"
+  info "📡 API:     ${BOLD}http://localhost:3001${NC}"
   echo ""
-  info "Tekan Ctrl+C untuk menghentikan server."
+  info "Tekan Ctrl+C untuk menghentikan."
   echo ""
 
   cd "$INSTALL_DIR"
@@ -127,27 +218,35 @@ do_start() {
 
 do_check_update() {
   print_banner
+  info "Versi saat ini: ${BOLD}v${CURRENT_VERSION}${NC}"
+  info "Memeriksa update dari GitHub Releases..."
+  echo ""
 
-  if [ ! -d "$INSTALL_DIR" ]; then
-    error "Truckers Tool belum terinstall. Jalankan: $0 -i"
-    exit 1
+  local latest
+  latest=$(get_latest_version)
+
+  if [ -z "$latest" ]; then
+    warn "Tidak bisa mengambil info release. Cek koneksi internet."
+    echo ""
+    return
   fi
 
-  cd "$INSTALL_DIR"
+  info "Versi terbaru (stable): ${BOLD}v${latest}${NC}"
 
-  info "Memeriksa update..."
-  git fetch origin main 2>/dev/null
-
-  LOCAL=$(git rev-parse HEAD 2>/dev/null)
-  REMOTE=$(git rev-parse origin/main 2>/dev/null)
-
-  if [ "$LOCAL" = "$REMOTE" ]; then
-    info "✅ Sudah versi terbaru!"
-  else
-    BEHIND=$(git rev-list HEAD..origin/main --count 2>/dev/null)
-    warn "Ada ${BEHIND} commit baru tersedia."
+  if version_lt "$CURRENT_VERSION" "$latest"; then
     echo ""
-    echo -e "  Jalankan ${BOLD}$0 -UI${NC} untuk update."
+    warn "🆕 Update tersedia! v${CURRENT_VERSION} → v${latest}"
+    echo -e "  Jalankan ${BOLD}./ttl.sh update${NC} untuk update."
+  else
+    info "✅ Sudah versi terbaru!"
+  fi
+
+  # Check pre-release
+  local beta
+  beta=$(get_latest_prerelease)
+  if [ -n "$beta" ] && version_lt "$CURRENT_VERSION" "$beta"; then
+    echo ""
+    echo -e "  ${DIM}🧪 Pre-release tersedia: v${beta} (beta/tester)${NC}"
   fi
   echo ""
 }
@@ -158,26 +257,46 @@ do_update() {
   print_banner
 
   if [ ! -d "$INSTALL_DIR" ]; then
-    error "Truckers Tool belum terinstall. Jalankan: $0 -i"
+    error "Truckers Tool belum terinstall."
+    echo -e "  Jalankan: ${BOLD}./ttl.sh install${NC}"
     exit 1
   fi
 
   cd "$INSTALL_DIR"
 
+  info "Versi saat ini: ${BOLD}v${CURRENT_VERSION}${NC}"
   info "Mengupdate Truckers Tool Linux..."
+  echo ""
 
   # Pull latest changes
   git pull origin main
   echo ""
 
-  # Reinstall dependencies (in case package.json changed)
+  # Reinstall dependencies
   info "Mengupdate dependencies..."
   npm install
   echo ""
 
+  # Update script itself
+  if [ -f "$INSTALL_DIR/ttl.sh" ]; then
+    local script_path
+    script_path="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+    if [ "$script_path" != "$INSTALL_DIR/ttl.sh" ]; then
+      info "Mengupdate script ttl.sh..."
+      cp "$INSTALL_DIR/ttl.sh" "$script_path"
+      chmod +x "$script_path"
+    fi
+  fi
+
   info "✅ Update selesai!"
-  echo -e "  Jalankan ${BOLD}$0 -S${NC} untuk memulai."
+  echo -e "  Jalankan ${BOLD}./ttl.sh start${NC} untuk memulai."
   echo ""
+}
+
+# ─── Version ─────────────────────────────────────────────────────
+
+do_version() {
+  echo "Truckers Tool Linux v${CURRENT_VERSION}"
 }
 
 # ─── Help ─────────────────────────────────────────────────────────
@@ -185,20 +304,27 @@ do_update() {
 show_help() {
   print_banner
   echo -e "${BOLD}Penggunaan:${NC}"
-  echo "  ./ttl.sh [opsi]"
+  echo "  ./ttl.sh <command>"
   echo ""
-  echo -e "${BOLD}Opsi:${NC}"
-  echo "  -i     Install Truckers Tool Linux (clone + npm install)"
-  echo "  -S     Start / jalankan web app"
-  echo "  -u     Cek apakah ada update terbaru"
-  echo "  -UI    Update app (git pull + npm install)"
-  echo "  -h     Tampilkan bantuan ini"
+  echo -e "${BOLD}Commands:${NC}"
+  echo "  install,  -i,  --install     Install app (clone + npm install)"
+  echo "  start,    -s,  --start       Jalankan web app"
+  echo "  update,   -u,  --update      Update ke versi terbaru"
+  echo "  check,    -c,  --check       Cek update (via GitHub Releases)"
+  echo "  node,     -n,  --node        Install Node.js via nvm"
+  echo "  version,  -v,  --version     Tampilkan versi saat ini"
+  echo "  help,     -h,  --help        Tampilkan bantuan ini"
+  echo ""
+  echo -e "${BOLD}Kombinasi:${NC}"
+  echo "  -IS                           Install + langsung start"
   echo ""
   echo -e "${BOLD}Contoh:${NC}"
-  echo "  ./ttl.sh -i      # Install pertama kali"
-  echo "  ./ttl.sh -S      # Jalankan web app"
-  echo "  ./ttl.sh -u      # Cek update"
-  echo "  ./ttl.sh -UI     # Update ke versi terbaru"
+  echo "  ./ttl.sh node                # Install Node.js"
+  echo "  ./ttl.sh install             # Install app"
+  echo "  ./ttl.sh start               # Jalankan web app"
+  echo "  ./ttl.sh -IS                 # Install + start sekaligus"
+  echo "  ./ttl.sh check               # Cek update"
+  echo "  ./ttl.sh update              # Update ke versi terbaru"
   echo ""
 }
 
@@ -210,13 +336,17 @@ if [ $# -eq 0 ]; then
 fi
 
 case "$1" in
-  -i)   do_install ;;
-  -S)   do_start ;;
-  -u)   do_check_update ;;
-  -UI)  do_update ;;
-  -h|--help) show_help ;;
+  install|-i|--install)       do_install ;;
+  start|-s|--start)           do_start ;;
+  update|-u|--update)         do_update ;;
+  check|-c|--check)           do_check_update ;;
+  node|-n|--node)             do_install_node ;;
+  version|-v|--version)       do_version ;;
+  -IS)                        do_install; do_start ;;
+  help|-h|--help)             show_help ;;
   *)
-    error "Opsi tidak dikenal: $1"
+    error "Command tidak dikenal: $1"
+    echo ""
     show_help
     exit 1
     ;;
