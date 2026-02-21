@@ -330,7 +330,7 @@ export default function Dashboard({ data, onSave, saving, onBack, profileId }: D
         {/* Footer */}
         <footer className="h-10 bg-bg-secondary border-t border-border flex items-center justify-center px-6 flex-shrink-0">
           <p className="text-xs text-text-muted">
-            v2.0.0 • Berjalan secara lokal • Data tidak dikirim ke server manapun
+            v{__APP_VERSION__} • Berjalan secara lokal • Data tidak dikirim ke server manapun
           </p>
         </footer>
       </main>

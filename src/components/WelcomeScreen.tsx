@@ -95,7 +95,7 @@ export default function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         </button>
 
         <p className="text-center text-text-muted text-xs mt-5">
-          v2.0.0 • Running locally • Data not sent to any server
+          v{__APP_VERSION__} • Running locally • Data not sent to any server
         </p>
       </div>
     </div>

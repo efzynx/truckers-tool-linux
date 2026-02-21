@@ -98,7 +98,7 @@ export default function GameSelector({ onSelect }: GameSelectorProps) {
         </div>
 
         <p className="text-center text-text-muted text-xs mt-8">
-          v2.0.0 • Berjalan secara lokal • Data tidak dikirim ke server manapun
+          v{__APP_VERSION__} • Berjalan secara lokal • Data tidak dikirim ke server manapun
         </p>
       </div>
     </div>

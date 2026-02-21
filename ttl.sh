@@ -21,7 +21,15 @@ REPO_NAME="truckers-tool-linux"
 REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
 INSTALL_DIR="$HOME/.truckers-tool-linux"
 MIN_NODE_VERSION=18
-CURRENT_VERSION="0.1.1"
+
+# Read version from package.json (single source of truth)
+if [ -f "$INSTALL_DIR/package.json" ]; then
+  CURRENT_VERSION=$(grep '"version"' "$INSTALL_DIR/package.json" | sed -E 's/.*"version":\s*"([^"]+)".*/\1/')
+elif [ -f "$(dirname "$0")/package.json" ]; then
+  CURRENT_VERSION=$(grep '"version"' "$(dirname "$0")/package.json" | sed -E 's/.*"version":\s*"([^"]+)".*/\1/')
+else
+  CURRENT_VERSION="unknown"
+fi
 
 # ─── Colors ───────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -68,12 +76,26 @@ get_latest_version() {
   echo "$version"
 }
 
-# Fetch latest pre-release version from GitHub API
+# Fetch latest pre-release tag from GitHub API
 get_latest_prerelease() {
   local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases"
+  local json
+  json=$(curl -fsSL "$api_url" 2>/dev/null)
+  # Find first release where prerelease is true and extract its tag
+  local tag
+  tag=$(echo "$json" | grep -B5 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')
+  # Strip v/V prefix for version comparison
   local version
-  version=$(curl -fsSL "$api_url" 2>/dev/null | grep -A2 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":\s*"[vV]?([^"]+)".*/\1/')
+  version=$(echo "$tag" | sed -E 's/^[vV]//')
   echo "$version"
+}
+
+# Get the raw tag name for a pre-release (with v prefix)
+get_latest_prerelease_tag() {
+  local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases"
+  local tag
+  tag=$(curl -fsSL "$api_url" 2>/dev/null | grep -B5 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')
+  echo "$tag"
 }
 
 # Compare semantic versions: returns 0 if $1 < $2
@@ -247,6 +269,7 @@ do_check_update() {
   if [ -n "$beta" ] && version_lt "$CURRENT_VERSION" "$beta"; then
     echo ""
     echo -e "  ${DIM}🧪 Pre-release tersedia: v${beta} (beta/tester)${NC}"
+    echo -e "  ${DIM}Jalankan ${BOLD}./ttl.sh update --beta${NC}${DIM} untuk install.${NC}"
   fi
   echo ""
 }
@@ -254,6 +277,11 @@ do_check_update() {
 # ─── Update ──────────────────────────────────────────────────────
 
 do_update() {
+  local use_beta=false
+  if [ "$1" = "--beta" ] || [ "$1" = "-b" ]; then
+    use_beta=true
+  fi
+
   print_banner
 
   if [ ! -d "$INSTALL_DIR" ]; then
@@ -265,11 +293,40 @@ do_update() {
   cd "$INSTALL_DIR"
 
   info "Versi saat ini: ${BOLD}v${CURRENT_VERSION}${NC}"
-  info "Mengupdate Truckers Tool Linux..."
-  echo ""
 
-  # Pull latest changes
-  git pull origin main
+  if [ "$use_beta" = true ]; then
+    # Update to pre-release
+    info "🧪 Mengupdate ke versi ${YELLOW}beta (pre-release)${NC}..."
+    echo ""
+
+    local beta_tag
+    beta_tag=$(get_latest_prerelease_tag)
+
+    if [ -z "$beta_tag" ]; then
+      error "Tidak ada pre-release yang tersedia."
+      exit 1
+    fi
+
+    local beta_ver
+    beta_ver=$(echo "$beta_tag" | sed -E 's/^[vV]//')
+    info "Pre-release terbaru: ${BOLD}v${beta_ver}${NC}"
+
+    # Fetch all tags and checkout
+    git fetch origin --tags
+    git checkout "$beta_tag"
+    echo ""
+
+    warn "⚠️  Kamu sekarang di versi beta (${beta_tag})."
+    echo -e "  Untuk kembali ke stable: ${BOLD}./ttl.sh update${NC}"
+  else
+    # Update to stable (main branch)
+    info "Mengupdate ke versi ${GREEN}stable${NC}..."
+    echo ""
+
+    # Make sure we're on main branch
+    git checkout main 2>/dev/null || true
+    git pull origin main
+  fi
   echo ""
 
   # Reinstall dependencies
@@ -315,7 +372,8 @@ show_help() {
   echo "  version,  -v,  --version     Tampilkan versi saat ini"
   echo "  help,     -h,  --help        Tampilkan bantuan ini"
   echo ""
-  echo -e "${BOLD}Kombinasi:${NC}"
+  echo -e "${BOLD}Options:${NC}"
+  echo "  update --beta                 Update ke pre-release (beta)"
   echo "  -IS                           Install + langsung start"
   echo ""
   echo -e "${BOLD}Contoh:${NC}"
@@ -324,7 +382,8 @@ show_help() {
   echo "  ./ttl.sh start               # Jalankan web app"
   echo "  ./ttl.sh -IS                 # Install + start sekaligus"
   echo "  ./ttl.sh check               # Cek update"
-  echo "  ./ttl.sh update              # Update ke versi terbaru"
+  echo "  ./ttl.sh update              # Update stable"
+  echo "  ./ttl.sh update --beta       # Update ke beta"
   echo ""
 }
 
@@ -338,7 +397,7 @@ fi
 case "$1" in
   install|-i|--install)       do_install ;;
   start|-s|--start)           do_start ;;
-  update|-u|--update)         do_update ;;
+  update|-u|--update)         do_update "$2" ;;
   check|-c|--check)           do_check_update ;;
   node|-n|--node)             do_install_node ;;
   version|-v|--version)       do_version ;;
