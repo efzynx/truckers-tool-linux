@@ -1,20 +1,33 @@
 export default function TruckEditor() {
   return (
-    <div className="animate-fade-in">
-      <h3 className="text-xl font-bold text-text-primary mb-1 flex items-center gap-2">
-        🚛 Truck
-      </h3>
-      <p className="text-text-muted text-sm mb-6">Informasi truck kamu</p>
+    <section className="w-full animate-fade-in" style={{ animationDelay: '50ms' }}>
+      <div className="bg-surface/80 rounded-2xl p-6 border border-white/5 relative overflow-hidden group">
+        {/* Decorative background element */}
+        <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
+        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+           <span className="material-symbols-outlined text-8xl text-primary">local_shipping</span>
+        </div>
+        
+        <div className="flex items-center gap-3 mb-6 relative z-10">
+          <div className="w-10 h-10 rounded-xl bg-background-dark border border-white/10 flex items-center justify-center">
+             <span className="material-symbols-outlined text-primary text-xl">directions_car</span>
+          </div>
+          <div>
+            <h3 className="text-white text-sm font-bold tracking-[0.1em] uppercase font-display">Fleet Control</h3>
+            <span className="text-xs text-text-muted/60 font-mono">Vehicle Management</span>
+          </div>
+        </div>
 
-      <div className="bg-bg-primary border border-border rounded-xl p-8 text-center">
-        <div className="text-5xl mb-4">🚧</div>
-        <h4 className="text-text-primary font-semibold mb-2">Coming Soon</h4>
-        <p className="text-text-muted text-sm">
-          Fitur edit truck akan tersedia di update selanjutnya.
-          <br />
-          Termasuk: engine, transmission, chassis, dan paint job.
-        </p>
+        <div className="flex flex-col items-center justify-center p-6 bg-background-dark/50 rounded-xl border border-white/5 relative z-10 text-center gap-3">
+          <span className="material-symbols-outlined text-4xl text-primary/50 mb-1">lock</span>
+          <p className="text-xs text-text-muted font-mono leading-relaxed max-w-md mx-auto">
+            Fitur perbaikan & kustomisasi truk akan tersedia pada update mendatang.
+          </p>
+          <div className="mt-2 text-[10px] text-primary font-mono tracking-widest uppercase bg-primary/10 border border-primary/20 px-2 py-1 rounded">
+            Coming Soon
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

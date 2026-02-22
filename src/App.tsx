@@ -1,11 +1,11 @@
+"use client";
+
 import { useState, useCallback } from 'react';
 import type { AppStep, GameType, Profile, GameData } from './types';
 import { scanProfiles, backupProfile, decryptProfile, parseContent, saveChanges } from './hooks/useApi';
 import WelcomeScreen from './components/WelcomeScreen';
-import GameSelector from './components/GameSelector';
 import PathInput from './components/PathInput';
 import ProfileList from './components/ProfileList';
-import BackupDialog from './components/BackupDialog';
 import Dashboard from './components/Dashboard';
 
 function App() {
@@ -23,8 +23,6 @@ function App() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [backupLoading, setBackupLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
 
   // ---- Handlers ----
 
@@ -51,17 +49,10 @@ function App() {
     }
   }, []);
 
-  const handleProfileSelect = useCallback((profile: Profile) => {
-    setSelectedProfile(profile);
-    setStep('backup-confirm');
-  }, []);
-
-  const proceedToDecrypt = useCallback(async () => {
-    if (!selectedProfile) return;
-
+  const proceedToDecrypt = useCallback(async (profile: Profile) => {
     try {
       // Decrypt the save file
-      const decryptResult = await decryptProfile(selectedProfile.path);
+      const decryptResult = await decryptProfile(profile.path);
       if (!decryptResult.success) {
         setScanError(decryptResult.error || 'Gagal mendekripsi');
         setStep('profile-select');
@@ -85,39 +76,38 @@ function App() {
       setScanError(err instanceof Error ? err.message : 'Network error');
       setStep('profile-select');
     }
-  }, [selectedProfile]);
+  }, []);
 
-  const handleBackup = useCallback(async () => {
-    if (!selectedProfile) return;
-    setBackupLoading(true);
-    try {
-      const result = await backupProfile(selectedProfile.path);
-      if (result.success) {
-        await proceedToDecrypt();
-      } else {
-        setScanError(result.error || 'Gagal backup');
-        setStep('profile-select');
+  const handleProfileSelect = useCallback(async (profile: Profile, useBackup: boolean) => {
+    setSelectedProfile(profile);
+    
+    if (useBackup) {
+      setBackupLoading(true);
+      try {
+        const result = await backupProfile(profile.path);
+        if (result.success) {
+          await proceedToDecrypt(profile);
+        } else {
+          setScanError(result.error || 'Gagal backup');
+          setStep('profile-select');
+        }
+      } catch (err) {
+        setScanError(err instanceof Error ? err.message : 'Network error');
+      } finally {
+        setBackupLoading(false);
       }
-    } catch (err) {
-      setScanError(err instanceof Error ? err.message : 'Network error');
-    } finally {
+    } else {
+      setBackupLoading(true);
+      await proceedToDecrypt(profile);
       setBackupLoading(false);
     }
-  }, [selectedProfile, proceedToDecrypt]);
-
-  const handleSkipBackup = useCallback(async () => {
-    setBackupLoading(true);
-    await proceedToDecrypt();
-    setBackupLoading(false);
   }, [proceedToDecrypt]);
 
   const handleSave = useCallback(
     async (updatedData: GameData) => {
       setSaving(true);
-      setSaveSuccess(null);
       try {
         const result = await saveChanges(siiFilePath, siiContent, updatedData);
-        setSaveSuccess(result.success);
         if (result.success) {
           setGameData(updatedData);
           // Update the siiContent with the new values for subsequent saves
@@ -127,12 +117,8 @@ function App() {
             setSiiContent(decryptResult.content);
           }
         }
-      } catch {
-        setSaveSuccess(false);
       } finally {
         setSaving(false);
-        // Auto-hide the save status after 4 seconds
-        setTimeout(() => setSaveSuccess(null), 4000);
       }
     },
     [siiFilePath, siiContent, selectedProfile]
@@ -146,7 +132,6 @@ function App() {
     setGameData(null);
     setSiiContent('');
     setSiiFilePath('');
-    setSaveSuccess(null);
     setScanError(null);
   }, []);
 
@@ -154,10 +139,7 @@ function App() {
 
   switch (step) {
     case 'welcome':
-      return <WelcomeScreen onContinue={() => setStep('game-select')} />;
-
-    case 'game-select':
-      return <GameSelector onSelect={handleGameSelect} />;
+      return <WelcomeScreen onSelect={handleGameSelect} />;
 
     case 'path-input':
       return (
@@ -176,15 +158,6 @@ function App() {
           profiles={profiles}
           onSelect={handleProfileSelect}
           onBack={() => setStep('path-input')}
-        />
-      );
-
-    case 'backup-confirm':
-      return (
-        <BackupDialog
-          profileName={selectedProfile?.name || ''}
-          onBackup={handleBackup}
-          onSkip={handleSkipBackup}
           loading={backupLoading}
         />
       );

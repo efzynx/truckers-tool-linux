@@ -2,7 +2,7 @@
 
 A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simulator** on Linux. Edit your profile data (money, XP, skills) directly from the browser — no Windows tools needed.
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-0.1.0-orange?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.0.0--beta.1-orange?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 ## ✨ Features
 
@@ -10,9 +10,10 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 - 📂 **Profile Scanner** — Auto-detect profiles from native or Wine/Proton paths
 - 🔓 **Auto Decrypt** — Decrypt SCS binary save files on-the-fly
 - 📊 **Dashboard** — View profile overview: level, XP, money, skills
+- ⚡ **Quick Actions** — Fast actions like Inject €50k, Clear Debt, Add 10K XP
 - ✏️ **Profile Editor** — Edit money, experience points, and skill levels
 - 💾 **Auto Backup** — Creates backup before any changes
-- 🎨 **Dark Theme** — Glassmorphism UI with smooth animations
+- 🎨 **Pixel-Perfect Stitch UI** — Responsive Glassmorphism UI (Mobile & Desktop Full-width)
 
 ## 📋 Prerequisites
 

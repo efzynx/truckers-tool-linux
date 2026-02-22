@@ -1,103 +1,110 @@
+import type { GameType } from '../types';
+
 interface WelcomeScreenProps {
-  onContinue: () => void;
+  onSelect: (game: GameType) => void;
 }
 
-const features = [
-  {
-    icon: '💰',
-    title: 'Edit Money',
-    desc: 'Manage your in-game currency.',
-    color: 'from-green-500/20 to-emerald-900/10',
-  },
-  {
-    icon: '⭐',
-    title: 'Edit XP & Level',
-    desc: 'Adjust driver experience and level.',
-    color: 'from-amber-500/20 to-yellow-900/10',
-  },
-  {
-    icon: '🔧',
-    title: 'Edit Skills',
-    desc: 'Unlock driver abilities.',
-    color: 'from-blue-500/20 to-cyan-900/10',
-  },
-];
-
-export default function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
+export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-tire-tread relative overflow-hidden">
-      {/* Subtle radial glow behind content */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(25,127,230,0.08)_0%,transparent_70%)] pointer-events-none" />
-
-      <div className="max-w-2xl w-full animate-fade-in relative z-10">
-        {/* Logo / Title */}
-        <div className="text-center mb-8">
-          <div className="text-7xl mb-4 animate-float">🚛</div>
-          <h1 className="text-5xl font-bold text-text-primary mb-2 tracking-tight">
-            Truckers Tool
-          </h1>
-          <p className="text-text-secondary text-lg">
-            Save Editor untuk ETS2 & ATS
-          </p>
-        </div>
-
-        {/* Warning Card */}
-        <div className="glass rounded-2xl p-5 mb-8 border-l-4 border-l-warning">
-          <div className="flex items-start gap-4">
-            <div className="text-3xl flex-shrink-0">⚠️</div>
-            <div>
-              <h2 className="text-warning font-semibold text-sm uppercase tracking-wider mb-1">
-                Important
-              </h2>
-              <p className="text-text-secondary text-sm leading-relaxed">
-                This tool is recommended for{' '}
-                <span className="text-text-primary font-medium">New Profiles</span>{' '}
-                or profiles{' '}
-                <span className="text-danger font-medium">
-                  NOT linked to Steam Cloud
-                </span>
-                . Using it on active Steam Cloud profiles may cause synchronization conflicts.
-              </p>
+    <div className="bg-background-dark text-text-main font-body antialiased overflow-hidden h-screen w-full select-none">
+      {/* Scanline Overlay */}
+      <div className="fixed inset-0 z-50 pointer-events-none scanline-overlay opacity-30"></div>
+      
+      {/* Main Container */}
+      <div className="relative flex flex-col h-full w-full">
+        {/* Top Half: ETS2 Context */}
+        <button 
+          onClick={() => onSelect('ets2')}
+          aria-label="Select Euro Truck Simulator 2" 
+          className="group relative flex-1 w-full overflow-hidden border-b-2 border-background-dark hover:border-ets-orange transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-ets-orange/50 cursor-pointer"
+        >
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
+            style={{ backgroundImage: "url('/images/ets2_hero.png')" }}
+          ></div>
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] via-[#0B0E14]/60 to-transparent opacity-90 group-hover:opacity-80 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 bg-ets-orange/10 mix-blend-overlay group-hover:bg-ets-orange/20 transition-colors duration-500"></div>
+          
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
+            <div className="animate-pulse-slow">
+              <div className="flex flex-col items-center">
+                <h1 className="font-display font-bold text-4xl md:text-6xl text-white tracking-tighter drop-shadow-[0_0_15px_rgba(255,140,0,0.6)]">
+                  EURO
+                </h1>
+                <h2 className="font-display font-bold text-2xl md:text-4xl text-ets-orange tracking-widest -mt-1 drop-shadow-[0_0_10px_rgba(255,140,0,0.8)]">
+                  TRUCK SIMULATOR 2
+                </h2>
+              </div>
             </div>
+            <div className="mt-4 flex items-center gap-2 opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+              <span className="material-symbols-outlined text-ets-orange text-3xl animate-bounce">arrow_upward</span>
+              <span className="font-mono text-ets-orange text-sm tracking-widest uppercase">Ignition Sequence</span>
+            </div>
+          </div>
+          {/* Neon Edge Effect */}
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-ets-orange to-transparent opacity-50 group-hover:opacity-100 group-hover:h-[2px] transition-all duration-300"></div>
+        </button>
+
+        {/* Bottom Half: ATS Context */}
+        <button 
+          onClick={() => onSelect('ats')}
+          aria-label="Select American Truck Simulator" 
+          className="group relative flex-1 w-full overflow-hidden border-t-2 border-background-dark hover:border-ats-red transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-ats-red/50 cursor-pointer"
+        >
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
+            style={{ backgroundImage: "url('/images/ats_hero.png')" }}
+          ></div>
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0B0E14] via-[#0B0E14]/60 to-transparent opacity-90 group-hover:opacity-80 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 bg-ats-red/10 mix-blend-overlay group-hover:bg-ats-red/20 transition-colors duration-500"></div>
+          
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
+            <div className="animate-pulse-slow">
+              <div className="flex flex-col items-center">
+                <h1 className="font-display font-bold text-4xl md:text-6xl text-white tracking-tighter drop-shadow-[0_0_15px_rgba(214,40,40,0.6)]">
+                  AMERICAN
+                </h1>
+                <h2 className="font-display font-bold text-2xl md:text-4xl text-ats-red tracking-widest -mt-1 drop-shadow-[0_0_10px_rgba(214,40,40,0.8)]">
+                  TRUCK SIMULATOR
+                </h2>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-2 opacity-0 transform -translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+              <span className="font-mono text-ats-red text-sm tracking-widest uppercase">Ignition Sequence</span>
+              <span className="material-symbols-outlined text-ats-red text-3xl animate-bounce">arrow_downward</span>
+            </div>
+          </div>
+          {/* Neon Edge Effect */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ats-red to-transparent opacity-50 group-hover:opacity-100 group-hover:h-[2px] transition-all duration-300"></div>
+        </button>
+
+        {/* Version Badge */}
+        <div className="absolute bottom-6 right-6 z-20 pointer-events-none hidden sm:block">
+          <div className="glass-panel px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span className="font-mono text-xs text-text-muted tracking-wider">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
           </div>
         </div>
 
-        {/* Feature Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-          {features.map((feature, i) => (
-            <div
-              key={feature.title}
-              className={`glass rounded-xl p-6 text-center transition-all duration-300 
-                         hover:scale-[1.03] hover:border-accent/40 cursor-default group`}
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
-              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">
-                {feature.icon}
-              </div>
-              <h3 className="text-sm font-bold text-text-primary mb-1">
-                {feature.title}
-              </h3>
-              <p className="text-xs text-text-muted leading-relaxed">{feature.desc}</p>
-            </div>
-          ))}
+        {/* Center Divider Ornament */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none flex items-center gap-4 w-full justify-center">
+          <div className="h-px bg-gradient-to-r from-transparent to-text-muted/20 w-16 md:w-32"></div>
+          <div className="bg-background-dark border border-white/10 text-text-muted font-mono text-[10px] px-2 py-0.5 rounded uppercase tracking-[0.2em]">
+            Select Context
+          </div>
+          <div className="h-px bg-gradient-to-l from-transparent to-text-muted/20 w-16 md:w-32"></div>
         </div>
-
-        {/* Continue Button */}
-        <button
-          onClick={onContinue}
-          className="w-full bg-accent text-white font-bold py-4 px-8 rounded-xl
-                     hover:bg-accent-hover transition-all duration-300 
-                     text-lg cursor-pointer
-                     shadow-lg shadow-accent/20 hover:shadow-accent/30 hover:shadow-xl
-                     active:scale-[0.98] flex items-center justify-center gap-2"
-        >
-          <span>🎮</span> Start Editing <span>→</span>
-        </button>
-
-        <p className="text-center text-text-muted text-xs mt-5">
-          v{__APP_VERSION__} • Running locally • Data not sent to any server
-        </p>
       </div>
+
+      {/* Background texture noise */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-[60] opacity-[0.03]" 
+        style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')" }}
+      ></div>
     </div>
   );
 }

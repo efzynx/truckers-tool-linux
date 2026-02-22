@@ -233,7 +233,11 @@ do_start() {
   echo ""
 
   cd "$INSTALL_DIR"
-  npm run dev
+  info "Membangun production build..."
+  npm run build
+  echo ""
+  info "Menjalankan mode production..."
+  npm start
 }
 
 # ─── Check Update ────────────────────────────────────────────────

@@ -2,6 +2,8 @@ export interface Profile {
   name: string;
   path: string;
   isBackup: boolean;
+  saveTime?: string;
+  imagePath?: string;
 }
 
 export interface ScanProfilesRequest {

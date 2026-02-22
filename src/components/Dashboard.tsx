@@ -4,9 +4,8 @@ import ProfileEditor from './editors/ProfileEditor';
 import UserEditor from './editors/UserEditor';
 import TruckEditor from './editors/TruckEditor';
 import GarageEditor from './editors/GarageEditor';
-import AboutModal from './AboutModal';
 
-type TabId = 'overview' | 'bank' | 'skills' | 'garage';
+export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage';
 
 interface DashboardProps {
   data: GameData;
@@ -16,27 +15,25 @@ interface DashboardProps {
   profileId: string;
 }
 
-const sidebarTabs: { id: TabId; label: string; icon: string }[] = [
-  { id: 'overview', label: 'Profile Overview', icon: '📊' },
-  { id: 'bank', label: 'Bank / Keuangan', icon: '💰' },
-  { id: 'skills', label: 'Skills & XP', icon: '⭐' },
-  { id: 'garage', label: 'Garage & Fleet', icon: '🏗️' },
-];
-
-/**
- * Actual ETS2 XP-per-level table (levels 1-30).
- * After level 30, each subsequent level costs a flat 6800 XP.
- * Source: https://truck-simulator.fandom.com/wiki/Experience
- */
+/** Level calculation helpers */
 const XP_TABLE: number[] = [
-  200,  500,  700,  900, 1000, 1100, 1300, 1600, 1700, 2100, // 1-10
-  2300, 2600, 2700, 2900, 3000, 3100, 3400, 3700, 4000, 4300, // 11-20
-  4600, 4700, 4900, 5200, 5700, 5900, 6000, 6200, 6600, 6800, // 21-30
+  200, 500, 700, 900, 1000, 1100, 1300, 1600, 1700, 2100,
+  2300, 2600, 2700, 2900, 3000, 3100, 3400, 3700, 4000, 4300,
+  4600, 4700, 4900, 5200, 5700, 5900, 6000, 6200, 6600, 6800,
 ];
 const XP_AFTER_30 = 6800;
-const CUMULATIVE_XP_AT_30 = XP_TABLE.reduce((sum, v) => sum + v, 0); // 99700
+const CUMULATIVE_XP_AT_30 = 99700;
 
-/** Get cumulative XP needed to reach a given level */
+function xpToLevel(xp: number): number {
+  if (xp <= 0) return 0;
+  let cumulative = 0;
+  for (let i = 0; i < 30; i++) {
+    cumulative += XP_TABLE[i];
+    if (xp < cumulative) return i;
+  }
+  return 30 + Math.floor((xp - CUMULATIVE_XP_AT_30) / XP_AFTER_30);
+}
+
 function xpForLevel(level: number): number {
   if (level <= 0) return 0;
   if (level <= 30) {
@@ -47,41 +44,25 @@ function xpForLevel(level: number): number {
   return CUMULATIVE_XP_AT_30 + (level - 30) * XP_AFTER_30;
 }
 
-/** Convert XP to level (ETS2 actual formula) */
-function xpToLevel(xp: number): number {
-  if (xp <= 0) return 0;
-  // Check levels 1-30
-  let cumulative = 0;
-  for (let i = 0; i < 30; i++) {
-    cumulative += XP_TABLE[i];
-    if (xp < cumulative) return i; // haven't reached level i+1 yet
-  }
-  // After level 30, each level costs 6800 XP
-  return 30 + Math.floor((xp - CUMULATIVE_XP_AT_30) / XP_AFTER_30);
-}
-
-/** Get total XP needed for next level */
-function xpForNextLevel(currentLevel: number): number {
-  return xpForLevel(currentLevel + 1);
-}
-
-function xpForCurrentLevel(currentLevel: number): number {
-  return xpForLevel(currentLevel);
-}
-
-
 export default function Dashboard({ data, onSave, saving, onBack, profileId }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [view, setView] = useState<DashboardView>('home');
   const [editableData, setEditableData] = useState<GameData>({ ...data });
   const [hasChanges, setHasChanges] = useState(false);
-  const [showAbout, setShowAbout] = useState(false);
+
+  // Quick stats
+  const level = useMemo(() => xpToLevel(editableData.experiencePoints), [editableData.experiencePoints]);
+  const currentLevelXp = useMemo(() => xpForLevel(level), [level]);
+  const nextLevelXp = useMemo(() => xpForLevel(level + 1), [level]);
+  const progressPercent = useMemo(() => {
+    const xpInLevel = editableData.experiencePoints - currentLevelXp;
+    const xpNeeded = nextLevelXp - currentLevelXp;
+    return Math.min(100, Math.max(0, (xpInLevel / xpNeeded) * 100));
+  }, [editableData.experiencePoints, currentLevelXp, nextLevelXp]);
 
   const handleChange = (updates: Partial<GameData>) => {
     setEditableData((prev) => {
       const newData = { ...prev, ...updates };
-      if (updates.skills) {
-        newData.skills = { ...prev.skills, ...updates.skills };
-      }
+      if (updates.skills) newData.skills = { ...prev.skills, ...updates.skills };
       return newData;
     });
     setHasChanges(true);
@@ -92,265 +73,267 @@ export default function Dashboard({ data, onSave, saving, onBack, profileId }: D
     setHasChanges(false);
   };
 
-  const level = useMemo(() => xpToLevel(editableData.experiencePoints), [editableData.experiencePoints]);
-  const nextLevelXp = useMemo(() => xpForNextLevel(level), [level]);
-  const currentLevelXp = useMemo(() => xpForCurrentLevel(level), [level]);
-  const progressPercent = useMemo(() => {
-    const xpInLevel = editableData.experiencePoints - currentLevelXp;
-    const xpNeeded = nextLevelXp - currentLevelXp;
-    return Math.min(100, Math.max(0, (xpInLevel / xpNeeded) * 100));
-  }, [editableData.experiencePoints, currentLevelXp, nextLevelXp]);
-
-  const totalSkills = useMemo(() => {
-    return Object.values(editableData.skills).reduce((sum, v) => sum + v, 0);
-  }, [editableData.skills]);
-
+  // --- Global Dashboard Layout ---
   return (
-    <div className="h-screen flex overflow-hidden">
-      {/* ===== Sidebar ===== */}
-      <aside className="w-56 bg-bg-secondary border-r border-border flex flex-col animate-slide-in-left flex-shrink-0">
-        {/* Brand */}
-        <div className="p-5 border-b border-border">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-text-muted hover:text-text-primary 
-                       transition-colors cursor-pointer text-xs mb-3"
-          >
-            <span>←</span>
-            <span>Kembali</span>
-          </button>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🚛</span>
-            <div>
-              <h1 className="text-sm font-bold text-text-primary">Truckers Tool</h1>
-              <p className="text-xs text-text-muted">Profile Editor</p>
+    <div className="bg-background-dark text-text-main font-body overflow-x-hidden min-h-screen relative selection:bg-primary selection:text-white pb-24 md:pb-0">
+      {/* Scanline Overlay */}
+      <div className="fixed inset-0 pointer-events-none z-50 bg-[image:var(--bg-scanlines)] opacity-40 mix-blend-overlay"></div>
+      
+      {/* Main Container */}
+      <div className="relative flex flex-col md:flex-row min-h-screen w-full bg-background-dark shadow-2xl border-x border-white/5">
+        
+        {/* Navigation Sidebar (Desktop) / Header (Mobile) */}
+        <header className="sticky top-0 md:h-screen md:w-64 lg:w-80 backdrop-blur-md bg-background-dark/80 border-b md:border-b-0 md:border-r border-white/5 flex md:flex-col items-center md:items-stretch justify-between pt-4 pb-3 px-5 md:py-8 z-40">
+          <div className="flex items-center justify-between mb-3 md:mb-0 w-full md:flex-col md:items-start md:gap-6">
+            <div className="flex md:flex-col items-center md:items-start gap-3 md:gap-6 w-full">
+              <div className="relative">
+                <div className="size-12 rounded-xl bg-surface border border-white/10 overflow-hidden relative group">
+                  <div className="absolute inset-0 bg-primary/20 group-hover:bg-primary/30 transition-colors"></div>
+                  {/* Avatar fallback using SVG/Icon */}
+                  <div className="w-full h-full flex items-center justify-center bg-background-dark text-primary">
+                     <span className="material-symbols-outlined text-3xl">person</span>
+                  </div>
+                </div>
+                <div className="absolute -bottom-1 -right-1 size-3 bg-green-500 rounded-full border-2 border-background-dark shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+              </div>
+              <div>
+                <h1 className="text-xl font-display font-bold tracking-wide text-white leading-none mb-1 uppercase truncate max-w-[150px]">{profileId || 'UNKNOWN'}</h1>
+                <p className="text-xs font-mono text-primary tracking-wider uppercase">Lvl {level} • Driver</p>
+              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Nav Items */}
-        <nav className="flex-1 p-3 space-y-1">
-          {sidebarTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all
-                         cursor-pointer ${
-                           activeTab === tab.id
-                             ? 'bg-accent/15 text-accent font-semibold border border-accent/20'
-                             : 'text-text-secondary hover:bg-bg-card hover:text-text-primary'
-                         }`}
+            
+            <button 
+              onClick={onBack}
+              className="size-10 md:hidden rounded-full bg-surface border border-white/5 flex items-center justify-center text-text-muted hover:text-red-400 hover:bg-white/5 transition-all"
             >
-              <span className="text-base">{tab.icon}</span>
-              <span>{tab.label}</span>
+              <span className="material-symbols-outlined text-[20px]">logout</span>
             </button>
-          ))}
-        </nav>
-
-        {/* Quick Info */}
-        <div className="p-4 border-t border-border space-y-2">
-          <h4 className="text-xs text-text-muted font-semibold uppercase tracking-wider">Info Cepat</h4>
-          <div className="text-xs">
-            <div className="flex justify-between text-text-secondary">
-              <span>Profile:</span>
-              <span className="text-text-primary font-mono">{profileId.substring(0, 12)}</span>
-            </div>
-            <div className="flex justify-between text-text-secondary mt-1">
-              <span>Uang:</span>
-              <span className="text-success font-medium">€{editableData.money.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-text-secondary mt-1">
-              <span>XP:</span>
-              <span className="text-gold font-medium">{editableData.experiencePoints.toLocaleString()}</span>
-            </div>
           </div>
-        </div>
-
-        {/* About Button */}
-        <div className="p-3 border-t border-border">
-          <button
-            onClick={() => setShowAbout(true)}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all
-                       cursor-pointer text-text-secondary hover:bg-bg-card hover:text-text-primary"
-          >
-            <span className="text-base">ℹ️</span>
-            <span>About</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* ===== Main Content ===== */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen">
-        {/* Top Bar */}
-        <header className="h-14 bg-bg-secondary border-b border-border flex items-center justify-between px-4 flex-shrink-0 gap-2">
-          <div className="text-sm text-text-muted truncate min-w-0">
-            Truckers Tool — <span className="text-text-primary font-medium">Editor</span>
-          </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <span className="text-xs text-text-muted font-mono hidden lg:inline">
-              {profileId.substring(0, 12)}
-            </span>
-            <button
-              onClick={handleSave}
-              disabled={saving || !hasChanges}
-              className={`text-sm font-bold px-4 py-2 rounded-lg transition-all cursor-pointer
-                         flex items-center gap-2 flex-shrink-0 whitespace-nowrap
-                         ${hasChanges
-                           ? 'bg-accent text-white hover:bg-accent-hover shadow-lg shadow-accent/20'
-                           : 'bg-bg-card text-text-muted border border-border cursor-not-allowed'
-                         }
-                         disabled:opacity-50 disabled:cursor-not-allowed`}
+          {/* Desktop Nav Start */}
+          <nav className="hidden md:flex flex-col gap-2 mt-8 flex-1 w-full">
+            <button onClick={() => setView('home')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'home' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+              <span className="material-symbols-outlined">speed</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">Dashboard</span>
+            </button>
+            <button onClick={() => setView('profile')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'profile' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+              <span className="material-symbols-outlined">account_balance_wallet</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">Economy</span>
+            </button>
+            <button onClick={() => setView('user')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'user' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+              <span className="material-symbols-outlined">psychology</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">Skills</span>
+            </button>
+            <button onClick={() => setView('truck')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'truck' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+              <span className="material-symbols-outlined">warehouse</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">Garage & HQs</span>
+            </button>
+          </nav>
+          
+          <button 
+              onClick={onBack}
+              className="hidden md:flex mt-auto w-full items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:text-red-400 hover:bg-white/5 transition-all"
             >
-              {saving ? (
-                <>
-                  <span className="animate-spin">⏳</span> Saving...
-                </>
-              ) : (
-                <>
-                  💾 Save
-                </>
-              )}
-            </button>
+              <span className="material-symbols-outlined">logout</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">Disconnect</span>
+          </button>
+          
+          {/* Mobile XP Progress */}
+          <div className="md:hidden w-full h-1.5 bg-surface rounded-full overflow-hidden absolute bottom-0 left-0">
+            <div 
+              className="absolute top-0 left-0 h-full bg-primary shadow-[0_0_10px_rgba(255,140,0,0.8)] rounded-full transition-all duration-1000"
+              style={{ width: `${progressPercent}%` }}
+            ></div>
           </div>
         </header>
 
-        {/* Content Area */}
-        <div className="flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden">
-          {activeTab === 'overview' && (
-            <div className="animate-fade-in space-y-6 max-w-5xl">
-              {/* Profile Overview Header */}
+        {/* Main Workspace Area */}
+        <main className="flex-1 flex flex-col relative z-20 min-w-0 h-[100dvh] overflow-y-auto no-scrollbar">
+          {view === 'home' && (
+            <div className="px-5 py-6 md:p-10 flex flex-col gap-6 md:gap-10 pb-24 md:pb-10 w-full animate-fade-in">
+              {/* Stat Gauges */}
+              <div className="grid grid-cols-2 gap-4">
+            {/* Cash Card */}
+            <button onClick={() => setView('profile')} className="relative bg-surface rounded-2xl p-4 border border-white/5 hover:border-primary/50 transition-all duration-300 group text-left overflow-hidden cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="flex justify-between items-start mb-3">
+                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:shadow-neon-sm transition-shadow">
+                  <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+                </div>
+                <span className="material-symbols-outlined text-text-muted text-[16px] group-hover:text-primary transition-colors">arrow_outward</span>
+              </div>
               <div>
-                <h2 className="text-2xl font-bold text-text-primary mb-1">Profile Overview</h2>
-                <p className="text-text-muted text-sm">Ringkasan profil dan progres Anda</p>
+                <p className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-0.5">Balance</p>
+                <p className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight group-hover:text-primary transition-colors truncate">
+                  €{(editableData.money / 1000).toFixed(0)}k
+                </p>
               </div>
+            </button>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Level Circle */}
-                <div className="glass rounded-2xl p-5 flex flex-col items-center">
-                  <div
-                    className="level-ring w-32 h-32 animate-glow-ring"
-                    style={{ '--progress': `${progressPercent}%` } as React.CSSProperties}
-                  >
-                    <div className="level-ring-inner w-full h-full">
-                      <span className="text-gold text-xs font-semibold uppercase tracking-widest">Level</span>
-                      <span className="text-4xl font-bold text-text-primary">{level}</span>
-                      <span className="text-xs text-text-muted">
-                        {editableData.experiencePoints.toLocaleString()} XP
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-text-muted mt-3">
-                    Next Level: {nextLevelXp.toLocaleString()} XP
-                  </p>
+            {/* XP Card */}
+            <button onClick={() => setView('user')} className="relative bg-surface rounded-2xl p-4 border border-white/5 hover:border-blue-400/50 transition-all duration-300 group text-left overflow-hidden cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="flex justify-between items-start mb-3">
+                <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:shadow-[0_0_5px_rgba(96,165,250,0.4)] transition-shadow">
+                  <span className="material-symbols-outlined text-[20px]">military_tech</span>
                 </div>
-
-                {/* Stats Grid */}
-                <div className="lg:col-span-2 grid grid-cols-2 gap-4">
-                  <div className="glass rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">💰</span>
-                      <span className="text-text-muted text-xs">Uang</span>
-                    </div>
-                    <p className="text-xl font-bold text-success">
-                      €{editableData.money.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="glass rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">⭐</span>
-                      <span className="text-text-muted text-xs">Experience</span>
-                    </div>
-                    <p className="text-xl font-bold text-gold">
-                      {editableData.experiencePoints.toLocaleString()} XP
-                    </p>
-                  </div>
-                  <div className="glass rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">🔧</span>
-                      <span className="text-text-muted text-xs">Total Skill Points</span>
-                    </div>
-                    <p className="text-xl font-bold text-accent">
-                      {totalSkills} <span className="text-xs text-text-muted font-normal">/ 36</span>
-                    </p>
-                  </div>
-                  <div className="glass rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">🎮</span>
-                      <span className="text-text-muted text-xs">Level</span>
-                    </div>
-                    <p className="text-xl font-bold text-text-primary">
-                      {level}
-                    </p>
-                    <div className="mt-2 w-full bg-bg-primary rounded-full h-1.5">
-                      <div
-                        className="bg-gold h-1.5 rounded-full transition-all duration-500"
-                        style={{ width: `${progressPercent}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
+                <span className="material-symbols-outlined text-text-muted text-[16px] group-hover:text-blue-400 transition-colors">arrow_outward</span>
               </div>
-
-              {/* Skills Overview */}
-              <div className="glass rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
-                  <span>🛠️</span> Skills Overview
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {[
-                    { key: 'adr', label: 'ADR', icon: '☣️' },
-                    { key: 'long_dist', label: 'Long Distance', icon: '🛣️' },
-                    { key: 'heavy', label: 'Heavy Cargo', icon: '🏋️' },
-                    { key: 'fragile', label: 'Fragile', icon: '📦' },
-                    { key: 'urgent', label: 'Just-in-Time', icon: '⏰' },
-                    { key: 'mechanical', label: 'Eco Drive', icon: '🌿' },
-                  ].map((skill) => (
-                    <div key={skill.key} className="bg-bg-primary rounded-xl p-3 text-center">
-                      <span className="text-xl">{skill.icon}</span>
-                      <p className="text-xs text-text-muted mt-1 truncate">{skill.label}</p>
-                      <p className="text-lg font-bold text-text-primary mt-1">
-                        {editableData.skills[skill.key as keyof typeof editableData.skills]}
-                        <span className="text-text-muted text-xs font-normal">/6</span>
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-0.5">Total XP</p>
+                <p className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors truncate">
+                  {(editableData.experiencePoints / 1000).toFixed(1)}k
+                </p>
               </div>
-            </div>
-          )}
+            </button>
+          </div>
 
-          {activeTab === 'bank' && (
-            <div className="animate-fade-in">
-              <ProfileEditor data={editableData} onChange={handleChange} />
-            </div>
-          )}
+          {/* Quick Actions Label */}
+          <div className="flex items-center gap-3 opacity-60">
+            <div className="h-px bg-white/20 flex-1"></div>
+            <span className="text-xs uppercase font-display font-bold tracking-widest text-text-main">System Controls</span>
+            <div className="h-px bg-white/20 flex-1"></div>
+          </div>
 
-          {activeTab === 'skills' && (
-            <div className="animate-fade-in">
-              <UserEditor data={editableData} onChange={handleChange} />
-            </div>
-          )}
-
-          {activeTab === 'garage' && (
-            <div className="animate-fade-in">
-              <div className="space-y-6">
-                <TruckEditor />
-                <GarageEditor />
+          {/* Tools Grid (2x2) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button onClick={() => handleChange({ money: (editableData.money || 0) + 50000 })} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-primary/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer">
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
+              <div className="size-12 shrink-0 rounded-full bg-background-dark border border-white/10 flex items-center justify-center shadow-inner group-hover:border-primary/50 group-hover:shadow-neon-sm transition-all duration-300">
+                <span className="material-symbols-outlined text-2xl text-text-main group-hover:text-primary transition-colors">payments</span>
               </div>
+              <div className="flex flex-col items-start z-10 text-left">
+                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">INJECT €50K</span>
+                <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-primary/80 transition-colors">Quick Add Funds</span>
+              </div>
+            </button>
+
+            <button onClick={() => handleChange({ money: Math.max(0, editableData.money) })} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-primary/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer">
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
+              <div className="size-12 shrink-0 rounded-full bg-background-dark border border-white/10 flex items-center justify-center shadow-inner group-hover:border-primary/50 group-hover:shadow-neon-sm transition-all duration-300">
+                <span className="material-symbols-outlined text-2xl text-text-main group-hover:text-primary transition-colors">credit_card_off</span>
+              </div>
+              <div className="flex flex-col items-start z-10 text-left">
+                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">CLEAR DEBT</span>
+                <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-primary/80 transition-colors">Pay Bank Loans</span>
+              </div>
+            </button>
+
+            <button onClick={() => handleChange({ experiencePoints: (editableData.experiencePoints || 0) + 10000 })} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-blue-400/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer">
+              <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
+              <div className="size-12 shrink-0 rounded-full bg-background-dark border border-white/10 flex items-center justify-center shadow-inner group-hover:border-blue-500/50 group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-all duration-300">
+                <span className="material-symbols-outlined text-2xl text-text-main group-hover:text-blue-400 transition-colors">star</span>
+              </div>
+              <div className="flex flex-col items-start z-10 text-left">
+                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">ADD 10K XP</span>
+                <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-blue-400/80 transition-colors">Level Up Boost</span>
+              </div>
+            </button>
+
+            <button onClick={() => handleChange({ skills: { adr:6, long_dist:6, heavy:6, fragile:6, urgent:6, mechanical:6 } })} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-blue-400/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer">
+              <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
+              <div className="size-12 shrink-0 rounded-full bg-background-dark border border-white/10 flex items-center justify-center shadow-inner group-hover:border-blue-500/50 group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-all duration-300">
+                <span className="material-symbols-outlined text-2xl text-text-main group-hover:text-blue-400 transition-colors">military_tech</span>
+              </div>
+              <div className="flex flex-col items-start z-10 text-left">
+                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">MAX SKILLS</span>
+                <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-blue-400/80 transition-colors">Unlock All Perks</span>
+              </div>
+            </button>
+          </div>
+
+          {/* Context Info */}
+          <div className="mt-2 p-4 rounded-xl border border-white/5 bg-gradient-to-r from-surface to-background-dark flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase text-text-muted font-bold tracking-widest mb-1">Current Session</span>
+              <span className="text-sm font-mono text-white flex items-center gap-2">
+                <span className="size-2 rounded-full bg-primary shadow-[0_0_6px_rgba(255,140,0,0.8)]"></span>
+                Active Connection
+              </span>
             </div>
-          )}
+          </div>
         </div>
+      )}
+          {view === 'profile' && (
+             <ProfileEditor 
+               data={editableData} 
+               onChange={handleChange} 
+               onBack={() => setView('home')} 
+               onSave={handleSave}
+               saving={saving}
+               hasChanges={hasChanges}
+             />
+          )}
+          {view === 'user' && (
+             <UserEditor 
+               data={editableData} 
+               onChange={handleChange} 
+               onBack={() => setView('home')} 
+               onSave={handleSave}
+               saving={saving}
+               hasChanges={hasChanges}
+             />
+          )}
+          {(view === 'truck' || view === 'garage') && (
+             <div className="flex-1 flex flex-col pt-24 pb-28 px-4 w-full max-w-md mx-auto z-10 overflow-y-auto no-scrollbar animate-fade-in">
+               <header className="fixed md:absolute top-0 left-0 right-0 z-40 glass-panel md:bg-transparent md:backdrop-blur-none border-b border-white/5 md:border-none">
+                 <div className="flex items-center justify-between px-4 py-4 max-w-md mx-auto">
+                   <button onClick={() => setView('home')} className="flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all">
+                     <span className="material-symbols-outlined text-3xl">chevron_left</span>
+                   </button>
+                   <h1 className="text-xl font-bold tracking-tight text-white uppercase">{view === 'truck' ? 'Fleet App' : 'Garage App'}</h1>
+                   <div className="w-10"></div>
+                 </div>
+               </header>
+               <div className="flex flex-col gap-6 mt-4">
+                 {view === 'truck' ? <TruckEditor /> : <GarageEditor />}
+               </div>
+               {hasChanges && (
+                 <div className="fixed md:absolute bottom-8 right-6 z-50">
+                    <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
+                    <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group">
+                      <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
+                        {saving ? 'sync' : 'save'}
+                      </span>
+                    </button>
+                 </div>
+               )}
+             </div>
+          )}
+        </main>
 
-        {/* Footer */}
-        <footer className="h-10 bg-bg-secondary border-t border-border flex items-center justify-center px-6 flex-shrink-0">
-          <p className="text-xs text-text-muted">
-            v{__APP_VERSION__} • Berjalan secara lokal • Data tidak dikirim ke server manapun
-          </p>
-        </footer>
-      </main>
-
-      {/* About Modal */}
-      {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
+        {/* Bottom Navigation Bar (Mobile Only) */}
+        <div className="md:hidden absolute bottom-0 w-full bg-background-dark border-t border-[#3a3127] px-4 pb-6 pt-3 backdrop-blur-xl bg-opacity-90 z-40">
+          <div className="flex gap-2">
+            <button onClick={() => setView('home')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'home' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-4 ${view === 'home' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[24px]">speed</span>
+              </div>
+              <p className="text-xs font-medium leading-normal tracking-wide font-display mt-1">Dashboard</p>
+            </button>
+            
+            <button onClick={() => setView('profile')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'profile' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-4 ${view === 'profile' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+              </div>
+              <p className="text-xs font-medium leading-normal tracking-wide font-display mt-1">Economy</p>
+            </button>
+            
+            <button onClick={() => setView('user')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'user' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-4 ${view === 'user' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[24px]">psychology</span>
+              </div>
+              <p className="text-xs font-medium leading-normal tracking-wide font-display mt-1">Skills</p>
+            </button>
+            
+            <button onClick={() => setView('truck')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${(view === 'truck' || view === 'garage') ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-4 ${(view === 'truck' || view === 'garage') ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[24px]">warehouse</span>
+              </div>
+              <p className="text-[10px] sm:text-xs font-medium leading-normal tracking-wide font-display mt-1">Garage</p>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

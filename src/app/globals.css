@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-primary: #f98c06;
+  --color-secondary: #D62828;
+  --color-background-light: #f8f7f5;
+  --color-background-dark: #0B0E14;
+  --color-surface: #151922;
+  --color-surface-dark: #151922;
+  --color-ets-orange: #FF8C00;
+  --color-ats-red: #D62828;
+  --color-text-main: #E2E8F0;
+  --color-text-muted: #64748B;
+  --color-success: #10B981;
+
+  /* Fonts */
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter Tight", sans-serif;
+  --font-mono: "Chakra Petch", monospace;
+  
+  /* Shadows */
+  --shadow-neon: 0 0 15px rgba(249, 140, 6, 0.5);
+  --shadow-neon-sm: 0 0 8px rgba(249, 140, 6, 0.3);
+  --shadow-neon-intense: 0 0 25px rgba(249, 140, 6, 0.8);
+
+  /* Backgrounds */
+  --bg-scanlines: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0, 0, 0, 0.2) 2px, rgba(0, 0, 0, 0.2) 3px);
+
+  /* Animations */
+  --animate-pulse-slow: pulse-logo 4s infinite ease-in-out;
+  @keyframes pulse-logo {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(0.98); }
+  }
+}
+
+/* Custom Scrollbar for webkit, as seen in Route Finder & Logbook */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0E14; 
+}
+::-webkit-scrollbar-thumb {
+  background: #27221b; 
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f98c06; 
+}
+
+/* Base Body Styles */
+@layer base {
+  body {
+    min-height: max(884px, 100dvh);
+  }
+}
+
+/* Custom Utilities extracted from Stitch */
+@layer utilities {
+  .glass-panel {
+    background: rgba(21, 25, 34, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .ets-glow:hover {
+    box-shadow: inset 0 0 50px rgba(255, 140, 0, 0.3);
+  }
+
+  .ats-glow:hover {
+    box-shadow: inset 0 0 50px rgba(214, 40, 40, 0.3);
+  }
+  
+  .neon-glow-hover:hover {
+    box-shadow: 0 0 15px rgba(249, 140, 6, 0.2);
+    border-color: rgba(249, 140, 6, 0.5);
+  }
+
+  .hexagon-mask {
+    clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;    /* Firefox */
+  }
+
+  .scanline-overlay {
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0, 0, 0, 0.3) 2px, rgba(0, 0, 0, 0.3) 3px);
+    pointer-events: none;
+  }
+}

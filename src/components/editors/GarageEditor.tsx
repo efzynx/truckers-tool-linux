@@ -1,20 +1,33 @@
 export default function GarageEditor() {
   return (
-    <div className="animate-fade-in">
-      <h3 className="text-xl font-bold text-text-primary mb-1 flex items-center gap-2">
-        🏠 Garasi
-      </h3>
-      <p className="text-text-muted text-sm mb-6">Kelola garasi kamu</p>
+    <section className="w-full animate-fade-in" style={{ animationDelay: '100ms' }}>
+      <div className="bg-surface/80 rounded-2xl p-6 border border-white/5 relative overflow-hidden group">
+        {/* Decorative background element */}
+        <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-warning/5 rounded-full blur-2xl pointer-events-none group-hover:bg-warning/10 transition-colors"></div>
+        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+           <span className="material-symbols-outlined text-8xl text-warning">warehouse</span>
+        </div>
+        
+        <div className="flex items-center gap-3 mb-6 relative z-10">
+          <div className="w-10 h-10 rounded-xl bg-background-dark border border-white/10 flex items-center justify-center">
+             <span className="material-symbols-outlined text-warning text-xl">domain</span>
+          </div>
+          <div>
+            <h3 className="text-white text-sm font-bold tracking-[0.1em] uppercase font-display">Headquarters</h3>
+            <span className="text-xs text-text-muted/60 font-mono">Property Expansion</span>
+          </div>
+        </div>
 
-      <div className="bg-bg-primary border border-border rounded-xl p-8 text-center">
-        <div className="text-5xl mb-4">🚧</div>
-        <h4 className="text-text-primary font-semibold mb-2">Coming Soon</h4>
-        <p className="text-text-muted text-sm">
-          Fitur edit garasi akan tersedia di update selanjutnya.
-          <br />
-          Termasuk: buka semua garasi, upgrade garasi, dan kelola driver.
-        </p>
+        <div className="flex flex-col items-center justify-center p-6 bg-background-dark/50 rounded-xl border border-white/5 relative z-10 text-center gap-3">
+          <span className="material-symbols-outlined text-4xl text-warning/50 mb-1">lock</span>
+          <p className="text-xs text-text-muted font-mono leading-relaxed max-w-md mx-auto">
+            Fitur manajemen HQ & Garasi akan tersedia pada patch selanjutnya.
+          </p>
+          <div className="mt-2 text-[10px] text-warning font-mono tracking-widest uppercase bg-warning/10 border border-warning/20 px-2 py-1 rounded">
+            Coming Soon
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
