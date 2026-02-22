@@ -315,9 +315,9 @@ do_update() {
     beta_ver=$(echo "$beta_tag" | sed -E 's/^[vV]//')
     info "Pre-release terbaru: ${BOLD}v${beta_ver}${NC}"
 
-    # Fetch all tags and checkout
+    # Fetch all tags and hard reset to discard any local modifications
     git fetch origin --tags
-    git checkout "$beta_tag"
+    git reset --hard "$beta_tag"
     echo ""
 
     warn "⚠️  Kamu sekarang di versi beta (${beta_tag})."
@@ -327,9 +327,9 @@ do_update() {
     info "Mengupdate ke versi ${GREEN}stable${NC}..."
     echo ""
 
-    # Make sure we're on main branch
-    git checkout main 2>/dev/null || true
-    git pull origin main
+    # Make sure to discard local changes and hard reset to latest origin/main
+    git fetch origin main
+    git reset --hard origin/main
   fi
   echo ""
 
@@ -338,14 +338,14 @@ do_update() {
   npm install
   echo ""
 
-  # Update script itself
+  # Update script itself outside the install directory
   if [ -f "$INSTALL_DIR/ttl.sh" ]; then
-    local script_path
-    script_path="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
-    if [ "$script_path" != "$INSTALL_DIR/ttl.sh" ]; then
-      info "Mengupdate script ttl.sh..."
-      cp "$INSTALL_DIR/ttl.sh" "$script_path"
-      chmod +x "$script_path"
+    # Jika script dijalankan dari luar INSTALL_DIR (contoh: ~/ttl.sh), pastikan kita timpa ulang
+    local external_script="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+    if [ "$external_script" != "$INSTALL_DIR/ttl.sh" ] && [ -w "$external_script" ]; then
+      info "Mengupdate script ttl.sh di luar direktori instalasi..."
+      cp -f "$INSTALL_DIR/ttl.sh" "$external_script"
+      chmod +x "$external_script"
     fi
   fi
 
