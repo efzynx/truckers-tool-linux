@@ -83,7 +83,7 @@ export default function Dashboard({ data, onSave, saving, onBack, profileId }: D
       <div className="relative flex flex-col md:flex-row min-h-screen w-full bg-background-dark shadow-2xl border-x border-white/5">
         
         {/* Navigation Sidebar (Desktop) / Header (Mobile) */}
-        <header className="sticky top-0 md:h-screen md:w-64 lg:w-80 backdrop-blur-md bg-background-dark/80 border-b md:border-b-0 md:border-r border-white/5 flex md:flex-col items-center md:items-stretch justify-between pt-4 pb-3 px-5 md:py-8 z-40">
+        <header className={`sticky top-0 md:h-screen md:w-64 lg:w-80 backdrop-blur-md bg-background-dark/80 border-b md:border-b-0 md:border-r border-white/5 flex md:flex-col items-center md:items-stretch justify-between pt-4 pb-3 px-5 md:py-8 z-40 ${view !== 'home' ? 'hidden md:flex' : ''}`}>
           <div className="flex items-center justify-between mb-3 md:mb-0 w-full md:flex-col md:items-start md:gap-6">
             <div className="flex md:flex-col items-center md:items-start gap-3 md:gap-6 w-full">
               <div className="relative">
@@ -302,7 +302,7 @@ export default function Dashboard({ data, onSave, saving, onBack, profileId }: D
         </main>
 
         {/* Bottom Navigation Bar (Mobile Only) */}
-        <div className="md:hidden absolute bottom-0 w-full bg-background-dark border-t border-[#3a3127] px-4 pb-6 pt-3 backdrop-blur-xl bg-opacity-90 z-40">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 w-full bg-background-dark border-t border-[#3a3127] px-4 pb-6 pt-3 backdrop-blur-xl bg-opacity-90 z-50">
           <div className="flex gap-2">
             <button onClick={() => setView('home')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'home' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
               <div className={`flex h-8 items-center justify-center rounded-full px-4 ${view === 'home' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>

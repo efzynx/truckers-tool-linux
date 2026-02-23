@@ -6,6 +6,13 @@ export interface Profile {
   imagePath?: string;
 }
 
+export interface Save {
+  name: string;
+  path: string;
+  isAutosave: boolean;
+  saveTime?: string;
+}
+
 export interface ScanProfilesRequest {
   path: string;
 }
@@ -13,6 +20,16 @@ export interface ScanProfilesRequest {
 export interface ScanProfilesResponse {
   success: boolean;
   profiles: Profile[];
+  error?: string;
+}
+
+export interface ScanSavesRequest {
+  profilePath: string;
+}
+
+export interface ScanSavesResponse {
+  success: boolean;
+  saves: Save[];
   error?: string;
 }
 
@@ -27,7 +44,7 @@ export interface BackupProfileResponse {
 }
 
 export interface DecryptRequest {
-  profilePath: string;
+  savePath: string;
 }
 
 export interface DecryptResponse {
@@ -69,5 +86,6 @@ export type AppStep =
   | 'game-select'
   | 'path-input'
   | 'profile-select'
+  | 'save-select'
   | 'backup-confirm'
   | 'dashboard';

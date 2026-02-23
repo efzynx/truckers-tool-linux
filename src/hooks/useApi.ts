@@ -20,11 +20,20 @@ export async function backupProfile(profilePath: string) {
   return res.json();
 }
 
-export async function decryptProfile(profilePath: string) {
-  const res = await fetch(`${API_BASE}/decrypt`, {
+export async function scanSaves(profilePath: string) {
+  const res = await fetch(`${API_BASE}/scan-saves`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profilePath }),
+  });
+  return res.json();
+}
+
+export async function decryptSave(savePath: string) {
+  const res = await fetch(`${API_BASE}/decrypt`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ savePath }),
   });
   return res.json();
 }

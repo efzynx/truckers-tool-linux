@@ -73,17 +73,31 @@ jobs:
 
           if [ "$PRERELEASE" = "true" ]; then
             TITLE="🧪 v${VERSION} — Pre-release (Beta)"
-            BODY="⚠️ **This is a pre-release version for testing purposes.**\n\nInstall with:\n\`\`\`bash\n./ttl.sh update --beta\n\`\`\`\n\nTo go back to stable:\n\`\`\`bash\n./ttl.sh update\n\`\`\`"
           else
             TITLE="🚛 v${VERSION}"
-            BODY="## What's New\n\nSee commit history for changes.\n\n## Install\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/ttl.sh -o ttl.sh\nchmod +x ttl.sh\n./ttl.sh install\n./ttl.sh start\n\`\`\`\n\n## Update\n\n\`\`\`bash\n./ttl.sh update\n\`\`\`"
           fi
 
           echo "title=$TITLE" >> $GITHUB_OUTPUT
-          # Use heredoc for multiline body
+          
+          # Extract the latest changelog block
+          if [ -f "CHANGELOG.md" ]; then
+            CHANGELOG=$(awk '/^## \[/ { if (p) exit; p=1; print; next } p { print }' CHANGELOG.md)
+          else
+            CHANGELOG="See commit history for changes."
+          fi
+
           {
             echo "body<<EOF"
-            echo -e "$BODY"
+            if [ "$PRERELEASE" = "true" ]; then
+              echo -e "⚠️ **This is a pre-release version for testing purposes.**\n"
+              echo -e "Install with:\n\`\`\`bash\n./ttl.sh update --beta\n\`\`\`\n"
+              echo -e "To go back to stable:\n\`\`\`bash\n./ttl.sh update\n\`\`\`\n\n---\n"
+              echo "$CHANGELOG"
+            else
+              echo "$CHANGELOG"
+              echo -e "\n## Install\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/ttl.sh -o ttl.sh\nchmod +x ttl.sh\n./ttl.sh install\n./ttl.sh start\n\`\`\`\n"
+              echo -e "## Update\n\n\`\`\`bash\n./ttl.sh update\n\`\`\`"
+            fi
             echo "EOF"
           } >> $GITHUB_OUTPUT
 

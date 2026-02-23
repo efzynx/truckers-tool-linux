@@ -1,15 +1,13 @@
-import { useState } from 'react';
 import type { Profile } from '../types';
 
 interface ProfileListProps {
   profiles: Profile[];
-  onSelect: (profile: Profile, useBackup: boolean) => void;
+  onSelect: (profile: Profile) => void;
   onBack: () => void;
   loading: boolean;
 }
 
 export default function ProfileList({ profiles, onSelect, onBack, loading }: ProfileListProps) {
-  const [useBackup, setUseBackup] = useState(true);
 
   // Sorting: newest saved first (fallback to name if saveTime is undefined)
   const sortedProfiles = [...profiles].sort((a, b) => {
@@ -55,31 +53,7 @@ export default function ProfileList({ profiles, onSelect, onBack, loading }: Pro
         {/* Main Content Area */}
         <main className="relative z-10 flex-1 overflow-y-auto px-4 pb-24 pt-4 scroll-smooth no-scrollbar">
           
-          {/* Backup Toggle Section */}
-          <div className="mb-6 sticky top-0 z-20 pt-2 -mt-2">
-            <div className="bg-surface/90 backdrop-blur-md border border-white/5 rounded-xl p-4 flex items-center justify-between shadow-lg">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 text-white font-medium">
-                  <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>save_as</span>
-                  <span>Safe Mode Protocol</span>
-                </div>
-                <span className="text-xs text-text-muted">Create .bak backup before writing</span>
-              </div>
-              {/* Toggle Switch */}
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="sr-only peer" 
-                  checked={useBackup}
-                  onChange={(e) => setUseBackup(e.target.checked)}
-                  disabled={loading}
-                />
-                <div className="w-12 h-7 bg-background-dark border border-white/10 peer-focus:outline-none rounded-full peer dark:bg-background-dark peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-text-muted after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary/20 peer-checked:border-primary peer-checked:after:bg-primary peer-checked:after:shadow-[0_0_10px_rgba(249,140,6,0.5)]"></div>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 pt-6">
             <div className="text-xs font-mono text-text-muted uppercase tracking-wider pl-2 mb-1">Local Profiles ({profiles.length})</div>
             
             {profiles.length === 0 && (
@@ -96,7 +70,7 @@ export default function ProfileList({ profiles, onSelect, onBack, loading }: Pro
               return (
                 <li key={profile.path}>
                   <button 
-                    onClick={() => onSelect(profile, useBackup)}
+                    onClick={() => onSelect(profile)}
                     disabled={loading}
                     className="group relative w-full text-left cursor-pointer disabled:opacity-50 disabled:cursor-wait block h-full"
                   >

@@ -86,4 +86,60 @@ router.post('/backup-profile', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/scan-saves
+ * Scans the provided profile directory for save games.
+ */
+router.post('/scan-saves', async (req, res) => {
+  try {
+    const { profilePath } = req.body as { profilePath: string };
+
+    if (!profilePath) {
+      res.status(400).json({ success: false, saves: [], error: 'Profile path tidak boleh kosong' });
+      return;
+    }
+
+    const savesDir = path.join(profilePath, 'save');
+
+    try {
+      await fs.access(savesDir);
+    } catch {
+      // It's possible the profile has no saves yet
+      res.json({ success: true, saves: [] });
+      return;
+    }
+
+    const entries = await fs.readdir(savesDir, { withFileTypes: true });
+    
+    // Process each folder inside the save directory
+    const savesPromises = entries
+      .filter(entry => entry.isDirectory())
+      .map(async (entry) => {
+        const saveFolderPath = path.join(savesDir, entry.name);
+        const gameSiiPath = path.join(saveFolderPath, 'game.sii');
+        
+        try {
+          const stat = await fs.stat(gameSiiPath);
+          return {
+            name: entry.name,
+            path: saveFolderPath,
+            saveTime: new Date(stat.mtimeMs).toISOString(),
+            isAutosave: entry.name.startsWith('autosave')
+          };
+        } catch {
+          // game.sii not found, not a valid save folder
+          return null;
+        }
+      });
+
+    const resolvedSaves = await Promise.all(savesPromises);
+    const validSaves = resolvedSaves.filter(s => s !== null);
+
+    res.json({ success: true, saves: validSaves });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({ success: false, saves: [], error: message });
+  }
+});
+
 export default router;
