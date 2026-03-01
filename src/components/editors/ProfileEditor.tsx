@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { GameData } from '../../types';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface ProfileEditorProps {
   data: GameData;
@@ -20,6 +21,7 @@ const presets = [
 
 export default function ProfileEditor({ data, onChange, onBack, onSave, saving, hasChanges }: ProfileEditorProps) {
   const [moneyStr, setMoneyStr] = useState(data.money.toLocaleString());
+  const { t } = useLanguage();
 
   // Sync internal state when data changes externally (e.g. after save)
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function ProfileEditor({ data, onChange, onBack, onSave, saving, 
           >
             <span className="material-symbols-outlined text-3xl">chevron_left</span>
           </button>
-          <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">Economy Tuner</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('editor.economyTitle')}</h1>
           <div className="w-10"></div> {/* Spacer for centering */}
         </div>
       </header>
@@ -77,7 +79,7 @@ export default function ProfileEditor({ data, onChange, onBack, onSave, saving, 
       <div className="flex items-center justify-start mb-8 opacity-70">
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-dark border border-white/5">
           <span className="material-symbols-outlined text-primary text-sm">person</span>
-          <span className="text-xs font-medium tracking-wide text-text-muted uppercase font-mono">FINANCIAL OVERRIDE</span>
+          <span className="text-xs font-medium tracking-wide text-text-muted uppercase font-mono">{t('editor.financialOverride')}</span>
         </div>
       </div>
 
@@ -86,7 +88,7 @@ export default function ProfileEditor({ data, onChange, onBack, onSave, saving, 
         <div className="flex flex-col gap-8">
           {/* Current Funds Section */}
           <section className="flex flex-col items-start justify-center w-full animate-fade-in">
-        <h2 className="text-text-muted text-sm font-bold tracking-[0.2em] mb-4 uppercase font-display">Current Funds</h2>
+        <h2 className="text-text-muted text-sm font-bold tracking-[0.2em] mb-4 uppercase font-display">{t('editor.currentFunds')}</h2>
         
         <div className="relative w-full group">
           <div className="absolute inset-0 bg-primary/5 blur-xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
@@ -104,13 +106,13 @@ export default function ProfileEditor({ data, onChange, onBack, onSave, saving, 
         
             <p className="mt-4 text-xs text-text-muted flex items-center gap-1 font-mono">
               <span className="material-symbols-outlined text-[14px]">info</span>
-              Editable • Tap to modify manually
+              {t('editor.tapToModify')}
             </p>
           </section>
 
           {/* Quick Add Chips */}
           <section className="w-full overflow-hidden animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <h2 className="text-text-muted text-sm font-bold tracking-[0.2em] mb-4 uppercase font-display">Fast Inject</h2>
+            <h2 className="text-text-muted text-sm font-bold tracking-[0.2em] mb-4 uppercase font-display">{t('editor.fastInject')}</h2>
             <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar px-1">
               {presets.map((preset) => (
                 <button
@@ -136,8 +138,8 @@ export default function ProfileEditor({ data, onChange, onBack, onSave, saving, 
               
               <div className="flex justify-between items-center mb-6">
                 <div className="flex flex-col">
-                  <h3 className="text-text-muted text-xs font-bold tracking-[0.1em] uppercase mb-1 font-display">Bank Loan</h3>
-                  <span className="text-sm text-text-muted/60 font-mono">Repayment Management</span>
+                  <h3 className="text-text-muted text-xs font-bold tracking-[0.1em] uppercase mb-1 font-display">{t('editor.bankLoan')}</h3>
+                  <span className="text-sm text-text-muted/60 font-mono">{t('editor.repaymentManagement')}</span>
                 </div>
                 <div className="text-right">
                   <span className="block text-xl sm:text-2xl font-mono font-bold text-white tracking-tight">€ {data.money < 0 ? Math.abs(data.money).toLocaleString() : '0'}</span>
@@ -159,7 +161,7 @@ export default function ProfileEditor({ data, onChange, onBack, onSave, saving, 
             className="w-full py-3 rounded-lg border border-secondary/30 text-secondary hover:bg-secondary/10 active:bg-secondary/20 font-medium text-sm tracking-wide uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer font-display"
           >
             <span className="material-symbols-outlined text-lg">credit_card_off</span>
-            Clear All Debt
+            {t('editor.clearAllDebt')}
           </button>
           </div>
         </section>

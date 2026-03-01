@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface FileUploadProps {
   onUpload: (file: File) => void;
@@ -10,6 +11,7 @@ const MAX_SIZE_MB = 50;
 const ACCEPTED_TYPES = '.sii,.zip';
 
 export default function FileUpload({ onUpload, loading, error }: FileUploadProps) {
+  const { t } = useLanguage();
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -108,10 +110,10 @@ export default function FileUpload({ onUpload, loading, error }: FileUploadProps
           {/* Text */}
           <div className="text-center">
             <p className={`font-display font-bold text-sm tracking-wide transition-colors ${dragActive ? 'text-primary' : 'text-text-main'}`}>
-              {dragActive ? 'LEPASKAN FILE DI SINI' : 'DRAG & DROP FILE'}
+              {dragActive ? t('path.uploadRelease') : t('path.uploadDragDrop')}
             </p>
             <p className="text-text-muted text-xs font-mono mt-1">
-              atau <span className="text-primary underline underline-offset-2">pilih file</span> dari komputer
+              {t('path.uploadOr')} <span className="text-primary underline underline-offset-2">{t('path.uploadChoose')}</span> {t('path.uploadFromComp')}
             </p>
           </div>
 
@@ -154,8 +156,8 @@ export default function FileUpload({ onUpload, loading, error }: FileUploadProps
             <span className="material-symbols-outlined text-xl animate-spin">sync</span>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-display font-bold text-white">PROCESSING...</p>
-            <p className="text-xs text-text-muted font-mono">Mengupload dan memvalidasi file</p>
+            <p className="text-sm font-display font-bold text-white">{t('path.uploadProgressTitle')}</p>
+            <p className="text-xs text-text-muted font-mono">{t('path.uploadProgressDesc')}</p>
           </div>
         </div>
       )}

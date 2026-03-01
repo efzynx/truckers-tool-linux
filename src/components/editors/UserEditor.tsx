@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { GameData } from '../../types';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface UserEditorProps {
   data: GameData;
@@ -28,6 +29,7 @@ const xpPresets = [
 
 export default function UserEditor({ data, onChange, onBack, onSave, saving, hasChanges }: UserEditorProps) {
   const [xpStr, setXpStr] = useState(data.experiencePoints.toLocaleString());
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!hasChanges) {
@@ -78,7 +80,7 @@ export default function UserEditor({ data, onChange, onBack, onSave, saving, has
           >
             <span className="material-symbols-outlined text-3xl">chevron_left</span>
           </button>
-          <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">Capability Tuner</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('editor.capabilitiesTitle')}</h1>
           <div className="w-10"></div> {/* Spacer */}
         </div>
       </header>
@@ -87,7 +89,7 @@ export default function UserEditor({ data, onChange, onBack, onSave, saving, has
       <div className="flex items-center justify-start mb-8 opacity-70">
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-dark border border-white/5">
           <span className="material-symbols-outlined text-blue-400 text-sm">psychology</span>
-          <span className="text-xs font-medium tracking-wide text-text-muted uppercase font-mono">SKILL OVERRIDE</span>
+          <span className="text-xs font-medium tracking-wide text-text-muted uppercase font-mono">{t('editor.skillOverride')}</span>
         </div>
       </div>
 
@@ -96,7 +98,7 @@ export default function UserEditor({ data, onChange, onBack, onSave, saving, has
         <div className="flex flex-col gap-8">
           {/* Experience Section */}
           <section className="flex flex-col items-start justify-center w-full animate-fade-in">
-        <h2 className="text-text-muted text-sm font-bold tracking-[0.2em] mb-4 uppercase font-display">Total Experience</h2>
+        <h2 className="text-text-muted text-sm font-bold tracking-[0.2em] mb-4 uppercase font-display">{t('editor.totalExperience')}</h2>
         
         <div className="relative w-full group">
           <div className="absolute inset-0 bg-blue-500/5 blur-xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
@@ -135,10 +137,10 @@ export default function UserEditor({ data, onChange, onBack, onSave, saving, has
       {/* Matrix Controls */}
       <section className="w-full animate-fade-in mb-6" style={{ animationDelay: '200ms' }}>
         <div className="flex justify-between items-end mb-4 px-1">
-           <h3 className="text-text-muted text-xs font-bold tracking-[0.1em] uppercase font-display">Skill Matrix</h3>
+           <h3 className="text-text-muted text-xs font-bold tracking-[0.1em] uppercase font-display">{t('dashboard.tabJobs')} MATRIX</h3>
             <div className="flex gap-2">
-              <button onClick={() => setAllSkills(0)} className="text-[10px] font-mono bg-surface border border-white/5 rounded px-2 py-1 text-text-muted hover:text-white transition-colors cursor-pointer">RESET</button>
-              <button onClick={() => setAllSkills(6)} className="text-[10px] font-mono bg-blue-500/20 border border-blue-500/30 rounded px-2 py-1 text-blue-400 hover:bg-blue-500/30 transition-colors cursor-pointer">MAX OUT</button>
+              <button onClick={() => setAllSkills(0)} className="text-[10px] font-mono bg-surface border border-white/5 rounded px-2 py-1 text-text-muted hover:text-white transition-colors cursor-pointer">{t('editor.reset')}</button>
+              <button onClick={() => setAllSkills(6)} className="text-[10px] font-mono bg-blue-500/20 border border-blue-500/30 rounded px-2 py-1 text-blue-400 hover:bg-blue-500/30 transition-colors cursor-pointer">{t('editor.maxOut')}</button>
             </div>
           </div>
 

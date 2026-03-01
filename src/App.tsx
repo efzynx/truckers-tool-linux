@@ -10,6 +10,7 @@ import SaveList from './components/SaveList';
 import UploadProfileList from './components/UploadProfileList';
 import UploadSaveList from './components/UploadSaveList';
 import Dashboard from './components/Dashboard';
+import { LanguageProvider } from './i18n/LanguageContext';
 
 function App() {
   // ---- App State Machine ----
@@ -290,9 +291,10 @@ function App() {
 
   // ---- Render ----
 
-  switch (step) {
-    case 'welcome':
-      return <WelcomeScreen onSelect={handleGameSelect} />;
+  const renderStep = () => {
+    switch (step) {
+      case 'welcome':
+        return <WelcomeScreen onSelect={handleGameSelect} />;
 
     case 'path-input':
       return (
@@ -367,9 +369,16 @@ function App() {
         />
       );
 
-    default:
-      return null;
-  }
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <LanguageProvider>
+      {renderStep()}
+    </LanguageProvider>
+  );
 }
 
 export default App;

@@ -1,12 +1,21 @@
 import type { GameType } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
+import LanguageToggle from './LanguageToggle';
 
 interface WelcomeScreenProps {
   onSelect: (game: GameType) => void;
 }
 
 export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="bg-background-dark text-text-main font-body antialiased overflow-hidden h-screen w-full select-none">
+      {/* Language Toggle Fixed Position */}
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageToggle />
+      </div>
+
       {/* Scanline Overlay */}
       <div className="fixed inset-0 z-50 pointer-events-none scanline-overlay opacity-30"></div>
       
@@ -30,7 +39,7 @@ export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
             <div className="animate-pulse-slow">
               <div className="flex flex-col items-center">
-                <h1 className="font-display font-bold text-4xl md:text-6xl text-white tracking-tighter drop-shadow-[0_0_15px_rgba(255,140,0,0.6)]">
+                <h1 className="font-display font-bold text-4xl md:text-6xl text-white tracking-tighter drop-shadow-[0_0_15px_rgba(255,140,0,0.6)] text-center">
                   EURO
                 </h1>
                 <h2 className="font-display font-bold text-2xl md:text-4xl text-ets-orange tracking-widest -mt-1 drop-shadow-[0_0_10px_rgba(255,140,0,0.8)]">
@@ -65,7 +74,7 @@ export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
             <div className="animate-pulse-slow">
               <div className="flex flex-col items-center">
-                <h1 className="font-display font-bold text-4xl md:text-6xl text-white tracking-tighter drop-shadow-[0_0_15px_rgba(214,40,40,0.6)]">
+                <h1 className="font-display font-bold text-4xl md:text-6xl text-white tracking-tighter drop-shadow-[0_0_15px_rgba(214,40,40,0.6)] text-center">
                   AMERICAN
                 </h1>
                 <h2 className="font-display font-bold text-2xl md:text-4xl text-ats-red tracking-widest -mt-1 drop-shadow-[0_0_10px_rgba(214,40,40,0.8)]">
@@ -93,8 +102,8 @@ export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
         {/* Center Divider Ornament */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none flex items-center gap-4 w-full justify-center">
           <div className="h-px bg-gradient-to-r from-transparent to-text-muted/20 w-16 md:w-32"></div>
-          <div className="bg-background-dark border border-white/10 text-text-muted font-mono text-[10px] px-2 py-0.5 rounded uppercase tracking-[0.2em]">
-            Select Context
+          <div className="bg-background-dark border border-white/10 text-text-muted font-mono text-[10px] px-2 py-0.5 rounded uppercase tracking-[0.2em] whitespace-nowrap">
+            {t('welcome.subtitle')}
           </div>
           <div className="h-px bg-gradient-to-l from-transparent to-text-muted/20 w-16 md:w-32"></div>
         </div>

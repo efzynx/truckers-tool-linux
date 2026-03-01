@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { GameType, InputMode } from '../types';
 import FileUpload from './FileUpload';
 
+import { useLanguage } from '../i18n/LanguageContext';
+
 interface PathInputProps {
   game: GameType;
   onScan: (path: string) => void;
@@ -19,6 +21,7 @@ const defaultPaths: Record<GameType, string> = {
 export default function PathInput({ game, onScan, onUpload, loading, error, onBack }: PathInputProps) {
   const [path, setPath] = useState(defaultPaths[game]);
   const [mode, setMode] = useState<InputMode>('path');
+  const { t } = useLanguage();
 
   const gameName = game === 'ets2' ? 'Euro Truck Simulator 2' : 'American Truck Simulator';
 
@@ -32,12 +35,13 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
         <button 
           onClick={onBack}
           disabled={loading}
+          title={t('path.backButton')}
           className="text-white hover:text-primary transition-colors flex size-10 shrink-0 items-center justify-center rounded-lg active:bg-surface/50 cursor-pointer"
         >
           <span className="material-symbols-outlined text-3xl">chevron_left</span>
         </button>
         <h2 className="text-white text-2xl font-display font-bold leading-tight tracking-wider flex-1 text-center pr-10 uppercase">
-          Locate Terminal
+          {t('path.title')}
         </h2>
       </div>
 
@@ -55,7 +59,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
                   : 'text-text-muted hover:text-white hover:bg-white/5'}`}
             >
               <span className="material-symbols-outlined text-[18px]">terminal</span>
-              <span>Local Path</span>
+              <span>{t('path.label')}</span>
             </button>
             <button
               onClick={() => setMode('upload')}
@@ -65,7 +69,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
                   : 'text-text-muted hover:text-white hover:bg-white/5'}`}
             >
               <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
-              <span>Upload File</span>
+              <span>{t('path.uploadTitle')}</span>
             </button>
           </div>
         </div>
@@ -76,7 +80,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
             {/* Input Section */}
             <div className="px-5 pt-6 pb-2">
               <label className="block text-text-muted font-display font-bold uppercase tracking-wider text-sm mb-2 ml-1">
-                System Path
+                {t('path.label')}
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-primary">
@@ -111,7 +115,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
                 </div>
               </div>
               <p className="text-text-muted font-mono text-xs uppercase tracking-widest">
-                {loading ? 'Scanning Directory...' : 'Awaiting Signal Lock'}
+                {loading ? t('path.scanning') : 'Awaiting Signal Lock'}
               </p>
               <p className="text-primary font-display font-bold text-lg mt-2 tracking-widest shadow-neon">
                 {gameName}
@@ -167,7 +171,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
             <div className="mt-4 flex flex-col gap-3">
               <div className="flex items-center gap-2 mb-1">
                 <span className="material-symbols-outlined text-primary text-[18px]">help_outline</span>
-                <p className="text-xs font-display font-bold text-primary uppercase tracking-wider">File apa yang bisa di-upload?</p>
+                <p className="text-xs font-display font-bold text-primary uppercase tracking-wider">{t('path.uploadDesc')}</p>
               </div>
 
               {/* Option 1: Direct SII */}
@@ -178,7 +182,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-white mb-1">game.sii</p>
                   <p className="text-[11px] text-text-muted leading-relaxed">
-                    Upload langsung file <span className="text-blue-400 font-mono">game.sii</span> dari save game kamu.
+                    {t('path.uploadLimit')}
                   </p>
                   <div className="mt-1.5 bg-background-dark/60 rounded-md px-2.5 py-1.5 overflow-x-auto">
                     <code className="text-[10px] font-mono text-text-muted whitespace-nowrap">
@@ -196,7 +200,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-white mb-1">profiles.zip</p>
                   <p className="text-[11px] text-text-muted leading-relaxed">
-                    Kompres seluruh folder <span className="text-emerald-400 font-mono">profiles/</span> jadi ZIP. Semua profile & save game akan terdeteksi otomatis.
+                    {t('path.uploadInstructionZipAll1')}<span className="text-emerald-400 font-mono">profiles/</span>{t('path.uploadInstructionZipAll2')}
                   </p>
                   <div className="mt-1.5 bg-background-dark/60 rounded-md px-2.5 py-1.5 overflow-x-auto">
                     <code className="text-[10px] font-mono text-text-muted whitespace-nowrap">
@@ -214,7 +218,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-white mb-1">{'<profile_id>'}.zip</p>
                   <p className="text-[11px] text-text-muted leading-relaxed">
-                    Kompres 1 folder profile saja. Contoh: folder <span className="text-amber-400 font-mono">6E616D696461/</span> dijadikan ZIP.
+                    {t('path.uploadInstructionZipSingle1')}<span className="text-amber-400 font-mono">6E616D696461/</span>{t('path.uploadInstructionZipSingle2')}
                   </p>
                   <div className="mt-1.5 bg-background-dark/60 rounded-md px-2.5 py-1.5 overflow-x-auto">
                     <code className="text-[10px] font-mono text-text-muted whitespace-nowrap">
@@ -227,7 +231,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
               {/* Size limit note */}
               <div className="flex items-center gap-2 px-1">
                 <span className="material-symbols-outlined text-text-muted text-[14px]">info</span>
-                <p className="text-[10px] text-text-muted font-mono">Maksimum ukuran file: 50MB</p>
+                <p className="text-[10px] text-text-muted font-mono">{t('path.uploadLimitNote')}</p>
               </div>
             </div>
 
@@ -237,7 +241,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
                 {gameName}
               </p>
               <p className="text-text-muted font-mono text-[10px] uppercase tracking-widest mt-1">
-                Upload Mode • Web Access
+                {t('path.uploadModeLabel')}
               </p>
             </div>
           </div>
@@ -260,7 +264,7 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
             ) : (
                <span className="material-symbols-outlined mr-2 text-2xl">radar</span>
             )}
-            {loading ? 'SCANNING...' : 'ENGAGE SCAN'}
+            {loading ? t('path.scanning') : t('path.scanButton')}
           </button>
         </div>
       )}

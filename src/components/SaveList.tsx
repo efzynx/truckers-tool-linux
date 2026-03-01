@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Save } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface SaveListProps {
   saves: Save[];
@@ -12,6 +13,7 @@ export default function SaveList({ saves, onSelect, onBack, loading }: SaveListP
   const [useBackup, setUseBackup] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'autosave' | 'manual'>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const { t } = useLanguage();
 
   // Filtering and Sorting
   const processedSaves = [...saves]
@@ -45,7 +47,7 @@ export default function SaveList({ saves, onSelect, onBack, loading }: SaveListP
             </button>
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>folder</span>
-              <span className="text-xs font-bold tracking-[0.2em] text-primary uppercase">Save Selection</span>
+              <span className="text-xs font-bold tracking-[0.2em] text-primary uppercase">{t('saveList.title')}</span>
             </div>
             <div className="w-10"></div> {/* Spacer for centering */}
           </div>
@@ -71,7 +73,7 @@ export default function SaveList({ saves, onSelect, onBack, loading }: SaveListP
                   <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>save_as</span>
                   <span>Safe Mode Protocol</span>
                 </div>
-                <span className="text-xs text-text-muted">Create .bak backup on profile level before writing</span>
+                <span className="text-xs text-text-muted">{t('saveList.backupCheck')}</span>
               </div>
               {/* Toggle Switch */}
               <label className="relative inline-flex items-center cursor-pointer">
@@ -97,15 +99,15 @@ export default function SaveList({ saves, onSelect, onBack, loading }: SaveListP
                   <button 
                     onClick={() => setFilterType('all')} 
                     className={`px-3 py-1 rounded-md text-xs font-mono transition-colors ${filterType === 'all' ? 'bg-primary/20 text-primary font-bold' : 'text-text-muted hover:text-white'}`}
-                  >ALL</button>
+                  >{t('saveList.filterTypeAll')}</button>
                   <button 
                     onClick={() => setFilterType('autosave')} 
                     className={`px-3 py-1 rounded-md text-xs font-mono transition-colors ${filterType === 'autosave' ? 'bg-primary/20 text-primary font-bold' : 'text-text-muted hover:text-white'}`}
-                  >AUTO</button>
+                  >{t('saveList.filterTypeAutosave')}</button>
                   <button 
                     onClick={() => setFilterType('manual')} 
                     className={`px-3 py-1 rounded-md text-xs font-mono transition-colors ${filterType === 'manual' ? 'bg-primary/20 text-primary font-bold' : 'text-text-muted hover:text-white'}`}
-                  >MANUAL</button>
+                  >{t('saveList.filterTypeManual')}</button>
                 </div>
                 
                 {/* Sort Order */}
@@ -114,7 +116,7 @@ export default function SaveList({ saves, onSelect, onBack, loading }: SaveListP
                   className="flex items-center gap-1 text-xs font-mono text-text-muted hover:text-white transition-colors p-1"
                 >
                   <span className="material-symbols-outlined text-[16px]">sort</span>
-                  <span>{sortOrder === 'newest' ? 'NEWEST' : 'OLDEST'}</span>
+                  <span>{sortOrder === 'newest' ? t('saveList.filterSortNewest') : t('saveList.filterSortOldest')}</span>
                 </button>
               </div>
             </div>
@@ -122,7 +124,7 @@ export default function SaveList({ saves, onSelect, onBack, loading }: SaveListP
             {processedSaves.length === 0 && (
               <div className="text-center py-10 opacity-50">
                 <span className="material-symbols-outlined text-4xl mb-2">sentiment_dissatisfied</span>
-                <p className="font-mono text-sm uppercase tracking-widest text-text-muted">No Save Data Found</p>
+                <p className="font-mono text-sm uppercase tracking-widest text-text-muted">{t('saveList.empty')}</p>
               </div>
             )}
 
@@ -158,7 +160,7 @@ export default function SaveList({ saves, onSelect, onBack, loading }: SaveListP
                       <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
                         <div className="flex justify-between items-baseline mb-1">
                           <h3 className={`text-lg ${isActive ? 'font-bold text-white' : 'font-medium text-text-main/80'} truncate pr-2 group-hover:${isActive ? 'text-primary' : 'text-white'} transition-colors`}>{save.name}</h3>
-                          <span className={`text-xs font-mono ${isActive ? 'text-primary bg-primary/10 border-primary/20' : 'text-text-muted bg-white/5 border-white/10 group-hover:text-text-main'} px-1.5 py-0.5 rounded border transition-colors`}>{save.isAutosave ? 'AUTO' : 'MANUAL'}</span>
+                          <span className={`text-xs font-mono ${isActive ? 'text-primary bg-primary/10 border-primary/20' : 'text-text-muted bg-white/5 border-white/10 group-hover:text-text-main'} px-1.5 py-0.5 rounded border transition-colors`}>{save.isAutosave ? t('saveList.autosave') : t('saveList.manualSave')}</span>
                         </div>
                         <div className={`flex items-center gap-3 text-xs ${isActive ? 'text-text-muted' : 'text-text-muted/70 group-hover:text-text-muted'} transition-colors`}>
                           <div className="flex items-center gap-1">

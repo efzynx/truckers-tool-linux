@@ -2,28 +2,31 @@
 
 A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simulator** on Linux. Edit your profile data (money, XP, skills) directly from the browser — no Windows tools needed.
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.0.1--beta.1.1-orange?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+[🇮🇩 Baca dalam Bahasa Indonesia (Read in Indonesian)](README-ID.md)
+
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.0.1--beta.1.2-orange?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 ## ✨ Features
 
 - 🎮 **Game Selection** — Support for ETS2 and ATS
 - 📂 **Profile Scanner** — Auto-detect profiles from native or Wine/Proton paths
-- 📤 **Upload Support** — Upload `.sii` or `.zip` file langsung via browser (tanpa install lokal)
+- 📤 **Upload Support** — Upload `.sii` or `.zip` files directly via browser (no local install required)
 - 🔓 **Auto Decrypt** — Decrypt SCS binary save files on-the-fly
 - 📊 **Dashboard** — View profile overview: level, XP, money, skills
 - ⚡ **Quick Actions** — Fast actions like Inject €50k, Clear Debt, Add 10K XP
-- 📥 **Download Edited** — Download file hasil edit untuk ditaruh kembali ke folder save game
+- 📥 **Download Edited File** — Download the edited file to place it back into your save game folder
 - ✏️ **Profile Editor** — Edit money, experience points, and skill levels
 - 💾 **Auto Backup** — Creates backup before any changes
-- ⚙️ **Configurable** — Semua setting via `settings.yml` (port, SMTP, paths, upload limits)
+- ⚙️ **Configurable** — All settings via `settings.yml` (port, SMTP, paths, upload limits)
 - 🎨 **Pixel-Perfect Stitch UI** — Responsive Glassmorphism UI (Mobile & Desktop Full-width)
+- 🌐 **Multilingual Support** — Available in English and Indonesian
 
 ## 📋 Prerequisites
 
 - **Git**
-- **Node.js** v18+ (script bisa install otomatis via nvm)
-- **PM2** (opsional, untuk production/server deployment)
-- **ETS2/ATS** installed (native Linux, Wine, or Proton) — atau upload file langsung
+- **Node.js** v18+ (script can install it automatically via nvm)
+- **PM2** (optional, for production/server deployment)
+- **ETS2/ATS** installed (native Linux, Wine, or Proton) — or simply upload your files
 
 ## 🚀 Quick Install
 
@@ -34,13 +37,13 @@ curl -fsSL https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/ttl
 chmod +x ttl.sh
 ```
 
-### 2. Install Node.js (jika belum ada)
+### 2. Install Node.js (if not already installed)
 
 ```bash
-# Via script (otomatis pakai nvm)
+# Via script (automatically uses nvm)
 ./ttl.sh node
 
-# Atau install manual:
+# Or install manually:
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 \. "$HOME/.nvm/nvm.sh"
 nvm install 24
@@ -49,49 +52,49 @@ nvm install 24
 ### 3. Install & setup
 
 ```bash
-# Install saja
+# Just install
 ./ttl.sh install
 
-# Setup settings.yml (interaktif)
+# Setup settings.yml (interactive)
 ./ttl.sh setup
 
 # Start web app
 ./ttl.sh start
 
-# Atau install + setup + start sekaligus
+# Or install + setup + start all at once
 ./ttl.sh -IS
 ```
 
-Buka browser di **http://localhost:3214** 🎉
+Open your browser at **http://localhost:3214** 🎉
 
-## ⚙️ Konfigurasi (settings.yml)
+## ⚙️ Configuration (settings.yml)
 
-Semua setting disimpan di file `settings.yml`. File ini **tidak di-push ke GitHub** untuk keamanan.
+All settings are stored in the `settings.yml` file. This file is **not pushed to GitHub** for security reasons.
 
-### Cara membuat:
+### How to create:
 
 ```bash
-# Otomatis (interaktif)
+# Automatic (interactive)
 ./ttl.sh setup
 
-# Atau manual
+# Or manually
 cp settings.example.yml settings.yml
 nano settings.yml
 ```
 
-### Isi settings.yml:
+### settings.yml Content:
 
 ```yaml
 app:
   name: "Truckers Tool Linux"
-  port_frontend: 3214          # Port frontend (Next.js)
-  port_backend: 8097           # Port backend API (Express)
+  port_frontend: 3214          # Frontend port (Next.js)
+  port_backend: 8097           # Backend API port (Express)
 
 admin:
-  email: "admin@example.com"   # Email admin
-  contact: "Admin Name"        # Nama kontak
+  email: "admin@example.com"   # Admin email
+  contact: "Admin Name"        # Contact name
 
-smtp:                          # SMTP relay (opsional)
+smtp:                          # SMTP relay (optional)
   host: "smtp.gmail.com"
   port: 587
   secure: false
@@ -110,10 +113,10 @@ upload:                        # Upload limits
 
 ## 🖥️ Production Deployment (PM2)
 
-Untuk menjalankan di server/VPS:
+To run on a server/VPS:
 
 ```bash
-# 1. Install PM2 global
+# 1. Install PM2 globally
 npm install -g pm2
 
 # 2. Setup settings
@@ -124,36 +127,36 @@ npm run build
 npm run pm2:start
 
 # Monitoring
-pm2 status                    # Lihat status
-pm2 logs                      # Lihat logs
+pm2 status                     # View status
+pm2 logs                       # View logs
 npm run pm2:restart            # Restart
 npm run pm2:stop               # Stop
 ```
 
-PM2 config ada di `ecosystem.config.cjs` yang otomatis baca port dari `settings.yml`.
+The PM2 config is located in `ecosystem.config.cjs` which automatically reads the port from `settings.yml`.
 
 ## 📖 Script Commands
 
-| Command | Deskripsi |
+| Command | Description |
 |---|---|
 | `./ttl.sh install` | Install app (clone repo + npm install) |
-| `./ttl.sh setup` | Generate settings.yml (interaktif) |
-| `./ttl.sh start` | Jalankan web app (PM2 jika ada, fallback npm start) |
+| `./ttl.sh setup` | Generate settings.yml (interactive) |
+| `./ttl.sh start` | Run web app (PM2 if available, fallback npm start) |
 | `./ttl.sh stop` | Stop app (PM2) |
 | `./ttl.sh -IS` | Install + setup + start |
 | `./ttl.sh node` | Install Node.js via nvm |
-| `./ttl.sh check` | Cek update dari GitHub Releases |
-| `./ttl.sh update` | Update ke versi terbaru |
-| `./ttl.sh version` | Tampilkan versi saat ini |
-| `./ttl.sh help` | Tampilkan bantuan |
+| `./ttl.sh check` | Check for updates from GitHub Releases |
+| `./ttl.sh update` | Update to the latest version |
+| `./ttl.sh version` | Show current version |
+| `./ttl.sh help` | Show help |
 
-## ▶️ Cara Penggunaan
+## ▶️ How to Use
 
-### Mode Local Path
+### Local Path Mode
 
 1. **Welcome Screen** → Click "Start Editing"
 2. **Select Game** → Choose ETS2 or ATS
-3. **Enter Profile Path** → Paste path ke folder profiles:
+3. **Enter Profile Path** → Paste the path to your profiles folder:
 
    | Install Type | Path |
    |---|---|
@@ -161,36 +164,36 @@ PM2 config ada di `ecosystem.config.cjs` yang otomatis baca port dari `settings.
    | **Steam Proton** | `~/.steam/steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2/profiles/` |
    | **Wine/Lutris** | `~/YOUR_GAMES_PATH_FOLDER/<prefix>/drive_c/users/<user>/Documents/Euro Truck Simulator 2/profiles/` |
 
-4. **Scan & Select Profile** → Click "Scan Folder", pilih profile
+4. **Scan & Select Profile** → Click "Scan Folder", choose a profile
 5. **Backup** → Optionally create a backup (recommended!)
-6. **Edit** → Ubah money, XP, skills dari Dashboard tabs
-7. **Save** → Click "Save" untuk menyimpan perubahan
+6. **Edit** → Modify money, XP, skills from the Dashboard tabs
+7. **Save** → Click "Save" to save your changes
 
-### Mode Upload File
+### File Upload Mode
 
 1. **Welcome Screen** → Select Game
-2. **Upload File Tab** → Pilih salah satu:
-   - **game.sii** — Upload langsung file save game
-   - **profiles.zip** — Kompres seluruh folder `profiles/`
-   - **<profile_id>.zip** — Kompres 1 folder profile
-3. **Pilih Profile** → (untuk ZIP) Pilih profile dari daftar
-4. **Pilih Save** → Pilih save data yang ingin diedit
-5. **Edit** → Ubah money, XP, skills
-6. **Download** → Click "Download File" dan letakkan ke folder save game
+2. **Upload File Tab** → Choose one:
+   - **game.sii** — Upload your save game file directly
+   - **profiles.zip** — Compress the entire `profiles/` folder
+   - **<profile_id>.zip** — Compress 1 profile folder
+3. **Select Profile** → (for ZIP) Choose a profile from the list
+4. **Select Save** → Choose the save data you want to edit
+5. **Edit** → Modify money, XP, skills
+6. **Download** → Click "Download File" and place it back into your save game folder
 
-> ⚠️ **Important:** Selalu tutup game sebelum mengedit save file.
+> ⚠️ **Important:** Always close the game before editing a save file.
 
 ## 🔄 Update
 
 ```bash
-# Cek apakah ada versi baru
+# Check if a new version is available
 ./ttl.sh check
 
-# Update ke versi terbaru
+# Update to the latest version
 ./ttl.sh update
 ```
 
-Versi dicek melalui [GitHub Releases](https://github.com/efzynx/truckers-tool-linux/releases). Pre-release tersedia sebagai versi beta/tester.
+Version checking is done via [GitHub Releases](https://github.com/efzynx/truckers-tool-linux/releases). Pre-releases are available as beta/tester versions.
 
 ## 🏗️ Tech Stack
 
@@ -208,8 +211,8 @@ Versi dicek melalui [GitHub Releases](https://github.com/efzynx/truckers-tool-li
 ```
 truckers-tool-linux/
 ├── ttl.sh                     # Installer & launcher script
-├── settings.yml               # Config (tidak di-push, buat via ./ttl.sh setup)
-├── settings.example.yml       # Template settings (di-push ke GitHub)
+├── settings.yml               # Config (not pushed, create via ./ttl.sh setup)
+├── settings.example.yml       # Config template (pushed to GitHub)
 ├── ecosystem.config.cjs       # PM2 production config
 ├── server/                    # Backend API
 │   ├── index.ts               # Express server entry

@@ -1,4 +1,5 @@
 import type { UploadedProfile } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface UploadProfileListProps {
   profiles: UploadedProfile[];
@@ -8,6 +9,7 @@ interface UploadProfileListProps {
 }
 
 export default function UploadProfileList({ profiles, onSelect, onBack, loading }: UploadProfileListProps) {
+  const { t } = useLanguage();
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-text-main font-display antialiased selection:bg-primary/30 selection:text-primary">
       <div className="relative flex flex-col min-h-screen w-full bg-background-dark shadow-2xl overflow-hidden border-x border-white/5">
@@ -50,7 +52,7 @@ export default function UploadProfileList({ profiles, onSelect, onBack, loading 
             {profiles.length === 0 && (
               <div className="text-center py-10 opacity-50">
                 <span className="material-symbols-outlined text-4xl mb-2">sentiment_dissatisfied</span>
-                <p className="font-mono text-sm uppercase tracking-widest text-text-muted">No Profiles Found</p>
+                <p className="font-mono text-sm uppercase tracking-widest text-text-muted">{t('profileList.empty')}</p>
               </div>
             )}
 

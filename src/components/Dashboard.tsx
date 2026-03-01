@@ -4,6 +4,7 @@ import ProfileEditor from './editors/ProfileEditor';
 import UserEditor from './editors/UserEditor';
 import TruckEditor from './editors/TruckEditor';
 import GarageEditor from './editors/GarageEditor';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage';
 
@@ -59,6 +60,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   const [view, setView] = useState<DashboardView>('home');
   const [editableData, setEditableData] = useState<GameData>({ ...data });
   const [hasChanges, setHasChanges] = useState(false);
+  const { t } = useLanguage();
 
   // Quick stats
   const level = useMemo(() => xpToLevel(editableData.experiencePoints), [editableData.experiencePoints]);
@@ -132,15 +134,15 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
             </button>
             <button onClick={() => setView('profile')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'profile' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">account_balance_wallet</span>
-              <span className="font-display tracking-widest uppercase text-xs font-bold">Economy</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabMoney')}</span>
             </button>
             <button onClick={() => setView('user')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'user' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">psychology</span>
-              <span className="font-display tracking-widest uppercase text-xs font-bold">Skills</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabJobs')} / Skills</span>
             </button>
             <button onClick={() => setView('truck')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'truck' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">warehouse</span>
-              <span className="font-display tracking-widest uppercase text-xs font-bold">Garage & HQs</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabGarages')} & {t('dashboard.tabTrucks')}</span>
             </button>
           </nav>
           
@@ -149,7 +151,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               className="hidden md:flex mt-auto w-full items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:text-red-400 hover:bg-white/5 transition-all"
             >
               <span className="material-symbols-outlined">logout</span>
-              <span className="font-display tracking-widest uppercase text-xs font-bold">Disconnect</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.btnBack')}</span>
           </button>
           
           {/* Mobile XP Progress */}
@@ -262,7 +264,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                 <span className="material-symbols-outlined text-2xl text-text-main group-hover:text-emerald-400 transition-colors">{downloading ? 'sync' : 'download'}</span>
               </div>
               <div className="flex flex-col items-start z-10 text-left">
-                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">{downloading ? 'PREPARING...' : 'DOWNLOAD FILE'}</span>
+                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">{downloading ? t('dashboard.btnDownloading') : t('dashboard.btnDownload')}</span>
                 <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-emerald-400/80 transition-colors">Export game.sii</span>
               </div>
             </button>
@@ -276,9 +278,9 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                   <span className="material-symbols-outlined text-emerald-400 text-xl">info</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-display font-bold text-emerald-400 uppercase tracking-wider mb-2">Instruksi Penempatan File</p>
+                  <p className="text-xs font-display font-bold text-emerald-400 uppercase tracking-wider mb-2">{t('dashboard.placementInstruction')}</p>
                   <p className="text-xs text-text-muted leading-relaxed mb-2">
-                    Setelah download, letakkan file <span className="text-white font-mono">game.sii</span> ke folder berikut:
+                    {t('dashboard.placementDesc')}<span className="text-white font-mono">game.sii</span>{t('dashboard.placementDesc2')}
                   </p>
                   <div className="bg-background-dark/80 rounded-lg p-3 border border-white/5 overflow-x-auto">
                     <code className="text-[11px] font-mono text-emerald-300 whitespace-nowrap">
@@ -287,7 +289,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="material-symbols-outlined text-amber-400 text-[14px]">warning</span>
-                    <p className="text-[10px] text-amber-400/80 font-mono">File ini akan menimpa game.sii yang ada di folder tersebut</p>
+                    <p className="text-[10px] text-amber-400/80 font-mono">{t('dashboard.placementWarning')}</p>
                   </div>
                 </div>
               </div>
@@ -368,7 +370,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <div className={`flex h-8 items-center justify-center rounded-full px-4 ${view === 'profile' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
                 <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
               </div>
-              <p className="text-xs font-medium leading-normal tracking-wide font-display mt-1">Economy</p>
+              <p className="text-xs font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabMoney')}</p>
             </button>
             
             <button onClick={() => setView('user')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'user' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
@@ -382,7 +384,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <div className={`flex h-8 items-center justify-center rounded-full px-4 ${(view === 'truck' || view === 'garage') ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
                 <span className="material-symbols-outlined text-[24px]">warehouse</span>
               </div>
-              <p className="text-[10px] sm:text-xs font-medium leading-normal tracking-wide font-display mt-1">Garage</p>
+              <p className="text-[10px] sm:text-xs font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabGarages')}</p>
             </button>
           </div>
         </div>

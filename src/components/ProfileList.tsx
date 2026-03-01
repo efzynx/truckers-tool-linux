@@ -1,4 +1,5 @@
 import type { Profile } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface ProfileListProps {
   profiles: Profile[];
@@ -8,6 +9,7 @@ interface ProfileListProps {
 }
 
 export default function ProfileList({ profiles, onSelect, onBack, loading }: ProfileListProps) {
+  const { t } = useLanguage();
 
   // Sorting: newest saved first (fallback to name if saveTime is undefined)
   const sortedProfiles = [...profiles].sort((a, b) => {
@@ -59,7 +61,7 @@ export default function ProfileList({ profiles, onSelect, onBack, loading }: Pro
             {profiles.length === 0 && (
               <div className="text-center py-10 opacity-50">
                 <span className="material-symbols-outlined text-4xl mb-2">sentiment_dissatisfied</span>
-                <p className="font-mono text-sm uppercase tracking-widest text-text-muted">No Profiles Found</p>
+                <p className="font-mono text-sm uppercase tracking-widest text-text-muted">{t('profileList.empty')}</p>
               </div>
             )}
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { UploadedSave } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface UploadSaveListProps {
   saves: UploadedSave[];
@@ -12,6 +13,7 @@ interface UploadSaveListProps {
 export default function UploadSaveList({ saves, profileName, onSelect, onBack, loading }: UploadSaveListProps) {
   const [filterType, setFilterType] = useState<'all' | 'autosave' | 'manual'>('all');
   const [sortOrder, setSortOrder] = useState<'az' | 'za'>('az');
+  const { t } = useLanguage();
 
   // Filtering and sorting
   const processedSaves = [...saves]
@@ -45,7 +47,7 @@ export default function UploadSaveList({ saves, profileName, onSelect, onBack, l
             </button>
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>folder</span>
-              <span className="text-xs font-bold tracking-[0.2em] text-primary uppercase">Save Selection</span>
+              <span className="text-xs font-bold tracking-[0.2em] text-primary uppercase">{t('saveList.title')}</span>
             </div>
             <div className="w-10"></div>
           </div>
@@ -84,15 +86,15 @@ export default function UploadSaveList({ saves, profileName, onSelect, onBack, l
                   <button 
                     onClick={() => setFilterType('all')} 
                     className={`px-3 py-1 rounded-md text-xs font-mono transition-colors cursor-pointer ${filterType === 'all' ? 'bg-primary/20 text-primary font-bold' : 'text-text-muted hover:text-white'}`}
-                  >ALL</button>
+                  >{t('saveList.filterTypeAll')}</button>
                   <button 
                     onClick={() => setFilterType('autosave')} 
                     className={`px-3 py-1 rounded-md text-xs font-mono transition-colors cursor-pointer ${filterType === 'autosave' ? 'bg-primary/20 text-primary font-bold' : 'text-text-muted hover:text-white'}`}
-                  >AUTO</button>
+                  >{t('saveList.filterTypeAutosave')}</button>
                   <button 
                     onClick={() => setFilterType('manual')} 
                     className={`px-3 py-1 rounded-md text-xs font-mono transition-colors cursor-pointer ${filterType === 'manual' ? 'bg-primary/20 text-primary font-bold' : 'text-text-muted hover:text-white'}`}
-                  >MANUAL</button>
+                  >{t('saveList.filterTypeManual')}</button>
                 </div>
                 
                 {/* Sort Order */}
@@ -109,7 +111,7 @@ export default function UploadSaveList({ saves, profileName, onSelect, onBack, l
             {processedSaves.length === 0 && (
               <div className="text-center py-10 opacity-50">
                 <span className="material-symbols-outlined text-4xl mb-2">sentiment_dissatisfied</span>
-                <p className="font-mono text-sm uppercase tracking-widest text-text-muted">No Save Data Found</p>
+                <p className="font-mono text-sm uppercase tracking-widest text-text-muted">{t('saveList.empty')}</p>
               </div>
             )}
 
@@ -145,7 +147,7 @@ export default function UploadSaveList({ saves, profileName, onSelect, onBack, l
                       <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
                         <div className="flex justify-between items-baseline mb-1">
                           <h3 className={`text-lg ${isActive ? 'font-bold text-white' : 'font-medium text-text-main/80'} truncate pr-2 group-hover:text-white transition-colors`}>{save.saveName}</h3>
-                          <span className={`text-xs font-mono ${isActive ? 'text-primary bg-primary/10 border-primary/20' : 'text-text-muted bg-white/5 border-white/10 group-hover:text-text-main'} px-1.5 py-0.5 rounded border transition-colors`}>{save.isAutosave ? 'AUTO' : 'MANUAL'}</span>
+                          <span className={`text-xs font-mono ${isActive ? 'text-primary bg-primary/10 border-primary/20' : 'text-text-muted bg-white/5 border-white/10 group-hover:text-text-main'} px-1.5 py-0.5 rounded border transition-colors`}>{save.isAutosave ? t('saveList.autosave') : t('saveList.manualSave')}</span>
                         </div>
                         <div className={`flex items-center gap-3 text-xs ${isActive ? 'text-text-muted' : 'text-text-muted/70 group-hover:text-text-muted'} transition-colors`}>
                           <div className="flex items-center gap-1">
