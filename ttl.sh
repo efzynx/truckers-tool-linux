@@ -529,7 +529,11 @@ do_update() {
     local external_script="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
     if [ "$external_script" != "$INSTALL_DIR/ttl.sh" ] && [ -w "$external_script" ]; then
       info "Mengupdate script ttl.sh di luar direktori instalasi..."
-      cp -f "$INSTALL_DIR/ttl.sh" "$external_script"
+      if [ "$use_beta" = true ]; then
+        curl -fsSL "https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/refs/heads/beta/ttl.sh" -o "$external_script" || cp -f "$INSTALL_DIR/ttl.sh" "$external_script"
+      else
+        curl -fsSL "https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/refs/heads/main/ttl.sh" -o "$external_script" || cp -f "$INSTALL_DIR/ttl.sh" "$external_script"
+      fi
       chmod +x "$external_script"
     fi
   fi
