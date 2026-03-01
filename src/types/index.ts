@@ -81,11 +81,44 @@ export interface SaveResponse {
 
 export type GameType = 'ets2' | 'ats';
 
+export type InputMode = 'path' | 'upload';
+
+export interface UploadedSave {
+  profileName: string;
+  saveName: string;
+  siiPath: string;
+  fullPath: string;
+  isAutosave: boolean;
+}
+
+export interface UploadedProfile {
+  name: string;
+  saves: UploadedSave[];
+  saveCount: number;
+}
+
+export interface UploadResponse {
+  success: boolean;
+  type: 'sii' | 'zip';
+  // For SII
+  content?: string;
+  filePath?: string;
+  encrypted?: boolean;
+  // For ZIP
+  profiles?: UploadedProfile[];
+  saves?: UploadedSave[];
+  // Common
+  tempDir?: string;
+  error?: string;
+}
+
 export type AppStep =
   | 'welcome'
   | 'game-select'
   | 'path-input'
   | 'profile-select'
   | 'save-select'
+  | 'upload-profile-select'
+  | 'upload-save-select'
   | 'backup-confirm'
   | 'dashboard';

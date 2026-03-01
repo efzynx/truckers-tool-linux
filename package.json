@@ -1,28 +1,38 @@
 {
   "name": "truckers-tool-linux",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1-beta.1.1",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n \"next,api\" -c \"cyan,yellow\" \"next dev\" \"tsx watch server/index.ts\"",
-    "dev:frontend": "next dev",
+    "dev": "concurrently -n \"next,api\" -c \"cyan,yellow\" \"next dev -p 3214\" \"tsx watch server/index.ts\"",
+    "dev:frontend": "next dev -p 3214",
     "dev:backend": "tsx watch server/index.ts",
     "build": "next build",
-    "start": "concurrently -n \"next,api\" -c \"cyan,yellow\" \"next start\" \"tsx server/index.ts\""
+    "start": "concurrently -n \"next,api\" -c \"cyan,yellow\" \"next start -p 3214\" \"tsx server/index.ts\"",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:stop": "pm2 stop ecosystem.config.cjs",
+    "pm2:restart": "pm2 restart ecosystem.config.cjs",
+    "pm2:logs": "pm2 logs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.2.0",
     "@trucky/sii-decrypt-ts": "^1.0.0",
+    "adm-zip": "^0.5.16",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "js-yaml": "^4.1.1",
+    "multer": "^2.1.0",
     "next": "^16.1.6",
     "postcss": "^8.5.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.2",
+    "@types/js-yaml": "^4.0.9",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22.15.3",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",

@@ -29,5 +29,12 @@ test.js
 # Logs
 *.log
 npm-debug.log*
+logs/
+
+# Settings (contains sensitive data)
+settings.yml
+
+# PM2
+.pm2/
 
 desain/

@@ -69,4 +69,48 @@ router.post('/save', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/download-save
+ * Applies updates to the game.sii content and returns it as a downloadable file.
+ * Used for web users who uploaded their files and want to download the edited result.
+ */
+router.post('/download-save', async (req, res) => {
+  try {
+    const { content, updates } = req.body as {
+      content: string;
+      updates: {
+        money?: number;
+        experiencePoints?: number;
+        skills?: {
+          adr?: number;
+          long_dist?: number;
+          heavy?: number;
+          fragile?: number;
+          urgent?: number;
+          mechanical?: number;
+        };
+      };
+    };
+
+    if (!content) {
+      res.status(400).json({ success: false, error: 'Content wajib diisi' });
+      return;
+    }
+
+    // Apply updates using regex
+    const updatedContent = applyUpdates(content, updates);
+
+    console.log(`📥 Download prepared: game.sii (${(updatedContent.length / 1024).toFixed(1)}KB)`);
+
+    // Send as downloadable file
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', 'attachment; filename="game.sii"');
+    res.send(updatedContent);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Download error:', message);
+    res.status(500).json({ success: false, error: message });
+  }
+});
+
 export default router;

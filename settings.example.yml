@@ -1,0 +1,48 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║         Truckers Tool Linux — Settings Template             ║
+# ║  Salin file ini ke settings.yml dan sesuaikan               ║
+# ║  cp settings.example.yml settings.yml                       ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+# ── App Configuration ─────────────────────────────────────────
+app:
+  name: "Truckers Tool Linux"
+  # Port untuk frontend (Next.js)
+  port_frontend: 3214
+  # Port untuk backend API (Express)
+  port_backend: 8097
+
+# ── Admin / Contact ───────────────────────────────────────────
+admin:
+  # Email admin (ditampilkan di halaman About / Footer)
+  email: "admin@example.com"
+  # Nama kontak admin
+  contact: "Admin Name"
+
+# ── SMTP Relay (opsional) ─────────────────────────────────────
+# Digunakan untuk notifikasi email (jika diimplementasi).
+# Biarkan kosong jika tidak digunakan.
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  secure: false
+  # Username SMTP (biasanya email)
+  user: ""
+  # Password atau App Password
+  pass: ""
+
+# ── Default Paths ─────────────────────────────────────────────
+# Path default ke folder profiles game.
+# Gunakan ~ untuk home directory user.
+paths:
+  ets2: "~/Documents/Euro Truck Simulator 2/profiles/"
+  ats: "~/Documents/American Truck Simulator/profiles/"
+
+# ── Upload Configuration ──────────────────────────────────────
+upload:
+  # Maksimum ukuran file upload (dalam MB)
+  max_file_size_mb: 50
+  # Maksimum ukuran setelah extract ZIP (dalam MB, proteksi zip bomb)
+  max_extracted_size_mb: 100
+  # Direktori temporary untuk file upload
+  temp_dir: "/tmp/truckers-tool-uploads"

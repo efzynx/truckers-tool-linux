@@ -7,12 +7,23 @@ import GarageEditor from './editors/GarageEditor';
 
 export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage';
 
+export interface UploadContext {
+  isUploadMode: boolean;
+  isZipUpload: boolean; // true = from ZIP (show path), false = direct SII (skip path)
+  gameType: 'ets2' | 'ats' | null;
+  profileName: string;
+  saveName: string;
+}
+
 interface DashboardProps {
   data: GameData;
   onSave: (data: GameData) => void;
+  onDownload: (data: GameData) => void;
   saving: boolean;
+  downloading: boolean;
   onBack: () => void;
   profileId: string;
+  uploadContext?: UploadContext;
 }
 
 /** Level calculation helpers */
@@ -44,7 +55,7 @@ function xpForLevel(level: number): number {
   return CUMULATIVE_XP_AT_30 + (level - 30) * XP_AFTER_30;
 }
 
-export default function Dashboard({ data, onSave, saving, onBack, profileId }: DashboardProps) {
+export default function Dashboard({ data, onSave, onDownload, saving, downloading, onBack, profileId, uploadContext }: DashboardProps) {
   const [view, setView] = useState<DashboardView>('home');
   const [editableData, setEditableData] = useState<GameData>({ ...data });
   const [hasChanges, setHasChanges] = useState(false);
@@ -71,6 +82,10 @@ export default function Dashboard({ data, onSave, saving, onBack, profileId }: D
   const handleSave = () => {
     onSave(editableData);
     setHasChanges(false);
+  };
+
+  const handleDownload = () => {
+    onDownload(editableData);
   };
 
   // --- Global Dashboard Layout ---
@@ -239,7 +254,45 @@ export default function Dashboard({ data, onSave, saving, onBack, profileId }: D
                 <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-blue-400/80 transition-colors">Unlock All Perks</span>
               </div>
             </button>
+
+            {/* Download Button */}
+            <button onClick={handleDownload} disabled={downloading} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-emerald-400/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer sm:col-span-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
+              <div className="size-12 shrink-0 rounded-full bg-background-dark border border-white/10 flex items-center justify-center shadow-inner group-hover:border-emerald-500/50 group-hover:shadow-[0_0_8px_rgba(16,185,129,0.6)] transition-all duration-300">
+                <span className="material-symbols-outlined text-2xl text-text-main group-hover:text-emerald-400 transition-colors">{downloading ? 'sync' : 'download'}</span>
+              </div>
+              <div className="flex flex-col items-start z-10 text-left">
+                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">{downloading ? 'PREPARING...' : 'DOWNLOAD FILE'}</span>
+                <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-emerald-400/80 transition-colors">Export game.sii</span>
+              </div>
+            </button>
           </div>
+
+          {/* Download Path Instructions — only for ZIP uploads */}
+          {uploadContext?.isUploadMode && uploadContext.isZipUpload && (
+            <div className="mt-3 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm">
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 mt-0.5">
+                  <span className="material-symbols-outlined text-emerald-400 text-xl">info</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-display font-bold text-emerald-400 uppercase tracking-wider mb-2">Instruksi Penempatan File</p>
+                  <p className="text-xs text-text-muted leading-relaxed mb-2">
+                    Setelah download, letakkan file <span className="text-white font-mono">game.sii</span> ke folder berikut:
+                  </p>
+                  <div className="bg-background-dark/80 rounded-lg p-3 border border-white/5 overflow-x-auto">
+                    <code className="text-[11px] font-mono text-emerald-300 whitespace-nowrap">
+                      ~/Documents/{uploadContext.gameType === 'ets2' ? 'Euro Truck Simulator 2' : 'American Truck Simulator'}/profiles/<span className="text-primary">{uploadContext.profileName}</span>/save/<span className="text-primary">{uploadContext.saveName}</span>/
+                    </code>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="material-symbols-outlined text-amber-400 text-[14px]">warning</span>
+                    <p className="text-[10px] text-amber-400/80 font-mono">File ini akan menimpa game.sii yang ada di folder tersebut</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Context Info */}
           <div className="mt-2 p-4 rounded-xl border border-white/5 bg-gradient-to-r from-surface to-background-dark flex items-center justify-between">
