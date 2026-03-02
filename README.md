@@ -4,7 +4,7 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 
 [🇮🇩 Baca dalam Bahasa Indonesia (Read in Indonesian)](README-ID.md)
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.0.1--beta.1.2-orange?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.0.1-green?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 ## ✨ Features
 

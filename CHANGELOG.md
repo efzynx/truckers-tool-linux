@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-03-02
+
+### Added
+- **Garage Inspection Modal:** Refactored the Garage Editor to include an interactive popup modal. Click on any city garage to view specific driver counts, vehicle capacity, and a detailed list of all trucks assigned to that specific garage (including their odometer and license plate).
+- **Stagger Animations:** Added smooth fluid wave animations to mass-action garage buttons ("Unlock All" and "Upgrade Owned") and entrance lists.
+- **About Page:** Introduced a new "About This Project" menu with build version checking, developer repository links, and donation options (Trakteer & Saweria).
+- **WebP App Icon:** Implemented a new custom favicon logo format via `layout.tsx` metadata routing.
+- **MIT License:** Distributed the open-source license officially to the repository.
+
+### Changed
+- **SEO & Metadata:** Updated the global site title to "Truckers Tool Linux -- for ALL".
+- **i18n Dictionaries:** Expanded translation dictionaries (`en.ts` / `id.ts`) to comprehensively cover newly added About tools, donation labels, and Garage slot properties.
+
+### Fixed
+- **State Hydration:** Resolved a bug in parser logic where upgrading a garage with existing vehicles or drivers would unintentionally delete them. The parser now safely preserves and re-attaches existing garage components.
+
 ## [1.0.1-beta.1.4] - 2026-03-02
 
 ### Added

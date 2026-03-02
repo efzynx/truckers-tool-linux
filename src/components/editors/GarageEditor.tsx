@@ -1,21 +1,26 @@
 import { useState, useMemo } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
-import type { GarageData } from '../../types';
+import { GarageData, TruckData } from '../../types';
 
 type GarageFilter = 'all' | 'owned' | 'locked';
 
 interface GarageEditorProps {
   garages: GarageData[];
+  trucks: TruckData[];
   targetGarages: Record<string, number>;
   onChange: (cityId: string, status: number) => void;
   onReplaceTargets: (newTargets: Record<string, number>) => void;
 }
 
-export default function GarageEditor({ garages, targetGarages, onChange, onReplaceTargets }: GarageEditorProps) {
+export default function GarageEditor({ garages, trucks, targetGarages, onChange, onReplaceTargets }: GarageEditorProps) {
   const { t } = useLanguage();
   const [filter, setFilter] = useState<GarageFilter>('all');
+  const [selectedGarage, setSelectedGarage] = useState<GarageData | null>(null);
+  const [isAnimatingAll, setIsAnimatingAll] = useState(false);
 
   const handleUnlockAll = () => {
+    setIsAnimatingAll(true);
+    setTimeout(() => setIsAnimatingAll(false), 600);
     const newTargets: Record<string, number> = {};
     garages.forEach(g => {
       newTargets[g.id] = 3;
@@ -24,6 +29,8 @@ export default function GarageEditor({ garages, targetGarages, onChange, onRepla
   };
 
   const handleUpgradeOwned = () => {
+    setIsAnimatingAll(true);
+    setTimeout(() => setIsAnimatingAll(false), 600);
     const newTargets: Record<string, number> = { ...targetGarages };
     garages.forEach(g => {
       if (g.status > 0 && g.status < 3) {
@@ -39,14 +46,19 @@ export default function GarageEditor({ garages, targetGarages, onChange, onRepla
   };
 
   const handleCityClick = (g: GarageData) => {
-    const currentStatus = currentLevel(g);
-    if (currentStatus === 0 || currentStatus < 3) {
-      onChange(g.id, 3);
-    } else {
-      const restored = { ...targetGarages };
-      delete restored[g.id];
-      onReplaceTargets(restored);
-    }
+    setSelectedGarage(g);
+  };
+
+  const handleModalAction = (status: number) => {
+    if (!selectedGarage) return;
+    onChange(selectedGarage.id, status);
+  };
+
+  const handleRevertModal = () => {
+    if (!selectedGarage) return;
+    const restored = { ...targetGarages };
+    delete restored[selectedGarage.id];
+    onReplaceTargets(restored);
   };
 
   // Stats
@@ -87,7 +99,13 @@ export default function GarageEditor({ garages, targetGarages, onChange, onRepla
     return t('garage.sizeLocked');
   };
 
+  const getAssignedTrucks = (g: GarageData) => {
+    if (!g.trucks || g.trucks.length === 0) return [];
+    return g.trucks.map(tid => trucks.find(t => t.id === tid)).filter(Boolean) as TruckData[];
+  };
+
   return (
+    <>
     <section className="w-full animate-fade-in" style={{ animationDelay: '100ms' }}>
       <div className="bg-surface/80 rounded-2xl p-6 border border-white/5 relative overflow-hidden group mb-6">
         {/* Decorative background */}
@@ -123,12 +141,12 @@ export default function GarageEditor({ garages, targetGarages, onChange, onRepla
 
         {/* Global Action Tools */}
         <div className="grid grid-cols-2 gap-3 relative z-10 w-full mb-5">
-            <button onClick={handleUnlockAll} className="bg-background-dark/50 hover:bg-warning/10 border border-white/5 hover:border-warning/50 rounded-lg p-3 flex items-center justify-center gap-2 transition-all group">
-                <span className="material-symbols-outlined text-sm text-text-muted group-hover:text-warning transition-colors">lock_open</span>
+            <button onClick={handleUnlockAll} className={`bg-background-dark/50 hover:bg-warning/10 border border-white/5 hover:border-warning/50 rounded-lg p-3 flex items-center justify-center gap-2 transition-all group ${isAnimatingAll ? 'scale-95 bg-warning/20 border-warning' : ''}`}>
+                <span className={`material-symbols-outlined text-sm text-text-muted group-hover:text-warning transition-colors ${isAnimatingAll ? 'text-warning animate-bounce' : ''}`}>lock_open</span>
                 <span className="font-display font-bold text-[10px] tracking-wider text-text-main group-hover:text-warning uppercase">{t('garage.unlockAll')}</span>
             </button>
-            <button onClick={handleUpgradeOwned} className="bg-background-dark/50 hover:bg-warning/10 border border-white/5 hover:border-warning/50 rounded-lg p-3 flex items-center justify-center gap-2 transition-all group">
-                <span className="material-symbols-outlined text-sm text-text-muted group-hover:text-warning transition-colors">add_home_work</span>
+            <button onClick={handleUpgradeOwned} className={`bg-background-dark/50 hover:bg-warning/10 border border-white/5 hover:border-warning/50 rounded-lg p-3 flex items-center justify-center gap-2 transition-all group ${isAnimatingAll ? 'scale-95 bg-warning/20 border-warning' : ''}`}>
+                <span className={`material-symbols-outlined text-sm text-text-muted group-hover:text-warning transition-colors ${isAnimatingAll ? 'text-warning animate-bounce' : ''}`}>add_home_work</span>
                 <span className="font-display font-bold text-[10px] tracking-wider text-text-main group-hover:text-warning uppercase">{t('garage.upgradeOwned')}</span>
             </button>
         </div>
@@ -159,7 +177,7 @@ export default function GarageEditor({ garages, targetGarages, onChange, onRepla
              <div className="p-8 text-center text-text-muted font-mono text-xs">{t('editor.garages.empty')}</div>
           )}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-            {filteredGarages.map((g) => {
+            {filteredGarages.map((g, idx) => {
               const status = currentLevel(g);
               const isActiveTarget = targetGarages[g.id] !== undefined;
               
@@ -167,9 +185,11 @@ export default function GarageEditor({ garages, targetGarages, onChange, onRepla
                 <button 
                   key={g.id} 
                   onClick={() => handleCityClick(g)}
-                  className={`flex flex-col items-start p-3 rounded-xl border transition-all duration-200 cursor-pointer overflow-hidden relative group active:scale-95
+                  style={{ animationDelay: `${isAnimatingAll ? (idx % 20) * 30 : 0}ms` }}
+                  className={`flex flex-col items-start p-3 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden relative group active:scale-95
                   ${getStatusColor(status)}
-                  ${isActiveTarget ? 'ring-1 ring-white/30 bg-opacity-30' : ''}`}
+                  ${isActiveTarget ? 'ring-1 ring-white/30 bg-opacity-30' : ''}
+                  ${isAnimatingAll ? 'animate-pulse' : ''}`}
                 >
                   <div className="flex items-center justify-between w-full mb-1.5">
                     <span className="material-symbols-outlined text-sm opacity-80">{getStatusIcon(status)}</span>
@@ -201,5 +221,133 @@ export default function GarageEditor({ garages, targetGarages, onChange, onRepla
 
       </div>
     </section>
+
+    {/* Garage Modal */}
+    {selectedGarage && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <div 
+          className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm animate-fade-in"
+          onClick={() => setSelectedGarage(null)}
+        />
+        
+        {/* Modal Content */}
+        {(() => {
+           const status = currentLevel(selectedGarage);
+           const isTargeted = targetGarages[selectedGarage.id] !== undefined;
+           const assignedTrucks = getAssignedTrucks(selectedGarage);
+
+           return (
+            <div className="relative w-full max-w-lg bg-surface border border-white/5 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-slide-up">
+              {/* Header */}
+              <div className={`p-6 border-b border-white/5 flex items-center gap-4 ${status >= 3 ? 'bg-emerald-500/10' : status > 0 ? 'bg-blue-500/10' : 'bg-background-dark/50'}`}>
+                <div className={`size-12 rounded-xl flex items-center justify-center shadow-inner ${status >= 3 ? 'bg-emerald-500/20 text-emerald-400' : status > 0 ? 'bg-blue-500/20 text-blue-400' : 'bg-surface text-text-muted border border-white/10'}`}>
+                   <span className="material-symbols-outlined text-2xl">{getStatusIcon(status)}</span>
+                </div>
+                <div className="flex-1">
+                   <h2 className="text-xl font-display font-bold text-white tracking-wider capitalize">{selectedGarage.id.replace(/_/g, ' ')}</h2>
+                   <p className="text-xs uppercase tracking-widest text-text-muted font-bold mt-0.5">{getStatusLabel(status)}</p>
+                </div>
+                <button onClick={() => setSelectedGarage(null)} className="size-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors">
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 flex flex-col gap-6 max-h-[60vh] overflow-y-auto no-scrollbar">
+                
+                {/* Status Indicator */}
+                <div className="flex gap-2">
+                  {[1, 2, 3].map(level => (
+                    <div key={level} className={`flex-1 h-2 rounded-full ${status >= level ? (level === 3 ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]') : 'bg-background-dark border border-white/10'}`} />
+                  ))}
+                </div>
+
+                {/* Slots Overview */}
+                {status > 0 && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-background-dark/50 rounded-xl p-4 border border-white/5">
+                      <div className="flex items-center gap-2 mb-2 text-text-muted">
+                        <span className="material-symbols-outlined text-lg">local_shipping</span>
+                        <span className="text-[10px] uppercase tracking-widest font-bold">Vehicles</span>
+                      </div>
+                      <p className="text-2xl font-mono text-white font-bold">{selectedGarage.vehicleCount} <span className="text-sm text-text-muted">/ {selectedGarage.vehicleSlots}</span></p>
+                    </div>
+                    <div className="bg-background-dark/50 rounded-xl p-4 border border-white/5">
+                      <div className="flex items-center gap-2 mb-2 text-text-muted">
+                        <span className="material-symbols-outlined text-lg">person</span>
+                        <span className="text-[10px] uppercase tracking-widest font-bold">Drivers</span>
+                      </div>
+                      <p className="text-2xl font-mono text-white font-bold">{selectedGarage.driverCount} <span className="text-sm text-text-muted">/ {selectedGarage.driverSlots}</span></p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Assigned Trucks List */}
+                {status > 0 && (
+                  <div>
+                    <h3 className="text-[10px] uppercase text-text-muted font-bold tracking-widest mb-3 border-b border-white/5 pb-2">{t('garage.assignedTrucks')}</h3>
+                    {assignedTrucks.length > 0 ? (
+                      <div className="flex flex-col gap-2">
+                         {assignedTrucks.map((trk, i) => (
+                           <div key={i} className="bg-background-dark/30 rounded-lg p-3 border border-white/5 flex items-center justify-between">
+                             <div className="flex items-center gap-3">
+                                <div className="size-8 rounded bg-surface border border-white/5 flex items-center justify-center">
+                                   <span className="material-symbols-outlined text-text-muted opacity-50 text-sm">local_shipping</span>
+                                </div>
+                                <div>
+                                   <p className="text-xs font-bold text-white uppercase">{trk.brand} {trk.model}</p>
+                                   <p className="text-[10px] font-mono text-primary uppercase">{trk.licensePlate || 'NO PLATE'}</p>
+                                </div>
+                             </div>
+                             <div className="text-right">
+                                <p className="text-[10px] text-text-muted uppercase tracking-widest mb-0.5">{t('truck.odometer')}</p>
+                                <p className="text-xs font-mono text-white">{trk.odometer.toLocaleString()} km</p>
+                             </div>
+                           </div>
+                         ))}
+                      </div>
+                    ) : (
+                      <div className="bg-background-dark/30 border border-white/5 rounded-lg border-dashed p-6 flex flex-col items-center justify-center text-center opacity-70">
+                        <span className="material-symbols-outlined text-3xl mb-2 text-text-muted">sentiment_dissatisfied</span>
+                        <p className="text-xs text-text-muted uppercase tracking-widest font-display">{t('garage.noTrucks')}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Actions Footer */}
+              <div className="p-4 bg-background-dark border-t border-white/5 flex gap-2">
+                 {isTargeted ? (
+                    <button onClick={handleRevertModal} className="flex-1 bg-surface hover:bg-surface-light text-white font-bold uppercase tracking-wider text-[10px] py-3 rounded-xl border border-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-sm">undo</span> {t('garage.revert')}
+                    </button>
+                 ) : (
+                    <>
+                      {status === 0 && (
+                        <button onClick={() => handleModalAction(1)} className="flex-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/40 font-bold uppercase tracking-wider text-[10px] py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                          <span className="material-symbols-outlined text-sm">add_circle</span> {t('garage.buySmall')}
+                        </button>
+                      )}
+                      {status === 1 && (
+                        <button onClick={() => handleModalAction(2)} className="flex-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 font-bold uppercase tracking-wider text-[10px] py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                          <span className="material-symbols-outlined text-sm">upgrade</span> {t('garage.upgradeMedium')}
+                        </button>
+                      )}
+                      {(status === 0 || status === 1 || status === 2) && (
+                        <button onClick={() => handleModalAction(3)} className="flex-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/40 font-bold uppercase tracking-wider text-[10px] py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                          <span className="material-symbols-outlined text-sm">stars</span> {t('garage.upgradeMax')}
+                        </button>
+                      )}
+                    </>
+                 )}
+              </div>
+            </div>
+           );
+        })()}
+      </div>
+    )}
+    </>
   );
 }

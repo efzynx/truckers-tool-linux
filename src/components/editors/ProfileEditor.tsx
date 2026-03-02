@@ -70,7 +70,7 @@ export default function ProfileEditor({ data, onChange, onBack, onSave, saving, 
           >
             <span className="material-symbols-outlined text-3xl">chevron_left</span>
           </button>
-          <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('economyTitle')}</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('Economy')}</h1>
           <div className="w-10"></div> {/* Spacer for centering */}
         </div>
       </header>

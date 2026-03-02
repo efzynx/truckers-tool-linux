@@ -6,6 +6,7 @@ import TruckEditor from './editors/TruckEditor';
 import GarageEditor from './editors/GarageEditor';
 import { useLanguage } from '../i18n/LanguageContext';
 import SupportModal from './SupportModal';
+import AboutModal from './AboutModal';
 
 export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage';
 
@@ -62,6 +63,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   const [editableData, setEditableData] = useState<GameData>({ ...data });
   const [hasChanges, setHasChanges] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const { t } = useLanguage();
   
   // Track individual garage upgrades
@@ -234,6 +236,16 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
           </nav>
           
           <div className="hidden md:flex flex-col gap-2 mt-auto w-full pt-4 border-t border-white/5">
+            <button 
+                onClick={() => setIsAboutOpen(true)}
+                className="flex items-center justify-between w-full gap-3 px-4 py-3 rounded-xl text-text-muted hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20"
+              >
+                <div className="flex flex-row items-center gap-3">
+                  <span className="material-symbols-outlined">info</span>
+                  <span className="font-display tracking-widest uppercase text-xs font-bold">{t('about.title')}</span>
+                </div>
+            </button>
+
             <button 
                 onClick={() => setIsSupportOpen(true)}
                 className="flex items-center justify-between w-full gap-3 px-4 py-3 rounded-xl text-text-muted hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20"
@@ -441,6 +453,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                <div className="w-full max-w-7xl mx-auto">
                  <GarageEditor 
                    garages={editableData.garages || []}
+                   trucks={editableData.trucks || []}
                    targetGarages={targetGarages}
                    onChange={handleGarageChange}
                    onReplaceTargets={handleGarageReplaceAll}
@@ -534,6 +547,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
       </div>
 
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
+      {isAboutOpen && <AboutModal onClose={() => setIsAboutOpen(false)} />}
     </div>
   );
 }

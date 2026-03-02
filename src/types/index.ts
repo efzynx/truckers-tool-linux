@@ -78,6 +78,7 @@ export interface GarageData {
   driverCount: number;
   driverSlots: number;
   trailers: number;
+  trucks: string[];
 }
 
 export interface GameData {

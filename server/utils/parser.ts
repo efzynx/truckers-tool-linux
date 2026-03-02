@@ -11,6 +11,7 @@ export interface ParsedGarageData {
   driverCount: number;
   driverSlots: number;
   trailers: number;
+  trucks: string[];
 }
 
 export interface ParsedTruckData {
@@ -137,7 +138,7 @@ export function parseGameData(content: string): ParsedGameData {
             curGarage = {
               id: blockId.replace('garage.', ''),
               status: 0, vehicleCount: 0, vehicleSlots: 0,
-              driverCount: 0, driverSlots: 0, trailers: 0,
+              driverCount: 0, driverSlots: 0, trailers: 0, trucks: []
             };
           }
           if (type === 'vehicle') {
@@ -198,7 +199,13 @@ export function parseGameData(content: string): ParsedGameData {
         curGarage.vehicleSlots = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
       }
       if (trimmed.startsWith('vehicles[')) {
-        if (!trimmed.endsWith('null')) curGarage.vehicleCount++;
+        if (!trimmed.endsWith('null')) {
+            curGarage.vehicleCount++;
+            const truckId = trimmed.split(':')[1].trim();
+            if (truckId && truckId !== 'null') {
+                curGarage.trucks.push(truckId);
+            }
+        }
       }
       if (trimmed.startsWith('drivers:') && !trimmed.startsWith('drivers[')) {
         curGarage.driverSlots = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
@@ -376,20 +383,43 @@ export function applyUpdates(
     if (line === '}') {
       if (garageRebuild) {
         result.push(garageRebuild[0]);
+        const existingVehicles: string[] = [];
+        const existingDrivers: string[] = [];
+        
         for (const gl of garageRebuild.slice(1)) {
           const t = gl.trimStart();
           if (t.startsWith('status:')) {
             result.push(` status: ${garageTargetStatus}`);
+          } else if (t.startsWith('vehicles[')) {
+            existingVehicles.push(t.substring(t.indexOf(':') + 1).trim());
+          } else if (t.startsWith('drivers[')) {
+            existingDrivers.push(t.substring(t.indexOf(':') + 1).trim());
           } else if (t.startsWith('vehicles') || t.startsWith('drivers')) {
             // skip
           } else {
             result.push(gl);
           }
         }
-        result.push(' vehicles: 5');
-        for (let s = 0; s < 5; s++) result.push(` vehicles[${s}]: null`);
-        result.push(' drivers: 5');
-        for (let s = 0; s < 5; s++) result.push(` drivers[${s}]: null`);
+        
+        // Calculate new slots size safely, never shrinking below existing arrays
+        const targetSlots = Math.max(
+            existingVehicles.length, 
+            existingDrivers.length, 
+            garageTargetStatus >= 3 ? 5 : garageTargetStatus === 2 ? 3 : garageTargetStatus === 1 ? 1 : 0
+        );
+
+        result.push(` vehicles: ${targetSlots}`);
+        for (let s = 0; s < targetSlots; s++) {
+          const val = existingVehicles[s] && existingVehicles[s] !== 'null' ? existingVehicles[s] : 'null';
+          result.push(` vehicles[${s}]: ${val}`);
+        }
+        
+        result.push(` drivers: ${targetSlots}`);
+        for (let s = 0; s < targetSlots; s++) {
+          const val = existingDrivers[s] && existingDrivers[s] !== 'null' ? existingDrivers[s] : 'null';
+          result.push(` drivers[${s}]: ${val}`);
+        }
+        
         result.push('}');
         garageRebuild = null;
       } else {
