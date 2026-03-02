@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { getSettings } from '../utils/settings.js';
+import { isSafePath } from '../utils/pathValidator.js';
 
 const router = Router();
+const settings = getSettings();
+const allowedBasePaths = [settings.paths.ets2, settings.paths.ats];
 
 /**
  * POST /api/scan-profiles
@@ -14,6 +18,13 @@ router.post('/scan-profiles', async (req, res) => {
 
     if (!profilesPath) {
       res.status(400).json({ success: false, profiles: [], error: 'Path tidak boleh kosong' });
+      return;
+    }
+
+    // SECURITY: Prevent Directory Traversal
+    if (!isSafePath(profilesPath, allowedBasePaths)) {
+      console.warn(`[SECURITY] Blocked directory traversal attempt: ${profilesPath}`);
+      res.status(403).json({ success: false, profiles: [], error: 'Akses ke direktori ditutup untuk alasan keamanan.' });
       return;
     }
 
@@ -53,6 +64,13 @@ router.post('/backup-profile', async (req, res) => {
 
     if (!profilePath) {
       res.status(400).json({ success: false, error: 'Profile path tidak boleh kosong' });
+      return;
+    }
+
+    // SECURITY: Prevent Directory Traversal
+    if (!isSafePath(profilePath, allowedBasePaths)) {
+      console.warn(`[SECURITY] Blocked directory traversal attempt on backup: ${profilePath}`);
+      res.status(403).json({ success: false, error: 'Akses ditutup untuk alasan keamanan.' });
       return;
     }
 
@@ -96,6 +114,13 @@ router.post('/scan-saves', async (req, res) => {
 
     if (!profilePath) {
       res.status(400).json({ success: false, saves: [], error: 'Profile path tidak boleh kosong' });
+      return;
+    }
+
+    // SECURITY: Prevent Directory Traversal
+    if (!isSafePath(profilePath, allowedBasePaths)) {
+      console.warn(`[SECURITY] Blocked directory traversal attempt on save scan: ${profilePath}`);
+      res.status(403).json({ success: false, saves: [], error: 'Akses ditutup untuk alasan keamanan.' });
       return;
     }
 

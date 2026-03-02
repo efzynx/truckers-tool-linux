@@ -2,8 +2,11 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Truckers Tool — Night Haul Editor',
+  title: 'Truckers Tool Linux -- for ALL',
   description: 'Local Save Editor for Euro Truck Simulator 2 and American Truck Simulator',
+  icons: {
+    icon: '/icon.webp'
+  }
 }
 
 export default function RootLayout({

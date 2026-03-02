@@ -127,6 +127,12 @@ export const en: TranslationDoc = {
   "garage.slots": "Slots",
   "garage.vehicles": "Vehicles",
   "garage.drivers": "Drivers",
+  "garage.assignedTrucks": "Assigned Trucks",
+  "garage.noTrucks": "No trucks parked here",
+  "garage.buySmall": "Buy Small Garage",
+  "garage.upgradeMedium": "Upgrade to Medium",
+  "garage.upgradeMax": "Max Upgrade",
+  "garage.revert": "Revert Change",
   // Truck Editor V2
   "truck.repairAll": "Repair All Trucks",
   "truck.repairAllDesc": "Reset all damage to 0% for every truck.",
@@ -138,5 +144,25 @@ export const en: TranslationDoc = {
   "truck.damage": "Damage",
   "truck.condition": "Condition",
   "truck.noDamage": "No Damage",
-  "truck.scanning": "Scanning fleet..."
+  "truck.scanning": "Scanning fleet...",
+  
+  // AboutModal.tsx
+  "about.title": "About This Project",
+  "about.tabInfo": "Information",
+  "about.tabDonation": "Donate & Support",
+  "about.version": "Current Build",
+  "about.developer": "Developer",
+  "about.repository": "Repository Link",
+  "about.updateTitle": "System Update",
+  "about.btnCheckUpdate": "Check OTA",
+  "about.btnChecking": "Polling...",
+  "about.branchStable": "Stable Branch",
+  "about.branchBeta": "Beta Branch",
+  "about.statusUpdate": "Update",
+  "about.statusAvailable": "Available",
+  "about.statusCurrent": "Up to date",
+  "about.updateCmdTitle": "Execute Update Script:",
+  "about.donationDesc": "If you find this tool helpful, you can support its development by making a donation. Thank you!",
+  "about.donationBtnTrakteer": "Support via Trakteer",
+  "about.donationBtnSaweria": "Support via Saweria"
 };

@@ -127,6 +127,12 @@ export const id = {
   "garage.slots": "Slot",
   "garage.vehicles": "Kendaraan",
   "garage.drivers": "Pengemudi",
+  "garage.assignedTrucks": "Truk yang Ditugaskan",
+  "garage.noTrucks": "Tidak ada truk parkir di sini",
+  "garage.buySmall": "Beli Garasi Kecil",
+  "garage.upgradeMedium": "Tingkatkan ke Sedang",
+  "garage.upgradeMax": "Maksimumkan",
+  "garage.revert": "Batalkan Perubahan",
   // Truck Editor V2
   "truck.repairAll": "Perbaiki Semua Truk",
   "truck.repairAllDesc": "Reset semua kerusakan ke 0% untuk setiap truk.",
@@ -138,5 +144,25 @@ export const id = {
   "truck.damage": "Kerusakan",
   "truck.condition": "Kondisi",
   "truck.noDamage": "Tidak Ada Kerusakan",
-  "truck.scanning": "Memindai armada..."
+  "truck.scanning": "Memindai armada...",
+  
+  // AboutModal.tsx
+  "about.title": "Tentang Proyek Ini",
+  "about.tabInfo": "Informasi",
+  "about.tabDonation": "Donasi & Dukungan",
+  "about.version": "Versi Build Saat Ini",
+  "about.developer": "Pengembang",
+  "about.repository": "Tautan Repositori",
+  "about.updateTitle": "Update Sistem",
+  "about.btnCheckUpdate": "Cek Update",
+  "about.btnChecking": "Memeriksa...",
+  "about.branchStable": "Cabang Stabil",
+  "about.branchBeta": "Cabang Beta",
+  "about.statusUpdate": "Update",
+  "about.statusAvailable": "Tersedia",
+  "about.statusCurrent": "Sudah Baru",
+  "about.updateCmdTitle": "Jalankan Skrip Update:",
+  "about.donationDesc": "Jika tool ini bermanfaat, Anda bisa memberikan dukungan pengembangan proyek ini melalui donasi. Terima kasih!",
+  "about.donationBtnTrakteer": "Dukung via Trakteer",
+  "about.donationBtnSaweria": "Dukung via Saweria"
 };

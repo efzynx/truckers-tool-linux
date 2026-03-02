@@ -12,12 +12,12 @@ interface UserEditorProps {
 }
 
 const skillInfo = [
-  { key: 'adr', label: 'HAZMAT', icon: 'science', color: 'text-purple-400', bgHover: 'hover:bg-purple-900/20', borderFocus: 'focus-within:border-purple-500' },
-  { key: 'long_dist', label: 'LONG DIST', icon: 'map', color: 'text-blue-400', bgHover: 'hover:bg-blue-900/20', borderFocus: 'focus-within:border-blue-500' },
-  { key: 'heavy', label: 'HEAVY', icon: 'weight', color: 'text-orange-400', bgHover: 'hover:bg-orange-900/20', borderFocus: 'focus-within:border-orange-500' },
-  { key: 'fragile', label: 'FRAGILE', icon: 'wine_bar', color: 'text-yellow-400', bgHover: 'hover:bg-yellow-900/20', borderFocus: 'focus-within:border-yellow-500' },
-  { key: 'urgent', label: 'J.I.T.', icon: 'timer', color: 'text-red-400', bgHover: 'hover:bg-red-900/20', borderFocus: 'focus-within:border-red-500' },
-  { key: 'mechanical', label: 'ECO-DRIVE', icon: 'eco', color: 'text-green-400', bgHover: 'hover:bg-green-900/20', borderFocus: 'focus-within:border-green-500' },
+  { key: 'adr', label: 'HAZMAT', icon: 'science', color: 'text-purple-400', bgColor: 'bg-purple-400', bgHover: 'hover:bg-purple-900/20', borderFocus: 'focus-within:border-purple-500' },
+  { key: 'long_dist', label: 'LONG DIST', icon: 'map', color: 'text-blue-400', bgColor: 'bg-blue-400', bgHover: 'hover:bg-blue-900/20', borderFocus: 'focus-within:border-blue-500' },
+  { key: 'heavy', label: 'HEAVY', icon: 'weight', color: 'text-orange-400', bgColor: 'bg-orange-400', bgHover: 'hover:bg-orange-900/20', borderFocus: 'focus-within:border-orange-500' },
+  { key: 'fragile', label: 'FRAGILE', icon: 'wine_bar', color: 'text-yellow-400', bgColor: 'bg-yellow-400', bgHover: 'hover:bg-yellow-900/20', borderFocus: 'focus-within:border-yellow-500' },
+  { key: 'urgent', label: 'J.I.T.', icon: 'timer', color: 'text-red-400', bgColor: 'bg-red-400', bgHover: 'hover:bg-red-900/20', borderFocus: 'focus-within:border-red-500' },
+  { key: 'mechanical', label: 'ECO-DRIVE', icon: 'eco', color: 'text-green-400', bgColor: 'bg-green-400', bgHover: 'hover:bg-green-900/20', borderFocus: 'focus-within:border-green-500' },
 ];
 
 const xpPresets = [
@@ -80,7 +80,7 @@ export default function UserEditor({ data, onChange, onBack, onSave, saving, has
           >
             <span className="material-symbols-outlined text-3xl">chevron_left</span>
           </button>
-          <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('capabilitiesTitle')}</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('Capabilities')}</h1>
           <div className="w-10"></div> {/* Spacer */}
         </div>
       </header>
@@ -166,7 +166,7 @@ export default function UserEditor({ data, onChange, onBack, onSave, saving, has
                     <button
                       key={idx}
                       onClick={() => handleSkillChange(skill.key, idx + 1)}
-                      className={`h-10 flex-1 rounded-sm border ${idx < value ? `${skill.color.replace('text-', 'bg-')} border-transparent shadow-[0_0_8px_currentColor] opacity-80` : 'bg-background-dark border-white/5 hover:border-white/20 hover:bg-white/5'} transition-all cursor-pointer`}
+                      className={`h-10 flex-1 rounded-sm border ${idx < value ? `${skill.bgColor} border-transparent shadow-[0_0_8px_currentColor] opacity-80` : 'bg-background-dark border-white/5 hover:border-white/20 hover:bg-white/5'} transition-all cursor-pointer`}
                     ></button>
                   ))}
                 </div>
