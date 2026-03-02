@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import type { GameType } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import LanguageToggle from './LanguageToggle';
+import SupportModal from './SupportModal';
 
 interface WelcomeScreenProps {
   onSelect: (game: GameType) => void;
@@ -8,11 +10,19 @@ interface WelcomeScreenProps {
 
 export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
   const { t } = useLanguage();
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
 
   return (
     <div className="bg-background-dark text-text-main font-body antialiased overflow-hidden h-screen w-full select-none">
-      {/* Language Toggle Fixed Position */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Top Right Utilities Fixed Position */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
+        <button 
+          onClick={() => setIsSupportOpen(true)}
+          title={t('support.btnOpen')}
+          className="flex items-center justify-center size-9 md:size-10 rounded-xl bg-surface/80 border border-white/10 backdrop-blur-md shadow-lg text-text-muted hover:text-primary hover:bg-white/5 transition-all"
+        >
+          <span className="material-symbols-outlined text-[20px]">support_agent</span>
+        </button>
         <LanguageToggle />
       </div>
 
@@ -114,6 +124,8 @@ export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
         className="fixed inset-0 pointer-events-none z-[60] opacity-[0.03]" 
         style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')" }}
       ></div>
+
+      <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
     </div>
   );
 }

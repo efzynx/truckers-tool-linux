@@ -6,6 +6,7 @@ import decryptRouter from './routes/decrypt.js';
 import saveRouter from './routes/save.js';
 import updateRouter from './routes/update.js';
 import uploadRouter from './routes/upload.js';
+import supportRouter from './routes/support.js';
 
 const settings = getSettings();
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api', decryptRouter);
 app.use('/api', saveRouter);
 app.use('/api', updateRouter);
 app.use('/api', uploadRouter);
+app.use('/api', supportRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {

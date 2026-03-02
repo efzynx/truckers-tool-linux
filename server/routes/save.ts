@@ -46,6 +46,11 @@ router.post('/save', async (req, res) => {
           urgent?: number;
           mechanical?: number;
         };
+        targetGarages?: Record<string, number>;
+        truckRepairAll?: boolean;
+        truckRefuelAll?: boolean;
+        truckRepairIds?: string[];
+        truckRefuelIds?: string[];
       };
     };
 
@@ -89,6 +94,11 @@ router.post('/download-save', async (req, res) => {
           urgent?: number;
           mechanical?: number;
         };
+        targetGarages?: Record<string, number>;
+        truckRepairAll?: boolean;
+        truckRefuelAll?: boolean;
+        truckRepairIds?: string[];
+        truckRefuelIds?: string[];
       };
     };
 

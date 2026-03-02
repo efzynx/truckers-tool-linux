@@ -55,6 +55,31 @@ export interface DecryptResponse {
   error?: string;
 }
 
+export interface TruckData {
+  id: string;           // _nameless ID
+  brand: string;        // e.g. "volvo"
+  model: string;        // e.g. "fh16_2012"
+  licensePlate: string;
+  odometer: number;
+  fuelRelative: number; // 0-1
+  engineWear: number;
+  transmissionWear: number;
+  cabinWear: number;
+  chassisWear: number;
+  wheelsWear: number;
+  isPlayerTruck: boolean;
+}
+
+export interface GarageData {
+  id: string;
+  status: number;
+  vehicleCount: number;
+  vehicleSlots: number;
+  driverCount: number;
+  driverSlots: number;
+  trailers: number;
+}
+
 export interface GameData {
   money: number;
   experiencePoints: number;
@@ -66,12 +91,20 @@ export interface GameData {
     urgent: number;
     mechanical: number;
   };
+  garages: GarageData[];
+  trucks: TruckData[];
 }
 
 export interface SaveRequest {
   filePath: string;
   content: string;
-  updates: Partial<GameData>;
+  updates: Partial<GameData> & {
+    targetGarages?: Record<string, number>;
+    truckRepairAll?: boolean;
+    truckRefuelAll?: boolean;
+    truckRepairIds?: string[];
+    truckRefuelIds?: string[];
+  };
 }
 
 export interface SaveResponse {

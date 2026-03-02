@@ -5,6 +5,7 @@ import UserEditor from './editors/UserEditor';
 import TruckEditor from './editors/TruckEditor';
 import GarageEditor from './editors/GarageEditor';
 import { useLanguage } from '../i18n/LanguageContext';
+import SupportModal from './SupportModal';
 
 export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage';
 
@@ -60,30 +61,114 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   const [view, setView] = useState<DashboardView>('home');
   const [editableData, setEditableData] = useState<GameData>({ ...data });
   const [hasChanges, setHasChanges] = useState(false);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
   const { t } = useLanguage();
+  
+  // Track individual garage upgrades
+  const [targetGarages, setTargetGarages] = useState<Record<string, number>>({});
+  
+  // Track truck actions
+  const [truckRepairAll, setTruckRepairAll] = useState(false);
+  const [truckRefuelAll, setTruckRefuelAll] = useState(false);
+  const [truckRepairIds, setTruckRepairIds] = useState<string[]>([]);
+  const [truckRefuelIds, setTruckRefuelIds] = useState<string[]>([]);
 
   // Quick stats
-  const level = useMemo(() => xpToLevel(editableData.experiencePoints), [editableData.experiencePoints]);
+  const level = useMemo(() => {
+    return xpToLevel(editableData.experiencePoints || 0);
+  }, [editableData.experiencePoints]);
   const currentLevelXp = useMemo(() => xpForLevel(level), [level]);
   const nextLevelXp = useMemo(() => xpForLevel(level + 1), [level]);
   const progressPercent = useMemo(() => {
-    const xpInLevel = editableData.experiencePoints - currentLevelXp;
-    const xpNeeded = nextLevelXp - currentLevelXp;
-    return Math.min(100, Math.max(0, (xpInLevel / xpNeeded) * 100));
-  }, [editableData.experiencePoints, currentLevelXp, nextLevelXp]);
+    const range = nextLevelXp - currentLevelXp;
+    const current = (editableData.experiencePoints || 0) - currentLevelXp;
+    return Math.min(100, Math.max(0, (current / range) * 100));
+  }, [editableData.experiencePoints, level, currentLevelXp, nextLevelXp]);
 
   const handleChange = (updates: Partial<GameData>) => {
-    setEditableData((prev) => {
+    setEditableData(prev => {
       const newData = { ...prev, ...updates };
       if (updates.skills) newData.skills = { ...prev.skills, ...updates.skills };
       return newData;
     });
     setHasChanges(true);
   };
+  
+  const handleGarageChange = (cityId: string, status: number) => {
+    setTargetGarages(prev => ({ ...prev, [cityId]: status }));
+    setHasChanges(true);
+  };
+  
+  const handleGarageReplaceAll = (newTargets: Record<string, number>) => {
+    setTargetGarages(newTargets);
+    setHasChanges(true);
+  };
+  
+  const handleTruckRepairAll = () => {
+    setTruckRepairAll(true);
+    // Also update local display data
+    setEditableData(prev => ({
+      ...prev,
+      trucks: prev.trucks.map(tr => ({
+        ...tr,
+        engineWear: 0,
+        transmissionWear: 0,
+        cabinWear: 0,
+        chassisWear: 0,
+        wheelsWear: 0,
+      }))
+    }));
+    setHasChanges(true);
+  };
+  
+  const handleTruckRefuelAll = () => {
+    setTruckRefuelAll(true);
+    setEditableData(prev => ({
+      ...prev,
+      trucks: prev.trucks.map(tr => ({
+        ...tr,
+        fuelRelative: 1,
+      }))
+    }));
+    setHasChanges(true);
+  };
+
+  const handleTruckRepair = (truckId: string) => {
+    setTruckRepairIds(prev => prev.includes(truckId) ? prev : [...prev, truckId]);
+    setEditableData(prev => ({
+      ...prev,
+      trucks: prev.trucks.map(tr => tr.id === truckId ? {
+        ...tr,
+        engineWear: 0, transmissionWear: 0, cabinWear: 0, chassisWear: 0, wheelsWear: 0,
+      } : tr)
+    }));
+    setHasChanges(true);
+  };
+
+  const handleTruckRefuel = (truckId: string) => {
+    setTruckRefuelIds(prev => prev.includes(truckId) ? prev : [...prev, truckId]);
+    setEditableData(prev => ({
+      ...prev,
+      trucks: prev.trucks.map(tr => tr.id === truckId ? { ...tr, fuelRelative: 1 } : tr)
+    }));
+    setHasChanges(true);
+  };
 
   const handleSave = () => {
-    onSave(editableData);
+    const payload = {
+      ...editableData,
+      targetGarages,
+      truckRepairAll,
+      truckRefuelAll,
+      truckRepairIds,
+      truckRefuelIds,
+    };
+    onSave(payload);
     setHasChanges(false);
+    setTruckRepairAll(false);
+    setTruckRefuelAll(false);
+    setTruckRepairIds([]);
+    setTruckRefuelIds([]);
   };
 
   const handleDownload = () => {
@@ -106,7 +191,6 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <div className="relative">
                 <div className="size-12 rounded-xl bg-surface border border-white/10 overflow-hidden relative group">
                   <div className="absolute inset-0 bg-primary/20 group-hover:bg-primary/30 transition-colors"></div>
-                  {/* Avatar fallback using SVG/Icon */}
                   <div className="w-full h-full flex items-center justify-center bg-background-dark text-primary">
                      <span className="material-symbols-outlined text-3xl">person</span>
                   </div>
@@ -126,7 +210,6 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <span className="material-symbols-outlined text-[20px]">logout</span>
             </button>
           </div>
-          {/* Desktop Nav Start */}
           <nav className="hidden md:flex flex-col gap-2 mt-8 flex-1 w-full">
             <button onClick={() => setView('home')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'home' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">speed</span>
@@ -140,19 +223,35 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <span className="material-symbols-outlined">psychology</span>
               <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabJobs')} / Skills</span>
             </button>
-            <button onClick={() => setView('truck')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'truck' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+            <button onClick={() => setView('garage')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'garage' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">warehouse</span>
-              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabGarages')} & {t('dashboard.tabTrucks')}</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabGarages')}</span>
+            </button>
+            <button onClick={() => setView('truck')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'truck' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+              <span className="material-symbols-outlined">local_shipping</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabTrucks')}</span>
             </button>
           </nav>
           
-          <button 
-              onClick={onBack}
-              className="hidden md:flex mt-auto w-full items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:text-red-400 hover:bg-white/5 transition-all"
-            >
-              <span className="material-symbols-outlined">logout</span>
-              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.btnBack')}</span>
-          </button>
+          <div className="hidden md:flex flex-col gap-2 mt-auto w-full pt-4 border-t border-white/5">
+            <button 
+                onClick={() => setIsSupportOpen(true)}
+                className="flex items-center justify-between w-full gap-3 px-4 py-3 rounded-xl text-text-muted hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20"
+              >
+                <div className="flex flex-row items-center gap-3">
+                  <span className="material-symbols-outlined">help</span>
+                  <span className="font-display tracking-widest uppercase text-xs font-bold">{t('support.btnOpen')}</span>
+                </div>
+            </button>
+
+            <button 
+                onClick={onBack}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:text-red-400 hover:bg-white/5 transition-all w-full"
+              >
+                <span className="material-symbols-outlined">logout</span>
+                <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.btnBack')}</span>
+            </button>
+          </div>
           
           {/* Mobile XP Progress */}
           <div className="md:hidden w-full h-1.5 bg-surface rounded-full overflow-hidden absolute bottom-0 left-0">
@@ -328,24 +427,61 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                hasChanges={hasChanges}
              />
           )}
-          {(view === 'truck' || view === 'garage') && (
-             <div className="flex-1 flex flex-col pt-24 pb-28 px-4 w-full max-w-md mx-auto z-10 overflow-y-auto no-scrollbar animate-fade-in">
-               <header className="fixed md:absolute top-0 left-0 right-0 z-40 glass-panel md:bg-transparent md:backdrop-blur-none border-b border-white/5 md:border-none">
-                 <div className="flex items-center justify-between px-4 py-4 max-w-md mx-auto">
-                   <button onClick={() => setView('home')} className="flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all">
+          {view === 'garage' && (
+             <div className="flex-1 flex flex-col pt-24 pb-28 px-4 md:px-10 lg:px-20 w-full z-10 overflow-y-auto no-scrollbar animate-fade-in">
+               <header className="fixed top-0 left-0 right-0 z-40 glass-panel">
+                 <div className="flex items-center justify-between px-4 py-4 md:px-10 lg:px-20 mx-auto w-full">
+                   <button onClick={() => setView('home')} className="flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer">
                      <span className="material-symbols-outlined text-3xl">chevron_left</span>
                    </button>
-                   <h1 className="text-xl font-bold tracking-tight text-white uppercase">{view === 'truck' ? 'Fleet App' : 'Garage App'}</h1>
+                   <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('dashboard.tabGarages')}</h1>
                    <div className="w-10"></div>
                  </div>
                </header>
-               <div className="flex flex-col gap-6 mt-4">
-                 {view === 'truck' ? <TruckEditor /> : <GarageEditor />}
+               <div className="w-full max-w-7xl mx-auto">
+                 <GarageEditor 
+                   garages={editableData.garages || []}
+                   targetGarages={targetGarages}
+                   onChange={handleGarageChange}
+                   onReplaceTargets={handleGarageReplaceAll}
+                 />
                </div>
                {hasChanges && (
-                 <div className="fixed md:absolute bottom-8 right-6 z-50">
+                 <div className="fixed bottom-8 right-6 z-50">
                     <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
-                    <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group">
+                    <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer">
+                      <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
+                        {saving ? 'sync' : 'save'}
+                      </span>
+                    </button>
+                 </div>
+               )}
+             </div>
+          )}
+          {view === 'truck' && (
+             <div className="flex-1 flex flex-col pt-24 pb-28 px-4 md:px-10 lg:px-20 w-full z-10 overflow-y-auto no-scrollbar animate-fade-in">
+               <header className="fixed top-0 left-0 right-0 z-40 glass-panel">
+                 <div className="flex items-center justify-between px-4 py-4 md:px-10 lg:px-20 mx-auto w-full">
+                   <button onClick={() => setView('home')} className="flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer">
+                     <span className="material-symbols-outlined text-3xl">chevron_left</span>
+                   </button>
+                   <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('dashboard.tabTrucks')}</h1>
+                   <div className="w-10"></div>
+                 </div>
+               </header>
+               <div className="w-full max-w-7xl mx-auto">
+                 <TruckEditor 
+                   trucks={editableData.trucks || []}
+                   onRepairAll={handleTruckRepairAll}
+                   onRefuelAll={handleTruckRefuelAll}
+                   onRepairTruck={handleTruckRepair}
+                   onRefuelTruck={handleTruckRefuel}
+                 />
+               </div>
+               {hasChanges && (
+                 <div className="fixed bottom-8 right-6 z-50">
+                    <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
+                    <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer">
                       <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
                         {saving ? 'sync' : 'save'}
                       </span>
@@ -358,37 +494,46 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
 
         {/* Bottom Navigation Bar (Mobile Only) */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 w-full bg-background-dark border-t border-[#3a3127] px-4 pb-6 pt-3 backdrop-blur-xl bg-opacity-90 z-50">
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <button onClick={() => setView('home')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'home' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
-              <div className={`flex h-8 items-center justify-center rounded-full px-4 ${view === 'home' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
-                <span className="material-symbols-outlined text-[24px]">speed</span>
+              <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'home' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]">speed</span>
               </div>
-              <p className="text-xs font-medium leading-normal tracking-wide font-display mt-1">Dashboard</p>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">Dashboard</p>
             </button>
             
             <button onClick={() => setView('profile')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'profile' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
-              <div className={`flex h-8 items-center justify-center rounded-full px-4 ${view === 'profile' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
-                <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+              <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'profile' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
               </div>
-              <p className="text-xs font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabMoney')}</p>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabMoney')}</p>
             </button>
             
             <button onClick={() => setView('user')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'user' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
-              <div className={`flex h-8 items-center justify-center rounded-full px-4 ${view === 'user' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
-                <span className="material-symbols-outlined text-[24px]">psychology</span>
+              <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'user' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]">psychology</span>
               </div>
-              <p className="text-xs font-medium leading-normal tracking-wide font-display mt-1">Skills</p>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">Skills</p>
             </button>
             
-            <button onClick={() => setView('truck')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${(view === 'truck' || view === 'garage') ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
-              <div className={`flex h-8 items-center justify-center rounded-full px-4 ${(view === 'truck' || view === 'garage') ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
-                <span className="material-symbols-outlined text-[24px]">warehouse</span>
+            <button onClick={() => setView('garage')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'garage' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'garage' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]">warehouse</span>
               </div>
-              <p className="text-[10px] sm:text-xs font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabGarages')}</p>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabGarages')}</p>
+            </button>
+            
+            <button onClick={() => setView('truck')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'truck' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'truck' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]">local_shipping</span>
+              </div>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabTrucks')}</p>
             </button>
           </div>
         </div>
       </div>
+
+      <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
     </div>
   );
 }

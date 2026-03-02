@@ -25,6 +25,11 @@ decrypted_game.sii
 
 # Test / debug scripts
 test.js
+parse_garage.js
+parse_garages.js
+
+# Temp uploads
+uploads/
 
 # Logs
 *.log

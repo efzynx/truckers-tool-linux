@@ -5,9 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1-beta.1.4] - 2026-03-02
+
+### Added
+- **Separated Garages & Trucks Tabs:** Split the combined "Garages & Trucks" menu into two distinct Dashboard tabs with dedicated navigation icons (desktop sidebar & mobile bottom nav).
+- **Truck Fleet Manager:** Brand-new `TruckEditor` component displaying a complete fleet overview — brand icons with country flags, model names, license plates, odometer readings, fuel levels, and overall condition ratings.
+- **Expandable Truck Detail:** Click any truck card to reveal a detailed breakdown panel with individual fuel bar, per-component wear bars (Engine, Transmission, Cabin, Chassis, Wheels), and per-truck Repair & Refuel action buttons.
+- **Per-Truck Repair & Refuel:** Individual trucks can now be repaired or refueled separately, in addition to global "Repair All" and "Refuel All" actions.
+- **Enhanced Garage Cards:** Garage cards now show vehicle/driver slot counts, trailer counts, and status badges (Small, Medium, Large) with filter tabs (All, Owned, Locked) and a summary stats bar.
+
+### Changed
+- **High-Performance Parser:** Completely rewrote `parser.ts` from regex block-matching to single-pass line scanning. Regex `[\s\S]*?` patterns caused catastrophic backtracking on large (5MB+) `.sii` files; new parser processes 218K lines instantly.
+- **Full-Width Editor Layout:** Garage and Truck views now use consistent full-width layout (`max-w-7xl`) matching ProfileEditor and UserEditor, instead of the previous narrow `max-w-md` constraint.
+- **Responsive Grids:** Garage grid scaled to 2–5 responsive columns; truck list uses 1–2 column grid on wider screens.
+
+### Fixed
+- **License Plate Markup Bug:** Fixed plates displaying raw SCS markup tags (`<offset>`, `<img>`, `<color>`, `<font>`, `<align>`, etc.). Plates are now cleanly stripped to plain text (e.g., `FSM689`, `1-LSQ-445`).
+- **Truck Detection Failure:** Trucks were not being detected due to the old regex parser hanging on large files. The new line-scanning parser correctly identifies all player-owned vehicles.
+
 ## [1.0.1-beta.1.3] - 2026-03-01
 
 ### Added
+- **Garage Editor:** Added instant action cards ("Unlock All Garages" & "Upgrade Owned") to gracefully apply _Large_ garage pad templates directly into `game.sii` via RegEx, expanding up to 180+ map garages instantly.
+- **Support / Feedback Module:** Introduced new Support Modal `SupportModal` on Dashboard & Welcome Screen allowing users to send feedback with automated `nodemailer` SMTP system integration.
 - **Multilingual Support (i18n):** Added full English (`en`) and Indonesian (`id`) language support across the entire interface (Dashboard, Editor, Tooltips, Welcome Screen).
 - **Language Switcher:** A new sleek toggle button featuring 🇺🇸 / 🇮🇩 flag icons on the `WelcomeScreen`.
 - **Translated Documentation:** Transitioned the main `README.md` to English and preserved the Indonesian manual in `README-ID.md`.
