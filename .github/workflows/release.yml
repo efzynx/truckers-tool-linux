@@ -10,6 +10,11 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      exists: ${{ steps.check_tag.outputs.exists }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -116,9 +121,10 @@ jobs:
 
   build-desktop:
     needs: release
-    if: needs.release.outputs.exists == 'false'
+    if: needs.release.result == 'success' && needs.release.outputs.exists == 'false'
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
@@ -127,6 +133,18 @@ jobs:
         with:
           ref: ${{ needs.release.outputs.tag }}
           fetch-depth: 0
+
+      - name: "🔍 Debug: Show release outputs"
+        run: |
+          echo "========================================="
+          echo "  Release Job Outputs"
+          echo "========================================="
+          echo "Tag:        ${{ needs.release.outputs.tag }}"
+          echo "Exists:     ${{ needs.release.outputs.exists }}"
+          echo "Prerelease: ${{ needs.release.outputs.prerelease }}"
+          echo "Version:    ${{ needs.release.outputs.version }}"
+          echo "OS:         ${{ matrix.os }}"
+          echo "========================================="
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -142,7 +160,28 @@ jobs:
           NEXT_PUBLIC_CLIENT_API_KEY: ${{ secrets.NEXT_PUBLIC_CLIENT_API_KEY }}
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://your-vercel-domain.vercel.app/api/v1' }}
         run: npm run dist
-        
+
+      - name: "🔍 Debug: List build output"
+        shell: bash
+        run: |
+          echo "========================================="
+          echo "  Build Output — release/ folder"
+          echo "========================================="
+          if [ -d "release" ]; then
+            echo "✅ release/ folder exists"
+            echo ""
+            echo "--- All files ---"
+            find release/ -type f -name "*.AppImage" -o -name "*.exe" -o -name "*.zip" -o -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" | head -20
+            echo ""
+            echo "--- Full listing ---"
+            ls -la release/ || true
+          else
+            echo "❌ release/ folder NOT found!"
+            echo "--- Listing current directory ---"
+            ls -la
+          fi
+          echo "========================================="
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
@@ -151,5 +190,6 @@ jobs:
             release/*.AppImage
             release/*.exe
             release/*.zip
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
