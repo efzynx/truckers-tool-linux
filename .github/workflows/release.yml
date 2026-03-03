@@ -113,3 +113,43 @@ jobs:
           files: ttl.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+  build-desktop:
+    needs: release
+    if: needs.release.outputs.exists == 'false'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Application
+        env:
+          CLIENT_API_KEY: ${{ secrets.CLIENT_API_KEY }}
+          NEXT_PUBLIC_CLIENT_API_KEY: ${{ secrets.NEXT_PUBLIC_CLIENT_API_KEY }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://your-vercel-domain.vercel.app/api/v1' }}
+        run: npm run dist
+        
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.release.outputs.tag }}
+          files: |
+            release/*.AppImage
+            release/*.exe
+            release/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
