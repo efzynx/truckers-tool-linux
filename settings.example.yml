@@ -19,17 +19,7 @@ admin:
   # Nama kontak admin
   contact: "Admin Name"
 
-# ── SMTP Relay (opsional) ─────────────────────────────────────
-# Digunakan untuk notifikasi email (jika diimplementasi).
-# Biarkan kosong jika tidak digunakan.
-smtp:
-  host: "smtp.gmail.com"
-  port: 587
-  secure: false
-  # Username SMTP (biasanya email)
-  user: ""
-  # Password atau App Password
-  pass: ""
+
 
 # ── Default Paths ─────────────────────────────────────────────
 # Path default ke folder profiles game.

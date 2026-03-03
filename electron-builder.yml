@@ -1,0 +1,22 @@
+appId: "com.efzyn.truckerstool"
+productName: "Truckers Tool Linux"
+directories:
+  output: release
+  buildResources: build
+files:
+  - "dist-electron/**/*"
+  - "dist-server/**/*"
+  - "out/**/*"
+extraResources:
+  - from: "settings.example.yml"
+    to: "settings.yml"
+win:
+  target: 
+    - nsis
+    - portable
+linux:
+  target: AppImage
+  category: Utility
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

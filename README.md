@@ -17,7 +17,7 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 - 📥 **Download Edited File** — Download the edited file to place it back into your save game folder
 - ✏️ **Profile Editor** — Edit money, experience points, and skill levels
 - 💾 **Auto Backup** — Creates backup before any changes
-- ⚙️ **Configurable** — All settings via `settings.yml` (port, SMTP, paths, upload limits)
+- ⚙️ **Configurable** — All settings via `settings.yml` (port, paths, upload limits)
 - 🎨 **Pixel-Perfect Stitch UI** — Responsive Glassmorphism UI (Mobile & Desktop Full-width)
 - 🌐 **Multilingual Support** — Available in English and Indonesian
 
@@ -93,13 +93,6 @@ app:
 admin:
   email: "admin@example.com"   # Admin email
   contact: "Admin Name"        # Contact name
-
-smtp:                          # SMTP relay (optional)
-  host: "smtp.gmail.com"
-  port: 587
-  secure: false
-  user: ""
-  pass: ""
 
 paths:                         # Default profile paths
   ets2: "~/Documents/Euro Truck Simulator 2/profiles/"
@@ -201,9 +194,9 @@ Version checking is done via [GitHub Releases](https://github.com/efzynx/trucker
 |---|---|
 | Frontend | Next.js 16 + React 19 + TypeScript |
 | Styling | Tailwind CSS v4 |
-| Backend | Express.js 5 + tsx |
+| Backend | Hosted privately (Separated Repository) |
+| Desktop App | Electron + React |
 | Decryption | [@trucky/sii-decrypt-ts](https://www.npmjs.com/package/@trucky/sii-decrypt-ts) |
-| Process Manager | PM2 (production) |
 | Config | settings.yml (js-yaml) |
 
 ## 📁 Project Structure
@@ -214,18 +207,7 @@ truckers-tool-linux/
 ├── settings.yml               # Config (not pushed, create via ./ttl.sh setup)
 ├── settings.example.yml       # Config template (pushed to GitHub)
 ├── ecosystem.config.cjs       # PM2 production config
-├── server/                    # Backend API
-│   ├── index.ts               # Express server entry
-│   ├── routes/
-│   │   ├── decrypt.ts         # Save file decryption
-│   │   ├── profiles.ts        # Profile scanning & backup
-│   │   ├── save.ts            # Parse, save, & download
-│   │   ├── update.ts          # Update checker
-│   │   └── upload.ts          # File upload handling
-│   └── utils/
-│       ├── parser.ts          # SII content parser
-│       ├── settings.ts        # Settings loader (settings.yml)
-│       └── uploadValidator.ts # Upload security validation
+├── electron/                  # Electron Desktop App main process
 ├── src/                       # Frontend React app
 │   ├── App.tsx                # Main app state machine
 │   ├── components/

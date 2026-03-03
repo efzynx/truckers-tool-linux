@@ -15,7 +15,7 @@ Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Tr
 - 📥 **Unduh Hasil Edit** — Download file hasil edit (`game.sii`) untuk ditaruh kembali ke folder permainan
 - ✏️ **Editor Terpadu** — Mengedit jumlah uang, experience point (XP), status pekerjaan, dan garasi secara bebas
 - 💾 **Backup Otomatis** — Membuat salinan (`.bak`) sebelum file asli dimodifikasi
-- ⚙️ **Konfigurasi Mudah** — Semua setting dapat diatur via file `settings.yml` (port, SMTP, lokasi target, batas penyimpanan RAM unggahan upload)
+- ⚙️ **Konfigurasi Mudah** — Semua setting dapat diatur via file `settings.yml` (port, lokasi target, batas penyimpanan RAM unggahan upload)
 - 🎨 **Antarmuka (UI) Pixel-Perfect Stitch** — Memanfaatkan gaya Glassmorphism modern yang interaktif, mewah dan responsif baik di desktop maupun layar sentuh (mobile).
 
 ## 📋 Persyaratan Sistem
@@ -90,13 +90,6 @@ app:
 admin:
   email: "admin@example.com"   # Email admin
   contact: "Admin Name"        # Nama kontak
-
-smtp:                          # SMTP relay (opsional)
-  host: "smtp.gmail.com"
-  port: 587
-  secure: false
-  user: ""
-  pass: ""
 
 paths:                         # Default profile paths
   ets2: "~/Documents/Euro Truck Simulator 2/profiles/"
@@ -198,9 +191,9 @@ Versi dicek melalui [GitHub Releases](https://github.com/efzynx/truckers-tool-li
 |---|---|
 | Frontend | Next.js 16 + React 19 + TypeScript |
 | Styling | Tailwind CSS v4 |
-| Backend | Express.js 5 + tsx |
+| Backend | Di-host secara private (Repository Terpisah) |
+| Desktop App | Electron + React |
 | Decryption | [@trucky/sii-decrypt-ts](https://www.npmjs.com/package/@trucky/sii-decrypt-ts) |
-| Process Manager | PM2 (production) |
 | Config | settings.yml (js-yaml) |
 
 ## 📁 Project Structure
@@ -211,18 +204,7 @@ truckers-tool-linux/
 ├── settings.yml               # Config (tidak di-push, buat via ./ttl.sh setup)
 ├── settings.example.yml       # Template settings (di-push ke GitHub)
 ├── ecosystem.config.cjs       # PM2 production config
-├── server/                    # Backend API
-│   ├── index.ts               # Express server entry
-│   ├── routes/
-│   │   ├── decrypt.ts         # Save file decryption
-│   │   ├── profiles.ts        # Profile scanning & backup
-│   │   ├── save.ts            # Parse, save, & download
-│   │   ├── update.ts          # Update checker
-│   │   └── upload.ts          # File upload handling
-│   └── utils/
-│       ├── parser.ts          # SII content parser
-│       ├── settings.ts        # Settings loader (settings.yml)
-│       └── uploadValidator.ts # Upload security validation
+├── electron/                  # Proses utama Aplikasi Desktop Electron
 ├── src/                       # Frontend React app
 │   ├── App.tsx                # Main app state machine
 │   ├── components/

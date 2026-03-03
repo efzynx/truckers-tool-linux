@@ -71,7 +71,28 @@ let _settings: AppSettings | null = null;
 export function loadSettings(): AppSettings {
   if (_settings) return _settings;
 
-  const settingsPath = path.resolve(process.cwd(), 'settings.yml');
+  let settingsPath = path.resolve(process.cwd(), 'settings.yml');
+
+  const userDataPath = process.env.USER_DATA_PATH;
+  const execDir = process.env.EXEC_DIR;
+  
+  if (userDataPath) {
+    const portablePath = path.join(process.cwd(), 'data', 'settings.yml');
+    const execSettingsPath = execDir ? path.join(execDir, 'settings.yml') : null;
+    const userConfigPath = path.join(userDataPath, 'settings.yml');
+
+    if (fs.existsSync(portablePath)) {
+      settingsPath = portablePath;
+    } else if (execSettingsPath && fs.existsSync(execSettingsPath)) {
+      // Prioritaskan file settings di sebelah executable/AppImage (Resources dir)
+      settingsPath = execSettingsPath;
+    } else if (fs.existsSync(userConfigPath)) {
+      settingsPath = userConfigPath;
+    } else if (!fs.existsSync(settingsPath)) {
+      // Jika di project root juga tidak ada, jadikan user config path sebagai default path untuk log peringatan
+      settingsPath = userConfigPath;
+    }
+  }
 
   try {
     if (fs.existsSync(settingsPath)) {
