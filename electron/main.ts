@@ -144,7 +144,7 @@ app.whenReady().then(() => {
     try {
       // Forward the bug report payload to the new external backend
       // Replace localhost:3000 with your actual Vercel URL later when deploying
-      const externalApiUrl = process.env.EXTERNAL_API_URL || 'http://localhost:3000/api/v1/report';
+      const externalApiUrl = process.env.EXTERNAL_API_URL || 'https://api-ttl.efzyn.my.id/api/v1/report';
       
       const apiKey = reportData.apiKey || process.env.CLIENT_API_KEY || '';
       // Remove apiKey from payload before sending it
