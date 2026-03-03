@@ -24,15 +24,27 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     proxyClientMaxBodySize: '50mb',
+    cpus: 2,
+    workerThreads: false,
+    memoryBasedWorkersCount: false,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `http://localhost:${backendPort}/api/:path*`,
-      },
-    ]
-  },
+  ...(process.env.IS_ELECTRON === 'true'
+    ? {
+        output: 'export',
+        trailingSlash: true,
+        assetPrefix: '.',
+        images: { unoptimized: true }
+      }
+    : {
+        async rewrites() {
+          return [
+            {
+              source: '/api/:path*',
+              destination: `http://localhost:${backendPort}/api/:path*`,
+            },
+          ];
+        },
+      }),
 };
 
 export default nextConfig;

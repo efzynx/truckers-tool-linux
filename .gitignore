@@ -4,6 +4,9 @@ node_modules/
 
 # Build output
 dist/
+dist-electron/
+dist-server/
+out/
 
 # Environment
 .env
@@ -43,3 +46,5 @@ settings.yml
 .pm2/
 
 desain/
+backend/
+release/

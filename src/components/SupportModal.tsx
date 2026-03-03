@@ -27,7 +27,23 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
     setStatus({ type: 'idle', msg: '' });
 
     try {
-      await sendSupportReport(formData);
+      // Collect basic logs/context
+      const contextLogs = {
+        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown',
+        platform: typeof window !== 'undefined' ? window.navigator.platform : 'Unknown',
+        screenResolution: typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : 'Unknown',
+        language: typeof window !== 'undefined' ? window.navigator.language : 'Unknown',
+        time: new Date().toISOString()
+      };
+
+      const payload = {
+        name: formData.name,
+        version: formData.version,
+        message: formData.message,
+        logs: contextLogs
+      };
+
+      await sendSupportReport(payload);
       setStatus({ type: 'success', msg: t('support.success') });
       
       // Reset form after 2 secs

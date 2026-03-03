@@ -32,16 +32,35 @@ export default function AboutModal({ onClose }: { onClose: () => void }) {
     setChecking(true);
     setError(null);
     try {
-      const res = await fetch('/api/check-update');
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data = await res.json();
-      setVersionInfo(data);
-    } catch {
-      setError('Failed to check for updates. Please check your connection.');
+      if (!navigator.onLine) {
+        throw new Error('Offline');
+      }
+
+      if (typeof window !== 'undefined' && 'electronAPI' in window && (window as any).electronAPI.network) {
+        // Desktop mode (Electron)
+        const response = await (window as any).electronAPI.network.checkUpdate();
+        if (!response.success) {
+          throw new Error(response.error === 'NO_INTERNET' ? 'Offline' : response.message);
+        }
+        setVersionInfo(response.data);
+      } else {
+        // Web mode fallback
+        const API_BASE = typeof window !== 'undefined' && 'electronAPI' in window ? 'http://localhost:8097/api' : '/api';
+        const res = await fetch(`${API_BASE}/check-update`);
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        setVersionInfo(data);
+      }
+    } catch (err: any) {
+      if (err.message === 'Offline') {
+         setError(t('Gagal menyambung ke server. Anda mungkin offline.'));
+      } else {
+         setError('Failed to check for updates. Please check your connection.');
+      }
     } finally {
       setChecking(false);
     }
-  }, []);
+  }, [t]);
 
   const isNewer = (remote: string | null, current: string) => {
     if (!remote) return false;

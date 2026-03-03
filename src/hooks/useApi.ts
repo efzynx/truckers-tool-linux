@@ -1,6 +1,13 @@
 import type { GameData, UploadResponse } from '../types';
 
-const API_BASE = '/api';
+let API_BASE = '/api';
+
+// Deteksi apakah sedang berjalan di dalam Electron window yang menggunakan proxy-backend API khusus
+if (typeof window !== 'undefined' && 'electronAPI' in window) {
+  // Dalam production Desktop (electron/main.ts), contextBridge IPC harus ditunggu
+  // Namun, demi sinkronus fetch state react, fallback cepat adalah localhost port statis
+  API_BASE = 'http://localhost:8097/api';
+}
 
 export async function scanProfiles(path: string) {
   const res = await fetch(`${API_BASE}/scan-profiles`, {
@@ -118,16 +125,46 @@ export async function cleanupUpload(tempDir: string) {
   return res.json();
 }
 
-export async function sendSupportReport(data: { name: string; version: string; message: string; }) {
-  const res = await fetch(`${API_BASE}/support`, {
+export async function sendSupportReport(data: { name: string; version: string; message: string; logs?: any }) {
+  // Format the data mapping to our new Backend standard `version, type, message, os, username, appName`
+  const formattedData = {
+    username: data.name,
+    version: data.version,
+    message: data.message,
+    logs: data.logs,
+    type: 'Bug Tracker',
+    appName: 'Truckers Tool Linux'
+  };
+
+  if (typeof window !== 'undefined' && 'electronAPI' in window && (window as any).electronAPI.network) {
+    // Pass the NEXT_PUBLIC variable down to the Electron IPC since the main process
+    // does not automatically load .env.local variables during runtime.
+    const ipcPayload = {
+      ...formattedData,
+      apiKey: process.env.NEXT_PUBLIC_CLIENT_API_KEY || ''
+    };
+    
+    const response = await (window as any).electronAPI.network.sendBugReport(ipcPayload);
+    if (!response.success) {
+      throw new Error(response.message || 'Gagal mengirim laporan');
+    }
+    return response.data;
+  }
+
+  // Fallback for Web/Browser execution (NextJS directly) using NEXT_PUBLIC Env variables
+  const externalApiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+  const res = await fetch(`${externalApiBase}/report`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    headers: { 
+      'Content-Type': 'application/json',
+      'X-API-Key': process.env.NEXT_PUBLIC_CLIENT_API_KEY || '' 
+    },
+    body: JSON.stringify(formattedData),
   });
   
   const result = await res.json();
   if (!res.ok) {
-    throw new Error(result.error || 'Gagal mengirim laporan');
+    throw new Error(result.message || result.error || 'Gagal mengirim laporan');
   }
-  return result;
+  return result.data || result;
 }
