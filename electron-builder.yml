@@ -1,5 +1,6 @@
 appId: "com.efzyn.truckerstool"
 productName: "Truckers Tool Linux"
+artifactName: "${name}-${version}.${ext}"
 directories:
   output: release
   buildResources: build

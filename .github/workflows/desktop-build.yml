@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and Publish Application
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           CLIENT_API_KEY: ${{ secrets.CLIENT_API_KEY }}
           NEXT_PUBLIC_CLIENT_API_KEY: ${{ secrets.NEXT_PUBLIC_CLIENT_API_KEY }}
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://your-vercel-domain.vercel.app/api/v1' }}
