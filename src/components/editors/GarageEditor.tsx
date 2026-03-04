@@ -80,22 +80,19 @@ export default function GarageEditor({ garages, trucks, targetGarages, onChange,
 
   const getStatusColor = (status: number) => {
     if (status >= 3) return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)]';
-    if (status === 2) return 'bg-blue-500/15 text-blue-400 border-blue-500/30 shadow-[0_0_12px_rgba(59,130,246,0.15)]';
-    if (status === 1) return 'bg-amber-500/15 text-amber-400 border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.15)]';
+    if (status > 0) return 'bg-amber-500/15 text-amber-400 border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.15)]';
     return 'bg-surface/50 border-white/5 text-text-muted hover:text-white hover:border-white/20';
   };
 
   const getStatusIcon = (status: number) => {
     if (status >= 3) return 'domain_verification';
-    if (status === 2) return 'home_work';
     if (status > 0) return 'storefront';
     return 'add_circle';
   };
 
   const getStatusLabel = (status: number) => {
     if (status >= 3) return t('garage.sizeLarge');
-    if (status === 2) return t('garage.sizeMedium');
-    if (status === 1) return t('garage.sizeSmall');
+    if (status > 0) return t('garage.sizeSmall');
     return t('garage.sizeLocked');
   };
 
@@ -328,11 +325,6 @@ export default function GarageEditor({ garages, trucks, targetGarages, onChange,
                       {status === 0 && (
                         <button onClick={() => handleModalAction(1)} className="flex-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/40 font-bold uppercase tracking-wider text-[10px] py-3 rounded-xl transition-all flex items-center justify-center gap-2">
                           <span className="material-symbols-outlined text-sm">add_circle</span> {t('garage.buySmall')}
-                        </button>
-                      )}
-                      {status === 1 && (
-                        <button onClick={() => handleModalAction(2)} className="flex-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 font-bold uppercase tracking-wider text-[10px] py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-                          <span className="material-symbols-outlined text-sm">upgrade</span> {t('garage.upgradeMedium')}
                         </button>
                       )}
                       {(status === 0 || status === 1 || status === 2) && (

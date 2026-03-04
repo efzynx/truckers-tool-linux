@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-03-04
+
+### Added
+- **Custom App Icon:** Desktop app now uses custom WebP brand icon instead of the default Electron icon. Icon is displayed in the taskbar, title bar, and bundled inside the `.AppImage` / Windows installer.
+
+### Fixed
+- **Garage Small Slot Count:** Fixed a critical bug where unlocking a garage to "Small" only allocated **1 slot** for vehicles and drivers, instead of the correct **3 slots** that the game (ETS2/ATS) expects. Saves that only unlocked a garage without upgrading it further would not be recognized correctly in-game.
+- **Removed Invalid Medium Garage State:** Removed the "Upgrade to Medium" option from the Garage Editor modal. In ETS2/ATS, there is no medium garage — the upgrade path is: **Locked → Small → Large**. Garages previously set to medium (status=2) are now correctly displayed as Small in the UI.
+
 ## [1.1.0-beta.4] - 2026-03-04
+
 
 ### Fixed
 - **CI/CD Release Assets:** Fixed GitHub Actions workflow where build artifacts (`.AppImage`, `.exe`) were never uploaded to Release assets. Root cause: missing `outputs` block on the `release` job caused the `build-desktop` job to be silently skipped.
