@@ -2,7 +2,7 @@ name: Auto Release
 
 on:
   push:
-    branches: [main, beta]
+    branches: [main, beta, alpha, rc]
 
 permissions:
   contents: write
@@ -77,7 +77,13 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           PRERELEASE="${{ steps.version.outputs.prerelease }}"
 
-          if [ "$PRERELEASE" = "true" ]; then
+          BRANCH="${GITHUB_REF#refs/heads/}"
+
+          if [ "$BRANCH" = "alpha" ]; then
+            TITLE="🔬 v${VERSION} — Alpha"
+          elif [ "$BRANCH" = "rc" ]; then
+            TITLE="🚦 v${VERSION} — Release Candidate"
+          elif [ "$PRERELEASE" = "true" ]; then
             TITLE="🧪 v${VERSION} — Pre-release (Beta)"
           else
             TITLE="🚛 v${VERSION}"
