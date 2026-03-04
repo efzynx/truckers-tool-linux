@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2-alpha.1] - 2026-03-04
+
+### Added
+- **GitHub Issues Bug Reporter:** SupportModal now has two reporting options — "Open GitHub Issue" (opens a pre-filled GitHub Issue with bug details, app version, and game version) and "Send via Email" (existing backend route). GitHub Issues are public and traceable; Email is private and direct.
+- **Auto-detected App Version in Bug Report:** The bug report form now automatically displays the current app version (from `NEXT_PUBLIC_APP_VERSION`) as a read-only badge. Both app version and game version are included in all bug reports sent via email or GitHub Issues.
+- **Donation Links in README:** Added `## ❤️ Support the Project` section with Trakteer and Saweria badge links to both `README.md` (EN) and `README-ID.md` (ID).
+
 ## [1.1.1] - 2026-03-04
+
 
 ### Added
 - **Custom App Icon:** Desktop app now uses custom WebP brand icon instead of the default Electron icon. Icon is displayed in the taskbar, title bar, and bundled inside the `.AppImage` / Windows installer.
