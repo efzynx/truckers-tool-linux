@@ -125,11 +125,12 @@ export async function cleanupUpload(tempDir: string) {
   return res.json();
 }
 
-export async function sendSupportReport(data: { name: string; version: string; message: string; logs?: any }) {
+export async function sendSupportReport(data: { name: string; appVersion?: string; gameVersion?: string; version?: string; message: string; logs?: any }) {
   // Format the data mapping to our new Backend standard `version, type, message, os, username, appName`
   const formattedData = {
     username: data.name,
-    version: data.version,
+    version: data.appVersion || data.version || 'unknown',
+    gameVersion: data.gameVersion || data.version || 'unknown',
     message: data.message,
     logs: data.logs,
     type: 'Bug Tracker',

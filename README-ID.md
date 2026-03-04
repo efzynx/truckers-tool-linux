@@ -225,7 +225,17 @@ truckers-tool-linux/
 └── tsconfig.json
 ```
 
+## ❤️ Dukung Proyek Ini
+
+Truckers Tool Linux gratis dan open-source. Jika tool ini bermanfaat, pertimbangkan untuk mendukung biaya server dan pengembangan!
+
+[![Trakteer](https://img.shields.io/badge/Trakteer-Dukung%20Saya-red?style=flat-square&logo=buymeacoffee&logoColor=white)](https://trakteer.id/efzyn/gift)
+[![Saweria](https://img.shields.io/badge/Saweria-Donasi-yellow?style=flat-square&logo=ko-fi&logoColor=black)](https://saweria.co/efzynx)
+
+> Server backend API butuh biaya hosting. Dukunganmu membuat proyek ini tetap hidup! 🚛
+
 ## 📝 License
+
 
 MIT — feel free to use and modify.
 

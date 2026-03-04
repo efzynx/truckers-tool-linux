@@ -9,6 +9,7 @@ interface SupportModalProps {
 
 export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const { t } = useLanguage();
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || 'unknown';
   
   const [formData, setFormData] = useState({
     name: '',
@@ -38,7 +39,8 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
 
       const payload = {
         name: formData.name,
-        version: formData.version,
+        appVersion,
+        gameVersion: formData.version,
         message: formData.message,
         logs: contextLogs
       };
@@ -52,13 +54,29 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
         setStatus({ type: 'idle', msg: '' });
         onClose();
       }, 2500);
-      
+
     } catch (err: any) {
       setStatus({ type: 'error', msg: err.message || 'Error pengiriman' });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleGitHubIssue = () => {
+    if (!formData.message.trim()) return;
+    const title = encodeURIComponent(`[Bug Report] ${formData.name ? `from ${formData.name}` : 'User Report'} — App v${appVersion}${formData.version ? ` | Game: ${formData.version}` : ''}`);
+    const body = encodeURIComponent(
+      `## Bug Report\n\n**Reporter:** ${formData.name || 'Anonymous'}\n**App Version:** v${appVersion}\n**Game Version:** ${formData.version || 'Not specified'}\n\n## Description\n${formData.message}\n\n---\n*Reported via Truckers Tool Linux in-app bug reporter*`
+    );
+    const url = `https://github.com/efzynx/truckers-tool-linux/issues/new?title=${title}&body=${body}&labels=bug`;
+    if (typeof window !== 'undefined' && 'electronAPI' in window) {
+      (window as any).electronAPI.openExternal(url);
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const isFormFilled = formData.message.trim().length > 0;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -104,6 +122,15 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
               />
             </div>
 
+            {/* App Version — auto detect */}
+            <div className="flex items-center justify-between bg-background-dark/40 border border-white/5 rounded-xl px-4 py-2.5">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[14px] text-primary opacity-70">memory</span>
+                <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t('support.labelAppVersion')}</span>
+              </div>
+              <span className="text-xs font-mono font-bold text-primary">v{appVersion}</span>
+            </div>
+
             {/* Versi Game */}
             <div>
               <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5">
@@ -111,7 +138,6 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
               </label>
               <input
                 type="text"
-                required
                 placeholder="ETS2 v1.53 / ATS v1.53"
                 value={formData.version}
                 onChange={e => setFormData(s => ({ ...s, version: e.target.value }))}
@@ -151,34 +177,52 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
             )}
 
             {/* Buttons */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col gap-2 pt-2">
+              {/* GitHub Issue Button */}
               <button
                 type="button"
-                onClick={onClose}
-                disabled={isSubmitting}
-                className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-text-muted hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-all disabled:opacity-50"
+                onClick={handleGitHubIssue}
+                disabled={!isFormFilled}
+                className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-white bg-[#24292e] hover:bg-[#2f363d] border border-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {t('support.btnCancel')}
+                <svg className="w-4 h-4 fill-white shrink-0" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                {t('support.btnGithub')}
+                <span className="material-symbols-outlined text-[14px] opacity-60">open_in_new</span>
               </button>
-              <button
-                type="submit"
-                disabled={isSubmitting || status.type === 'success'}
-                className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary-hover shadow-neon-sm hover:shadow-neon transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale"
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="material-symbols-outlined animate-spin">refresh</span>
-                    {t('support.btnSubmitting')}
-                  </>
-                ) : status.type === 'success' ? (
-                  <span className="material-symbols-outlined">check</span>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined text-[18px]">send</span>
-                    {t('support.btnSubmit')}
-                  </>
-                )}
-              </button>
+
+              {/* Email + Cancel */}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-text-muted hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-all disabled:opacity-50"
+                >
+                  {t('support.btnCancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || status.type === 'success'}
+                  className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary-hover shadow-neon-sm hover:shadow-neon transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin">refresh</span>
+                      {t('support.btnSubmitting')}
+                    </>
+                  ) : status.type === 'success' ? (
+                    <span className="material-symbols-outlined">check</span>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[18px]">email</span>
+                      {t('support.btnSubmit')}
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Note */}
+              <p className="text-[10px] text-text-muted text-center opacity-60">{t('support.githubNote')}</p>
             </div>
           </form>
         </div>
