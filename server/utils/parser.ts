@@ -402,10 +402,11 @@ export function applyUpdates(
         }
         
         // Calculate new slots size safely, never shrinking below existing arrays
+        // Note: In ETS2/ATS, small garage (status=1) = 3 slots, medium (status=2) = 3 slots, large (status=3+) = 5 slots
         const targetSlots = Math.max(
             existingVehicles.length, 
             existingDrivers.length, 
-            garageTargetStatus >= 3 ? 5 : garageTargetStatus === 2 ? 3 : garageTargetStatus === 1 ? 1 : 0
+            garageTargetStatus >= 3 ? 5 : garageTargetStatus === 2 ? 3 : garageTargetStatus === 1 ? 3 : 0
         );
 
         result.push(` vehicles: ${targetSlots}`);

@@ -44,10 +44,15 @@ const loadURL = serve({ directory: path.join(__dirname, '..', 'out') });
 
 // ...
 function createWindow() {
+  const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'build', 'icon.png')
+    : path.join(__dirname, '..', 'build', 'icon.png');
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     autoHideMenuBar: true,
+    icon: iconPath,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
