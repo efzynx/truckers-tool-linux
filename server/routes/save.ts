@@ -51,6 +51,9 @@ router.post('/save', async (req, res) => {
         truckRefuelAll?: boolean;
         truckRepairIds?: string[];
         truckRefuelIds?: string[];
+        trailerRepairAll?: boolean;
+        trailerRepairIds?: string[];
+        discoverMap?: boolean;
       };
     };
 
@@ -99,6 +102,9 @@ router.post('/download-save', async (req, res) => {
         truckRefuelAll?: boolean;
         truckRepairIds?: string[];
         truckRefuelIds?: string[];
+        trailerRepairAll?: boolean;
+        trailerRepairIds?: string[];
+        discoverMap?: boolean;
       };
     };
 

@@ -70,6 +70,14 @@ export interface TruckData {
   isPlayerTruck: boolean;
 }
 
+export interface TrailerData {
+  id: string;
+  cargoDamage: number;
+  bodyWear: number;
+  isPrivate: boolean;
+  sourceGarage: string | null;
+}
+
 export interface GarageData {
   id: string;
   status: number;
@@ -79,6 +87,33 @@ export interface GarageData {
   driverSlots: number;
   trailers: number;
   trucks: string[];
+}
+
+export interface DriverData {
+  id: string;             // e.g. "driver.127"
+  hometown: string;
+  currentCity: string;
+  state: number;          // 1=idle, 2=on_job, 3=resting
+  onDutyTimer: number;
+  experiencePoints: number;
+  skills: {
+    adr: number;
+    long_dist: number;
+    heavy: number;
+    fragile: number;
+    urgent: number;
+    mechanical: number;
+  };
+  garageId: string;
+  assignedTruck: string;
+}
+
+export interface BankLoan {
+  id: string;             // _nameless ID
+  amount: number;         // remaining amount
+  originalAmount: number;
+  interestRate: number;   // e.g. 0.12 = 12%
+  duration: number;       // months
 }
 
 export interface GameData {
@@ -94,6 +129,14 @@ export interface GameData {
   };
   garages: GarageData[];
   trucks: TruckData[];
+  trailers: TrailerData[];
+  drivers: DriverData[];
+  loans: BankLoan[];
+  mapDiscovery: {
+    visitedCities: number;
+    unlockedDealers: number;
+    unlockedRecruitments: number;
+  };
 }
 
 export interface SaveRequest {
@@ -105,6 +148,10 @@ export interface SaveRequest {
     truckRefuelAll?: boolean;
     truckRepairIds?: string[];
     truckRefuelIds?: string[];
+    trailerRepairAll?: boolean;
+    trailerRepairIds?: string[];
+    discoverMap?: boolean;
+    clearLoans?: boolean;
   };
 }
 

@@ -1,14 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import type { GameData } from '../types';
 import ProfileEditor from './editors/ProfileEditor';
 import UserEditor from './editors/UserEditor';
 import TruckEditor from './editors/TruckEditor';
 import GarageEditor from './editors/GarageEditor';
+import DriverEditor from './editors/DriverEditor';
+import TrailerEditor from './editors/TrailerEditor';
+import MapEditor from './editors/MapEditor';
 import { useLanguage } from '../i18n/LanguageContext';
 import SupportModal from './SupportModal';
 import AboutModal from './AboutModal';
 
-export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage';
+export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage' | 'driver' | 'trailer' | 'map';
 
 export interface UploadContext {
   isUploadMode: boolean;
@@ -65,7 +68,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const { t } = useLanguage();
-  
+
   // Track individual garage upgrades
   const [targetGarages, setTargetGarages] = useState<Record<string, number>>({});
   
@@ -74,6 +77,22 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   const [truckRefuelAll, setTruckRefuelAll] = useState(false);
   const [truckRepairIds, setTruckRepairIds] = useState<string[]>([]);
   const [truckRefuelIds, setTruckRefuelIds] = useState<string[]>([]);
+
+  // Track trailer actions
+  const [trailerRepairAll, setTrailerRepairAll] = useState(false);
+  const [trailerRepairIds, setTrailerRepairIds] = useState<string[]>([]);
+
+  // Track map discovery
+  const [discoverMap, setDiscoverMap] = useState(false);
+
+  // Track loan action
+  const [clearLoans, setClearLoans] = useState(false);
+
+  const handleClearLoans = () => {
+    setClearLoans(true);
+    setEditableData(prev => ({ ...prev, loans: [] }));
+    setHasChanges(true);
+  };
 
   // Quick stats
   const level = useMemo(() => {
@@ -156,6 +175,33 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setHasChanges(true);
   };
 
+  const handleTrailerRepairAll = () => {
+    setTrailerRepairAll(true);
+    setEditableData(prev => ({
+      ...prev,
+      trailers: (prev.trailers || []).map(tr => ({
+        ...tr,
+        cargoDamage: 0,
+        bodyWear: 0,
+      }))
+    }));
+    setHasChanges(true);
+  };
+
+  const handleTrailerRepair = (trailerId: string) => {
+    setTrailerRepairIds(prev => prev.includes(trailerId) ? prev : [...prev, trailerId]);
+    setEditableData(prev => ({
+      ...prev,
+      trailers: (prev.trailers || []).map(tr => tr.id === trailerId ? { ...tr, cargoDamage: 0, bodyWear: 0 } : tr)
+    }));
+    setHasChanges(true);
+  };
+
+  const handleDiscoverMap = () => {
+    setDiscoverMap(true);
+    setHasChanges(true);
+  };
+
   const handleSave = () => {
     const payload = {
       ...editableData,
@@ -164,6 +210,10 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
       truckRefuelAll,
       truckRepairIds,
       truckRefuelIds,
+      trailerRepairAll,
+      trailerRepairIds,
+      discoverMap,
+      clearLoans,
     };
     onSave(payload);
     setHasChanges(false);
@@ -171,11 +221,28 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setTruckRefuelAll(false);
     setTruckRepairIds([]);
     setTruckRefuelIds([]);
+    setTrailerRepairAll(false);
+    setTrailerRepairIds([]);
+    setDiscoverMap(false);
+    setClearLoans(false);
   };
 
   const handleDownload = () => {
     onDownload(editableData);
   };
+
+  // Keyboard shortcut: Ctrl+S / Cmd+S to save
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      if (hasChanges && !saving) handleSave();
+    }
+  }, [hasChanges, saving, handleSave]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   // --- Global Dashboard Layout ---
   return (
@@ -223,7 +290,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
             </button>
             <button onClick={() => setView('user')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'user' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">psychology</span>
-              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabJobs')} / Skills</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabUser')}</span>
             </button>
             <button onClick={() => setView('garage')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'garage' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">warehouse</span>
@@ -232,6 +299,18 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
             <button onClick={() => setView('truck')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'truck' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">local_shipping</span>
               <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabTrucks')}</span>
+            </button>
+            <button onClick={() => setView('trailer')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'trailer' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+              <span className="material-symbols-outlined">airport_shuttle</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('Trailers') || 'Trailers'}</span>
+            </button>
+            <button onClick={() => setView('map')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'map' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+              <span className="material-symbols-outlined">map</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('Map') || 'Map'}</span>
+            </button>
+            <button onClick={() => setView('driver')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'driver' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+              <span className="material-symbols-outlined">groups</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabDriver')}</span>
             </button>
           </nav>
           
@@ -278,8 +357,8 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
         <main className="flex-1 flex flex-col relative z-20 min-w-0 h-[100dvh] overflow-y-auto no-scrollbar">
           {view === 'home' && (
             <div className="px-5 py-6 md:p-10 flex flex-col gap-6 md:gap-10 pb-24 md:pb-10 w-full animate-fade-in">
-              {/* Stat Gauges */}
-              <div className="grid grid-cols-2 gap-4">
+          {/* Stat Cards Grid */}
+          <div className="grid grid-cols-2 gap-4">
             {/* Cash Card */}
             <button onClick={() => setView('profile')} className="relative bg-surface rounded-2xl p-4 border border-white/5 hover:border-primary/50 transition-all duration-300 group text-left overflow-hidden cursor-pointer">
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -307,9 +386,50 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                 <span className="material-symbols-outlined text-text-muted text-[16px] group-hover:text-blue-400 transition-colors">arrow_outward</span>
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-0.5">Total XP</p>
+                <p className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-0.5">Level {level}</p>
                 <p className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors truncate">
-                  {(editableData.experiencePoints / 1000).toFixed(1)}k
+                  {(editableData.experiencePoints / 1000).toFixed(1)}k XP
+                </p>
+                {/* Level Progress Bar */}
+                <div className="mt-2 h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-400 rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
+            </button>
+
+            {/* Trucks Card */}
+            <button onClick={() => setView('truck')} className="relative bg-surface rounded-2xl p-4 border border-white/5 hover:border-orange-400/50 transition-all duration-300 group text-left overflow-hidden cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="flex justify-between items-start mb-3">
+                <div className="size-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover:shadow-[0_0_5px_rgba(251,146,60,0.4)] transition-shadow">
+                  <span className="material-symbols-outlined text-[20px]">local_shipping</span>
+                </div>
+                <span className="material-symbols-outlined text-text-muted text-[16px] group-hover:text-orange-400 transition-colors">arrow_outward</span>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-0.5">{t('dashboard.statTrucks')}</p>
+                <p className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight group-hover:text-orange-400 transition-colors">
+                  {editableData.trucks.length}
+                </p>
+              </div>
+            </button>
+
+            {/* Garages Card */}
+            <button onClick={() => setView('garage')} className="relative bg-surface rounded-2xl p-4 border border-white/5 hover:border-emerald-400/50 transition-all duration-300 group text-left overflow-hidden cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="flex justify-between items-start mb-3">
+                <div className="size-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:shadow-[0_0_5px_rgba(52,211,153,0.4)] transition-shadow">
+                  <span className="material-symbols-outlined text-[20px]">warehouse</span>
+                </div>
+                <span className="material-symbols-outlined text-text-muted text-[16px] group-hover:text-emerald-400 transition-colors">arrow_outward</span>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-0.5">{t('dashboard.statGarages')}</p>
+                <p className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight group-hover:text-emerald-400 transition-colors">
+                  {editableData.garages.filter(g => g.status > 0).length}
                 </p>
               </div>
             </button>
@@ -427,6 +547,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                onSave={handleSave}
                saving={saving}
                hasChanges={hasChanges}
+               onClearLoans={handleClearLoans}
              />
           )}
           {view === 'user' && (
@@ -503,6 +624,15 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                )}
              </div>
           )}
+          {view === 'driver' && (
+            <DriverEditor
+              data={editableData}
+              onBack={() => setView('home')}
+              onSave={handleSave}
+              saving={saving}
+              hasChanges={hasChanges}
+            />
+          )}
         </main>
 
         {/* Bottom Navigation Bar (Mobile Only) */}
@@ -526,7 +656,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'user' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
                 <span className="material-symbols-outlined text-[22px]">psychology</span>
               </div>
-              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">Skills</p>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabUser')}</p>
             </button>
             
             <button onClick={() => setView('garage')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'garage' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
@@ -542,9 +672,91 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               </div>
               <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabTrucks')}</p>
             </button>
+
+            <button onClick={() => setView('trailer')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'trailer' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'trailer' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]">airport_shuttle</span>
+              </div>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('Trailers') || 'Trailers'}</p>
+            </button>
+
+            <button onClick={() => setView('map')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'map' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'map' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]">map</span>
+              </div>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('Map') || 'Map'}</p>
+            </button>
+
+            <button onClick={() => setView('driver')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'driver' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'driver' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]">groups</span>
+              </div>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabDriver')}</p>
+            </button>
           </div>
         </div>
       </div>
+
+      {view === 'trailer' && (
+         <div className="absolute inset-x-0 top-0 bottom-0 md:left-64 lg:left-80 z-40 bg-background-dark animate-fade-in flex flex-col pt-24 pb-28 px-4 md:px-10 lg:px-20 overflow-y-auto no-scrollbar">
+           <header className="fixed top-0 left-0 right-0 md:left-64 lg:left-80 z-40 glass-panel">
+             <div className="flex items-center justify-between px-4 py-4 md:px-10 lg:px-20 mx-auto w-full">
+               <button onClick={() => setView('home')} className="flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer">
+                 <span className="material-symbols-outlined text-3xl">chevron_left</span>
+               </button>
+               <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('Trailers') || 'Trailers'}</h1>
+               <div className="w-10"></div>
+             </div>
+           </header>
+           <div className="w-full max-w-7xl mx-auto flex-1">
+             <TrailerEditor 
+               trailers={editableData.trailers || []}
+               onRepairAll={handleTrailerRepairAll}
+               onRepairTrailer={handleTrailerRepair}
+             />
+           </div>
+           {hasChanges && (
+             <div className="fixed bottom-8 right-6 md:right-10 z-50">
+                <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
+                <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer">
+                  <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
+                    {saving ? 'sync' : 'save'}
+                  </span>
+                </button>
+             </div>
+           )}
+         </div>
+      )}
+
+      {view === 'map' && (
+         <div className="absolute inset-x-0 top-0 bottom-0 md:left-64 lg:left-80 z-40 bg-background-dark animate-fade-in flex flex-col pt-24 pb-28 px-4 md:px-10 lg:px-20 overflow-y-auto no-scrollbar">
+           <header className="fixed top-0 left-0 right-0 md:left-64 lg:left-80 z-40 glass-panel">
+             <div className="flex items-center justify-between px-4 py-4 md:px-10 lg:px-20 mx-auto w-full">
+               <button onClick={() => setView('home')} className="flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer">
+                 <span className="material-symbols-outlined text-3xl">chevron_left</span>
+               </button>
+               <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('Map') || 'Map'}</h1>
+               <div className="w-10"></div>
+             </div>
+           </header>
+           <div className="w-full max-w-7xl mx-auto flex-1">
+             <MapEditor 
+               data={editableData}
+               onDiscoverMap={handleDiscoverMap}
+             />
+           </div>
+           {hasChanges && (
+             <div className="fixed bottom-8 right-6 md:right-10 z-50">
+                <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
+                <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer">
+                  <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
+                    {saving ? 'sync' : 'save'}
+                  </span>
+                </button>
+             </div>
+           )}
+         </div>
+      )}
 
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
       {isAboutOpen && <AboutModal onClose={() => setIsAboutOpen(false)} />}
