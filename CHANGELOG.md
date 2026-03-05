@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2-alpha.2] - 2026-03-05
+
+### Added
+- **Trailer Editor:** A dedicated fleet manager for player-owned trailers. Allows repairing cargo damage and trailer body wear to 0%.
+- **Map Discovery Editor:** New dashboard tab to view discovery statistics. Includes a "Unlock Visited Cities" feature that marks all registered cities on the map as 100% discovered.
+- **Extended i18n Support:** Added comprehensive Indonesian and English translations for the new Trailer and Map features.
+
+### Changed
+- **Save Game Parser:** Enhanced the `.sii` parser to handle trailer blocks (`trailer` type) and player discovery arrays (`visited_cities`).
+- **Dashboard Sidebar/Nav:** Added Map and Trailer icons to the desktop sidebar and mobile bottom navigation bar.
+
 ## [1.1.2-alpha.1] - 2026-03-04
 
 ### Added
