@@ -80,10 +80,10 @@ export default function MapEditor({
                  className="w-full py-4 px-4 rounded-xl border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95 transition-all flex items-center justify-center gap-2 font-display font-bold uppercase text-xs tracking-wider cursor-pointer"
                >
                  <span className="material-symbols-outlined text-lg">public</span>
-                 {t('Unlock Visited Cities') || 'Unlock Visited Cities'}
+                 {t('Unlock Visited Places') || 'Unlock Visited Places'}
                </button>
                <p className="text-[10px] text-text-muted mt-2 leading-relaxed text-center">
-                  {t('Unlock Cities Desc') || 'Changes your visited cities status to 100% discovered for all registered cities on your map.'}
+                  {t('Unlock Places Desc') || 'Changes your visited cities status to 100% discovered, and unlocks all dealers and agencies for registered cities on your map. (Warning: We cannot unlock ALL places in the universe to prevent save corruption. Only places you have visited at least once will be fully unlocked)'}
                </p>
              </div>
           </div>

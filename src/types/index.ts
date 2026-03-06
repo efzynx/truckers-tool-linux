@@ -148,7 +148,6 @@ export interface SaveRequest {
     truckRefuelAll?: boolean;
     truckRepairIds?: string[];
     truckRefuelIds?: string[];
-    trailerRepairAll?: boolean;
     trailerRepairIds?: string[];
     discoverMap?: boolean;
     clearLoans?: boolean;
