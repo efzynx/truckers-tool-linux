@@ -302,6 +302,16 @@ export function parseGameData(content: string): ParsedGameData {
           skills[key] = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
         }
       }
+      
+      if (trimmed.startsWith('visited_cities:') && !trimmed.startsWith('visited_cities[')) {
+        visitedCitiesCount = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+      }
+      if (trimmed.startsWith('unlocked_dealers:') && !trimmed.startsWith('unlocked_dealers[')) {
+        unlockedDealersCount = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+      }
+      if (trimmed.startsWith('unlocked_recruitments:') && !trimmed.startsWith('unlocked_recruitments[')) {
+        unlockedRecruitmentsCount = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+      }
     }
 
     // ---- Player ----
@@ -316,16 +326,6 @@ export function parseGameData(content: string): ParsedGameData {
       const trailerMatch = trimmed.match(/^trailers\[\d+\]:\s*(\S+)/);
       if (trailerMatch && trailerMatch[1] !== 'null') {
         playerTrailerIds.add(trailerMatch[1]);
-      }
-      
-      if (trimmed.startsWith('visited_cities:') && !trimmed.startsWith('visited_cities[')) {
-        visitedCitiesCount = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
-      }
-      if (trimmed.startsWith('unlocked_dealers:') && !trimmed.startsWith('unlocked_dealers[')) {
-        unlockedDealersCount = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
-      }
-      if (trimmed.startsWith('unlocked_recruitments:') && !trimmed.startsWith('unlocked_recruitments[')) {
-        unlockedRecruitmentsCount = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
       }
 
       // Collect hired driver IDs — drivers[0] is usually the player themselves
@@ -614,9 +614,6 @@ export function applyUpdates(
   const hasAnyTrailerAction = updates.trailerRepairAll || trailerRepairIds.size > 0;
 
   // Track map discovery to inject count modifications
-  let discoveryCitiesCountTarget = 0;
-  let discoveryDealersCountTarget = 0;
-  let discoveryRecruCountTarget = 0;
 
   let blockType = '';
   let blockId = '';
@@ -772,17 +769,48 @@ export function applyUpdates(
       }
     }
 
-    // Player: Map Discovery
-    if (blockType === 'player' && updates.discoverMap) {
-      // Find the counts first so we know how many to process
+    // Economy: Map Discovery
+    if (blockType === 'economy' && updates.discoverMap) {
       if (trimmed.startsWith('visited_cities:') && !trimmed.startsWith('visited_cities[')) {
-        discoveryCitiesCountTarget = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+        // We only care about visited_cities[], the count is just parsed to skip
       }
+      if (trimmed.startsWith('visited_cities[')) {
+        const cityMatch = trimmed.match(/^visited_cities\[\d+\]:\s*(\S+)/);
+        if (cityMatch && cityMatch[1] && cityMatch[1] !== 'null') {
+          // Temporarily store the city to write later
+          if (!garageRebuild) garageRebuild = [];
+          garageRebuild.push(cityMatch[1]);
+        }
+      }
+
+      // 1. Rewrite unlocked_dealers
       if (trimmed.startsWith('unlocked_dealers:') && !trimmed.startsWith('unlocked_dealers[')) {
-        discoveryDealersCountTarget = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+        const citiesList = garageRebuild || [];
+        result.push(` unlocked_dealers: ${citiesList.length}`);
+        
+        for (let idx = 0; idx < citiesList.length; idx++) {
+          result.push(` unlocked_dealers[${idx}]: ${citiesList[idx]}`);
+        }
+        continue;
       }
+      if (trimmed.startsWith('unlocked_dealers[')) {
+        // Skip existing elements since we completely rewrote them
+        continue;
+      }
+
+      // 2. Rewrite unlocked_recruitments
       if (trimmed.startsWith('unlocked_recruitments:') && !trimmed.startsWith('unlocked_recruitments[')) {
-        discoveryRecruCountTarget = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+        const citiesList = garageRebuild || [];
+        result.push(` unlocked_recruitments: ${citiesList.length}`);
+        
+        for (let idx = 0; idx < citiesList.length; idx++) {
+          result.push(` unlocked_recruitments[${idx}]: ${citiesList[idx]}`);
+        }
+        continue;
+      }
+      if (trimmed.startsWith('unlocked_recruitments[')) {
+        // Skip existing elements
+        continue;
       }
       
       // Override visited_cities_count to 3 (visited) inside the array

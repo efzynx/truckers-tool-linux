@@ -2,7 +2,7 @@
 
 Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Truck Simulator** di Linux. Edit data profil Anda (uang, XP, skill) langsung dari browser — tanpa perlu alat pihak ketiga dari Windows.
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.0.1--beta.1.1-orange?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.2--beta.1-orange?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 ## ✨ Fitur
 
