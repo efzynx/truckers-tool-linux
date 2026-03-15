@@ -6,8 +6,6 @@ interface UserEditorProps {
   data: GameData;
   onChange: (updates: Partial<GameData>) => void;
   onBack: () => void;
-  onSave: () => void;
-  saving: boolean;
   hasChanges: boolean;
 }
 
@@ -27,7 +25,7 @@ const xpPresets = [
   { label: '500k XP', value: 500_000 },
 ];
 
-export default function UserEditor({ data, onChange, onBack, onSave, saving, hasChanges }: UserEditorProps) {
+export default function UserEditor({ data, onChange, onBack, hasChanges }: UserEditorProps) {
   const [xpStr, setXpStr] = useState(data.experiencePoints.toLocaleString());
   const { t } = useLanguage();
 
@@ -178,21 +176,8 @@ export default function UserEditor({ data, onChange, onBack, onSave, saving, has
     </div>
   </div>
 
-  {/* Floating Action Button (FAB) */}
-      {hasChanges && (
-        <div className="fixed bottom-8 right-6 z-50 animate-slide-in-up">
-          <div className="absolute inset-0 bg-blue-500 rounded-full blur animate-pulse opacity-50"></div>
-          <button 
-            onClick={onSave}
-            disabled={saving}
-            className="relative flex items-center justify-center w-16 h-16 bg-blue-500 text-black rounded-full shadow-neon hover:shadow-[0_0_25px_rgba(59,130,246,0.8)] hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer"
-          >
-            <span className={`material-symbols-outlined text-3xl transition-transform ${saving ? 'animate-spin' : 'group-hover:rotate-12'}`}>
-              {saving ? 'sync' : 'save'}
-            </span>
-          </button>
-        </div>
-      )}
+
+
       
       {/* Background Decoration Image */}
       <div className="fixed bottom-0 left-0 w-full h-1/2 pointer-events-none z-0 opacity-10">

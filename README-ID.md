@@ -2,7 +2,7 @@
 
 Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Truck Simulator** di Linux. Edit data profil Anda (uang, XP, skill) langsung dari browser — tanpa perlu alat pihak ketiga dari Windows.
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.2--beta.1-orange?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 ## ✨ Fitur
 
@@ -14,9 +14,16 @@ Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Tr
 - ⚡ **Aksi Cepat** — Tombol instan kontrol sistem seperti Inject €50k, Lunasi Hutang Bank, Tambah 10.000 XP, dan Maksimalkan Semua Skill
 - 📥 **Unduh Hasil Edit** — Download file hasil edit (`game.sii`) untuk ditaruh kembali ke folder permainan
 - ✏️ **Editor Terpadu** — Mengedit jumlah uang, experience point (XP), status pekerjaan, dan garasi secara bebas
+- 🚚 **Editor Trailer** — Tampilkan dan perbaiki semua trailer milik pemain (kerusakan muatan & badan trailer)
+- 🗺️ **Editor Peta** — Buka kunci semua kota yang pernah dikunjungi di peta
+- 💾 **Modal Konfirmasi Simpan** — Tinjau semua perubahan sebelum data ditulis ke save file
+- ↩️ **Riwayat Undo** — Hingga 20 level undo (`Ctrl+Z`)
+- 🔔 **Notifikasi Simpan Berhasil** — Toast konfirmasi setelah setiap penyimpanan
+- 🐛 **Pelapor Bug GitHub Issues** — Laporkan bug langsung dari aplikasi dengan info versi terisi otomatis
 - 💾 **Backup Otomatis** — Membuat salinan (`.bak`) sebelum file asli dimodifikasi
 - ⚙️ **Konfigurasi Mudah** — Semua setting dapat diatur via file `settings.yml` (port, lokasi target, batas penyimpanan RAM unggahan upload)
 - 🎨 **Antarmuka (UI) Pixel-Perfect Stitch** — Memanfaatkan gaya Glassmorphism modern yang interaktif, mewah dan responsif baik di desktop maupun layar sentuh (mobile).
+- 🌐 **Dukungan Multibahasa** — Tersedia dalam Bahasa Indonesia dan Inggris
 
 ## 📋 Persyaratan Sistem
 
@@ -157,7 +164,7 @@ PM2 config ada di `ecosystem.config.cjs` yang otomatis baca port dari `settings.
 4. **Scan & Pilih Profil** → Klik "Scan Profil", kemudian pilih profilnya.
 5. **Backup** → Opsional untuk mencentang mode pembuatan salinan cadangan (backup) jika menggunakan local path.
 6. **Edit** → Modifikasi nilai Uang, XP, atau skill di halaman Dashboard tab manapun
-7. **Simpan** → Tekan ikon disket atau tekan tombol "Simpan Perubahan/Save Changes"
+7. **Simpan** — Klik tombol Save (pojok kanan bawah). Modal konfirmasi akan muncul menampilkan semua perubahan. Konfirmasi untuk menyimpan ke file. Gunakan `Ctrl+Z` atau tombol Undo untuk membatalkan perubahan.
 
 ### Mode Upload File
 

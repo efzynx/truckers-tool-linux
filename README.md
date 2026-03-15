@@ -4,7 +4,7 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 
 [🇮🇩 Baca dalam Bahasa Indonesia (Read in Indonesian)](README-ID.md)
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.2--beta.1-orange?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 ## ✨ Features
 
@@ -16,6 +16,12 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 - ⚡ **Quick Actions** — Fast actions like Inject €50k, Clear Debt, Add 10K XP
 - 📥 **Download Edited File** — Download the edited file to place it back into your save game folder
 - ✏️ **Profile Editor** — Edit money, experience points, and skill levels
+- 🚚 **Trailer Editor** — View and repair all owned trailers (cargo damage & body wear)
+- 🗺️ **Map Discovery Editor** — Unlock all visited cities on the map
+- 💾 **Save Confirmation Modal** — Review all pending changes before writing to save file
+- ↩️ **Undo History** — Up to 20 levels of undo (`Ctrl+Z`)
+- 🔔 **Save Success Notification** — Toast confirmation after every save
+- 🐛 **GitHub Issues Reporter** — Report bugs directly from the app with auto-filled version info
 - 💾 **Auto Backup** — Creates backup before any changes
 - ⚙️ **Configurable** — All settings via `settings.yml` (port, paths, upload limits)
 - 🎨 **Pixel-Perfect Stitch UI** — Responsive Glassmorphism UI (Mobile & Desktop Full-width)
@@ -160,7 +166,7 @@ The PM2 config is located in `ecosystem.config.cjs` which automatically reads th
 4. **Scan & Select Profile** → Click "Scan Folder", choose a profile
 5. **Backup** → Optionally create a backup (recommended!)
 6. **Edit** → Modify money, XP, skills from the Dashboard tabs
-7. **Save** → Click "Save" to save your changes
+7. **Save** — Click the Save button (bottom-right). A confirmation modal will appear showing all changes. Confirm to write to the save file. Use `Ctrl+Z` or the Undo button to revert changes.
 
 ### File Upload Mode
 

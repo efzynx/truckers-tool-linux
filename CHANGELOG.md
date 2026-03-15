@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-03-15
+
+### Added
+- **Save Confirmation Modal:** Pressing Save now shows a confirmation modal listing all changes made before writing to the save file. Prevents accidental overwrites.
+- **Change Log Tracking:** Every modification (money, XP, skills, trucks, garages, trailers, map, loans) is automatically recorded as a labeled change entry with icon and color.
+- **Undo History:** Up to 20 levels of undo. An undo button (circular, with a level counter badge) appears above the Save button when changes are pending. Also triggered via `Ctrl+Z`.
+- **Save Success Notification:** A toast notification appears after a successful save confirming the operation.
+- **Keyboard Shortcut — Undo:** `Ctrl+Z` to undo the last action.
+- **Keyboard Shortcut — Save:** `Ctrl+S` now opens the confirmation modal instead of saving directly.
+- **Unified Floating Action Group:** Undo and Save buttons are grouped together in the bottom-right corner, consistent across all views.
+
+### Changed
+- **Save Flow:** Save is now a two-step process — trigger → confirm → save. The confirmation modal shows a full list of pending changes.
+- **Removed Duplicate FABs:** Per-view floating Save buttons removed from `ProfileEditor`, `UserEditor`, and `DriverEditor`. One global Save button now serves all views.
+- **Undo Button Shape:** Circular button (w-12) aligned center with the Save button (w-16) for visual consistency.
+
+### Promoted from
+- `1.1.2-alpha.1` — GitHub Issues reporter, app version in bug form, donation links
+- `1.1.2-alpha.2` — Trailer Editor, Map Discovery Editor, extended i18n
+- `1.1.2-beta.1`  — Build stability verification, broader testing
+
 ## [1.1.2-beta.1] - 2026-03-07
 
 ### Added

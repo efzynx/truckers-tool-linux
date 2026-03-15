@@ -5,9 +5,6 @@ import { useLanguage } from '../../i18n/LanguageContext';
 interface DriverEditorProps {
   data: GameData;
   onBack: () => void;
-  onSave: () => void;
-  saving: boolean;
-  hasChanges: boolean;
 }
 
 const skillInfo = [
@@ -32,7 +29,7 @@ function xpToLevel(xp: number): number {
   return Math.floor(Math.sqrt(xp / 1000));
 }
 
-export default function DriverEditor({ data, onBack, onSave, saving, hasChanges }: DriverEditorProps) {
+export default function DriverEditor({ data, onBack }: DriverEditorProps) {
   const { t } = useLanguage();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -225,21 +222,8 @@ export default function DriverEditor({ data, onBack, onSave, saving, hasChanges 
         </div>
       )}
 
-      {/* FAB Save */}
-      {hasChanges && (
-        <div className="fixed bottom-8 right-6 z-50 animate-slide-in-up">
-          <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
-          <button
-            onClick={onSave}
-            disabled={saving}
-            className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
-          >
-            <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : ''}`}>
-              {saving ? 'sync' : 'save'}
-            </span>
-          </button>
-        </div>
-      )}
+
+
     </div>
   );
 }

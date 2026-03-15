@@ -200,5 +200,37 @@ export const id = {
   "System Controls": "Kontrol Sistem",
   "Repair All": "Perbaiki Semua",
   "Owned Trailers": "Daftar Trailer",
-  "Map": "Peta"
+  "Map": "Peta",
+  // Save Confirm Modal
+  "confirm.title": "Konfirmasi Simpan Perubahan",
+  "confirm.subtitle": "Perubahan berikut akan diterapkan ke save file Anda:",
+  "confirm.btnConfirm": "Ya, Simpan",
+  "confirm.btnCancel": "Batal",
+  "confirm.noChanges": "Tidak ada perubahan terdeteksi",
+  // Notifications
+  "notif.saveSuccess": "Save file berhasil diperbarui!",
+  "notif.undoDone": "Perubahan terakhir dibatalkan",
+  // Undo
+  "undo.btn": "Undo",
+  "undo.tooltip": "Batalkan perubahan terakhir (Ctrl+Z)",
+  // Change log entry labels
+  "change.moneyAdded": "Uang ditambahkan: +€{amount}",
+  "change.moneySet": "Uang diatur ke: €{amount}",
+  "change.xpAdded": "XP ditambahkan: +{amount}",
+  "change.xpSet": "XP diatur ke: {amount}",
+  "change.skillsMaxed": "Semua skill dimaksimalkan",
+  "change.loansCleared": "Pinjaman bank dihapus",
+  "change.truckRepairAll": "Semua truk diperbaiki",
+  "change.truckRefuelAll": "Semua truk diisi BBM",
+  "change.truckRepair": "Truk diperbaiki: {id}",
+  "change.truckRefuel": "Truk diisi BBM: {id}",
+  "change.trailerRepairAll": "Semua trailer diperbaiki",
+  "change.trailerRepair": "Trailer diperbaiki: {id}",
+  "change.garageChanged": "Garasi diperbarui: {city}",
+  "change.garageUnlockAll": "Semua garasi dibuka",
+  "change.mapDiscovered": "Penemuan peta dibuka",
+  "change.moneyValue": "Uang diubah: €{amount}",
+  "change.xpValue": "XP diubah: {amount}",
+  "change.skillChanged": "Skill diperbarui: {skill}",
+  "change.customField": "Field diubah: {field}",
 };
