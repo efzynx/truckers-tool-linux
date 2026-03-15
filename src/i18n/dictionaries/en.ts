@@ -199,5 +199,37 @@ export const en: TranslationDoc = {
   "System Controls": "System Controls",
   "Repair All": "Repair All",
   "Owned Trailers": "Owned Trailers",
-  "Map": "Map"
+  "Map": "Map",
+  // Save Confirm Modal
+  "confirm.title": "Confirm Save Changes",
+  "confirm.subtitle": "The following changes will be applied to your save file:",
+  "confirm.btnConfirm": "Yes, Save",
+  "confirm.btnCancel": "Cancel",
+  "confirm.noChanges": "No changes detected",
+  // Notifications
+  "notif.saveSuccess": "Save file updated successfully!",
+  "notif.undoDone": "Last change undone",
+  // Undo
+  "undo.btn": "Undo",
+  "undo.tooltip": "Undo last change (Ctrl+Z)",
+  // Change log entry labels
+  "change.moneyAdded": "Money added: +€{amount}",
+  "change.moneySet": "Money set to: €{amount}",
+  "change.xpAdded": "XP added: +{amount}",
+  "change.xpSet": "XP set to: {amount}",
+  "change.skillsMaxed": "All skills maxed out",
+  "change.loansCleared": "Bank loans cleared",
+  "change.truckRepairAll": "All trucks repaired",
+  "change.truckRefuelAll": "All trucks refueled",
+  "change.truckRepair": "Truck repaired: {id}",
+  "change.truckRefuel": "Truck refueled: {id}",
+  "change.trailerRepairAll": "All trailers repaired",
+  "change.trailerRepair": "Trailer repaired: {id}",
+  "change.garageChanged": "Garage updated: {city}",
+  "change.garageUnlockAll": "All garages unlocked",
+  "change.mapDiscovered": "Map discovery unlocked",
+  "change.moneyValue": "Money changed: €{amount}",
+  "change.xpValue": "XP changed: {amount}",
+  "change.skillChanged": "Skill updated: {skill}",
+  "change.customField": "Field changed: {field}",
 };

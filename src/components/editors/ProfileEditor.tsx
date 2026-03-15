@@ -6,8 +6,6 @@ interface ProfileEditorProps {
   data: GameData;
   onChange: (updates: Partial<GameData>) => void;
   onBack: () => void;
-  onSave: () => void;
-  saving: boolean;
   hasChanges: boolean;
   onClearLoans: () => void;
 }
@@ -28,7 +26,7 @@ const SET_PRESETS = [
   { label: '€50M', value: 50_000_000 },
 ];
 
-export default function ProfileEditor({ data, onChange, onBack, onSave, saving, hasChanges, onClearLoans }: ProfileEditorProps) {
+export default function ProfileEditor({ data, onChange, onBack, hasChanges, onClearLoans }: ProfileEditorProps) {
   const [moneyStr, setMoneyStr] = useState(data.money.toLocaleString());
   const [injectMode, setInjectMode] = useState<'add' | 'set'>('add');
   const [customAmount, setCustomAmount] = useState('');
@@ -328,21 +326,8 @@ export default function ProfileEditor({ data, onChange, onBack, onSave, saving, 
 
       </div>
 
-      {/* FAB Save */}
-      {hasChanges && (
-        <div className="fixed bottom-8 right-6 z-50 animate-slide-in-up">
-          <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50" />
-          <button
-            onClick={onSave}
-            disabled={saving}
-            className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer"
-          >
-            <span className={`material-symbols-outlined text-3xl transition-transform ${saving ? 'animate-spin' : 'group-hover:rotate-12'}`}>
-              {saving ? 'sync' : 'save'}
-            </span>
-          </button>
-        </div>
-      )}
+
+
 
       <div className="fixed bottom-0 left-0 w-full h-1/2 pointer-events-none z-0 opacity-10">
         <div className="w-full h-full bg-gradient-to-t from-primary/20 via-transparent to-transparent" />

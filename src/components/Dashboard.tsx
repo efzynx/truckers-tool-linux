@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { GameData } from '../types';
 import ProfileEditor from './editors/ProfileEditor';
 import UserEditor from './editors/UserEditor';
@@ -10,6 +10,8 @@ import MapEditor from './editors/MapEditor';
 import { useLanguage } from '../i18n/LanguageContext';
 import SupportModal from './SupportModal';
 import AboutModal from './AboutModal';
+import SaveConfirmModal from './SaveConfirmModal';
+import type { ChangeEntry } from './SaveConfirmModal';
 
 export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage' | 'driver' | 'trailer' | 'map';
 
@@ -61,6 +63,10 @@ function xpForLevel(level: number): number {
   return CUMULATIVE_XP_AT_30 + (level - 30) * XP_AFTER_30;
 }
 
+/** Unique ID generator for change entries */
+let _changeIdCounter = 0;
+function makeChangeId() { return `chg_${++_changeIdCounter}`; }
+
 export default function Dashboard({ data, onSave, onDownload, saving, downloading, onBack, profileId, uploadContext }: DashboardProps) {
   const [view, setView] = useState<DashboardView>('home');
   const [editableData, setEditableData] = useState<GameData>({ ...data });
@@ -68,6 +74,30 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const { t } = useLanguage();
+
+  // Change tracking
+  const [changeLog, setChangeLog] = useState<ChangeEntry[]>([]);
+
+  // Undo stack — each entry is a snapshot of [editableData, changeLog, action-states]
+  type UndoSnapshot = {
+    data: GameData;
+    changeLog: ChangeEntry[];
+    targetGarages: Record<string, number>;
+    truckRepairAll: boolean;
+    truckRefuelAll: boolean;
+    truckRepairIds: string[];
+    truckRefuelIds: string[];
+    trailerRepairAll: boolean;
+    trailerRepairIds: string[];
+    discoverMap: boolean;
+    clearLoans: boolean;
+  };
+  const undoStack = useRef<UndoSnapshot[]>([]);
+
+  // Modal & notification state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessNotif, setShowSuccessNotif] = useState(false);
+  const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Track individual garage upgrades
   const [targetGarages, setTargetGarages] = useState<Record<string, number>>({});
@@ -88,73 +118,120 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   // Track loan action
   const [clearLoans, setClearLoans] = useState(false);
 
+  // ─────────────────────────── Helpers ───────────────────────────
+  /** Simpan snapshot saat ini ke undo stack sebelum perubahan */
+  const pushUndo = useCallback(() => {
+    undoStack.current = [
+      ...undoStack.current.slice(-19), // Maks 20 level undo
+      {
+        data: JSON.parse(JSON.stringify(editableData)),
+        changeLog: [...changeLog],
+        targetGarages: { ...targetGarages },
+        truckRepairAll,
+        truckRefuelAll,
+        truckRepairIds: [...truckRepairIds],
+        truckRefuelIds: [...truckRefuelIds],
+        trailerRepairAll,
+        trailerRepairIds: [...trailerRepairIds],
+        discoverMap,
+        clearLoans,
+      },
+    ];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editableData, changeLog, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans]);
+
+  /** Tambah entry ke change log */
+  const addChange = useCallback((entry: Omit<ChangeEntry, 'id'>) => {
+    setChangeLog(prev => [...prev, { ...entry, id: makeChangeId() }]);
+  }, []);
+
   const handleClearLoans = () => {
+    pushUndo();
     setClearLoans(true);
     setEditableData(prev => ({ ...prev, loans: [] }));
+    addChange({ labelKey: 'change.loansCleared', icon: 'credit_card_off', color: 'text-red-400' });
     setHasChanges(true);
   };
 
-  // Quick stats
-  const level = useMemo(() => {
-    return xpToLevel(editableData.experiencePoints || 0);
-  }, [editableData.experiencePoints]);
-  const currentLevelXp = useMemo(() => xpForLevel(level), [level]);
-  const nextLevelXp = useMemo(() => xpForLevel(level + 1), [level]);
-  const progressPercent = useMemo(() => {
-    const range = nextLevelXp - currentLevelXp;
-    const current = (editableData.experiencePoints || 0) - currentLevelXp;
-    return Math.min(100, Math.max(0, (current / range) * 100));
-  }, [editableData.experiencePoints, level, currentLevelXp, nextLevelXp]);
-
+  // ─────────────────────────── Handlers ───────────────────────────
   const handleChange = (updates: Partial<GameData>) => {
+    pushUndo();
     setEditableData(prev => {
       const newData = { ...prev, ...updates };
       if (updates.skills) newData.skills = { ...prev.skills, ...updates.skills };
       return newData;
     });
+
+    // Log perubahan spesifik
+    if (updates.money !== undefined && updates.money !== editableData.money) {
+      const diff = updates.money - editableData.money;
+      if (diff > 0) {
+        addChange({ labelKey: 'change.moneyAdded', params: { amount: diff.toLocaleString() }, icon: 'payments', color: 'text-primary' });
+      } else {
+        addChange({ labelKey: 'change.moneyValue', params: { amount: updates.money.toLocaleString() }, icon: 'payments', color: 'text-primary' });
+      }
+    }
+    if (updates.experiencePoints !== undefined && updates.experiencePoints !== editableData.experiencePoints) {
+      const diff = updates.experiencePoints - editableData.experiencePoints;
+      if (diff > 0) {
+        addChange({ labelKey: 'change.xpAdded', params: { amount: diff.toLocaleString() }, icon: 'military_tech', color: 'text-blue-400' });
+      } else {
+        addChange({ labelKey: 'change.xpValue', params: { amount: updates.experiencePoints.toLocaleString() }, icon: 'military_tech', color: 'text-blue-400' });
+      }
+    }
+    if (updates.skills) {
+      const allMax = Object.values({ ...editableData.skills, ...updates.skills }).every(v => v >= 6);
+      if (allMax) {
+        addChange({ labelKey: 'change.skillsMaxed', icon: 'star', color: 'text-yellow-400' });
+      } else {
+        addChange({ labelKey: 'change.customField', params: { field: 'skills' }, icon: 'psychology', color: 'text-blue-400' });
+      }
+    }
+
     setHasChanges(true);
   };
-  
+
   const handleGarageChange = (cityId: string, status: number) => {
+    pushUndo();
     setTargetGarages(prev => ({ ...prev, [cityId]: status }));
+    addChange({ labelKey: 'change.garageChanged', params: { city: cityId }, icon: 'warehouse', color: 'text-emerald-400' });
     setHasChanges(true);
   };
-  
+
   const handleGarageReplaceAll = (newTargets: Record<string, number>) => {
+    pushUndo();
     setTargetGarages(newTargets);
+    addChange({ labelKey: 'change.garageUnlockAll', icon: 'warehouse', color: 'text-emerald-400' });
     setHasChanges(true);
   };
-  
+
   const handleTruckRepairAll = () => {
+    pushUndo();
     setTruckRepairAll(true);
-    // Also update local display data
     setEditableData(prev => ({
       ...prev,
       trucks: prev.trucks.map(tr => ({
         ...tr,
-        engineWear: 0,
-        transmissionWear: 0,
-        cabinWear: 0,
-        chassisWear: 0,
-        wheelsWear: 0,
+        engineWear: 0, transmissionWear: 0, cabinWear: 0, chassisWear: 0, wheelsWear: 0,
       }))
     }));
+    addChange({ labelKey: 'change.truckRepairAll', icon: 'build', color: 'text-orange-400' });
     setHasChanges(true);
   };
-  
+
   const handleTruckRefuelAll = () => {
+    pushUndo();
     setTruckRefuelAll(true);
     setEditableData(prev => ({
       ...prev,
-      trucks: prev.trucks.map(tr => ({
-        ...tr,
-        fuelRelative: 1,
-      }))
+      trucks: prev.trucks.map(tr => ({ ...tr, fuelRelative: 1 }))
     }));
+    addChange({ labelKey: 'change.truckRefuelAll', icon: 'local_gas_station', color: 'text-orange-400' });
     setHasChanges(true);
   };
 
   const handleTruckRepair = (truckId: string) => {
+    pushUndo();
     setTruckRepairIds(prev => prev.includes(truckId) ? prev : [...prev, truckId]);
     setEditableData(prev => ({
       ...prev,
@@ -163,46 +240,59 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
         engineWear: 0, transmissionWear: 0, cabinWear: 0, chassisWear: 0, wheelsWear: 0,
       } : tr)
     }));
+    addChange({ labelKey: 'change.truckRepair', params: { id: truckId.slice(-6) }, icon: 'build', color: 'text-orange-400' });
     setHasChanges(true);
   };
 
   const handleTruckRefuel = (truckId: string) => {
+    pushUndo();
     setTruckRefuelIds(prev => prev.includes(truckId) ? prev : [...prev, truckId]);
     setEditableData(prev => ({
       ...prev,
       trucks: prev.trucks.map(tr => tr.id === truckId ? { ...tr, fuelRelative: 1 } : tr)
     }));
+    addChange({ labelKey: 'change.truckRefuel', params: { id: truckId.slice(-6) }, icon: 'local_gas_station', color: 'text-orange-400' });
     setHasChanges(true);
   };
 
   const handleTrailerRepairAll = () => {
+    pushUndo();
     setTrailerRepairAll(true);
     setEditableData(prev => ({
       ...prev,
-      trailers: (prev.trailers || []).map(tr => ({
-        ...tr,
-        cargoDamage: 0,
-        bodyWear: 0,
-      }))
+      trailers: (prev.trailers || []).map(tr => ({ ...tr, cargoDamage: 0, bodyWear: 0 }))
     }));
+    addChange({ labelKey: 'change.trailerRepairAll', icon: 'build', color: 'text-violet-400' });
     setHasChanges(true);
   };
 
   const handleTrailerRepair = (trailerId: string) => {
+    pushUndo();
     setTrailerRepairIds(prev => prev.includes(trailerId) ? prev : [...prev, trailerId]);
     setEditableData(prev => ({
       ...prev,
       trailers: (prev.trailers || []).map(tr => tr.id === trailerId ? { ...tr, cargoDamage: 0, bodyWear: 0 } : tr)
     }));
+    addChange({ labelKey: 'change.trailerRepair', params: { id: trailerId.slice(-6) }, icon: 'build', color: 'text-violet-400' });
     setHasChanges(true);
   };
 
   const handleDiscoverMap = () => {
+    pushUndo();
     setDiscoverMap(true);
+    addChange({ labelKey: 'change.mapDiscovered', icon: 'map', color: 'text-cyan-400' });
     setHasChanges(true);
   };
 
-  const handleSave = () => {
+  // ─────────────── Save: dua tahap (konfirmasi → eksekusi) ───────────────
+  /** Buka modal konfirmasi */
+  const handleSaveClick = useCallback(() => {
+    if (!hasChanges || saving) return;
+    setShowConfirmModal(true);
+  }, [hasChanges, saving]);
+
+  /** Eksekusi simpan sesungguhnya setelah dikonfirmasi */
+  const handleConfirmSave = useCallback(() => {
     const payload = {
       ...editableData,
       targetGarages,
@@ -216,7 +306,10 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
       clearLoans,
     };
     onSave(payload);
+    setShowConfirmModal(false);
     setHasChanges(false);
+    setChangeLog([]);
+    undoStack.current = [];
     setTruckRepairAll(false);
     setTruckRefuelAll(false);
     setTruckRepairIds([]);
@@ -225,24 +318,71 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setTrailerRepairIds([]);
     setDiscoverMap(false);
     setClearLoans(false);
-  };
+    // Tampilkan notifikasi sukses
+    if (successTimer.current) clearTimeout(successTimer.current);
+    setShowSuccessNotif(true);
+    successTimer.current = setTimeout(() => setShowSuccessNotif(false), 3000);
+  }, [editableData, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, onSave]);
+
+  // ──────────────────────────── Undo ────────────────────────────
+  const handleUndo = useCallback(() => {
+    const stack = undoStack.current;
+    if (stack.length === 0) return;
+    const prev = stack[stack.length - 1];
+    undoStack.current = stack.slice(0, -1);
+    setEditableData(prev.data);
+    setChangeLog(prev.changeLog);
+    setTargetGarages(prev.targetGarages);
+    setTruckRepairAll(prev.truckRepairAll);
+    setTruckRefuelAll(prev.truckRefuelAll);
+    setTruckRepairIds(prev.truckRepairIds);
+    setTruckRefuelIds(prev.truckRefuelIds);
+    setTrailerRepairAll(prev.trailerRepairAll);
+    setTrailerRepairIds(prev.trailerRepairIds);
+    setDiscoverMap(prev.discoverMap);
+    setClearLoans(prev.clearLoans);
+    setHasChanges(prev.changeLog.length > 0 || Object.keys(prev.targetGarages).length > 0);
+  }, []);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => { if (successTimer.current) clearTimeout(successTimer.current); };
+  }, []);
+
+  // Quick stats
+  const level = useMemo(() => {
+    return xpToLevel(editableData.experiencePoints || 0);
+  }, [editableData.experiencePoints]);
+  const currentLevelXp = useMemo(() => xpForLevel(level), [level]);
+  const nextLevelXp = useMemo(() => xpForLevel(level + 1), [level]);
+  const progressPercent = useMemo(() => {
+    const range = nextLevelXp - currentLevelXp;
+    const current = (editableData.experiencePoints || 0) - currentLevelXp;
+    return Math.min(100, Math.max(0, (current / range) * 100));
+  }, [editableData.experiencePoints, level, currentLevelXp, nextLevelXp]);
 
   const handleDownload = () => {
     onDownload(editableData);
   };
 
-  // Keyboard shortcut: Ctrl+S / Cmd+S to save
+  // Keyboard shortcut: Ctrl+S → buka konfirmasi, Ctrl+Z → undo
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      if (hasChanges && !saving) handleSave();
+      handleSaveClick();
     }
-  }, [hasChanges, saving, handleSave]);
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      e.preventDefault();
+      handleUndo();
+    }
+  }, [handleSaveClick, handleUndo]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+
 
   // --- Global Dashboard Layout ---
   return (
@@ -544,8 +684,6 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                data={editableData} 
                onChange={handleChange} 
                onBack={() => setView('home')} 
-               onSave={handleSave}
-               saving={saving}
                hasChanges={hasChanges}
                onClearLoans={handleClearLoans}
              />
@@ -555,8 +693,6 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                data={editableData} 
                onChange={handleChange} 
                onBack={() => setView('home')} 
-               onSave={handleSave}
-               saving={saving}
                hasChanges={hasChanges}
              />
           )}
@@ -580,16 +716,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                    onReplaceTargets={handleGarageReplaceAll}
                  />
                </div>
-               {hasChanges && (
-                 <div className="fixed bottom-8 right-6 z-50">
-                    <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
-                    <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer">
-                      <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
-                        {saving ? 'sync' : 'save'}
-                      </span>
-                    </button>
-                 </div>
-               )}
+
              </div>
           )}
           {view === 'truck' && (
@@ -612,25 +739,13 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                    onRefuelTruck={handleTruckRefuel}
                  />
                </div>
-               {hasChanges && (
-                 <div className="fixed bottom-8 right-6 z-50">
-                    <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
-                    <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer">
-                      <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
-                        {saving ? 'sync' : 'save'}
-                      </span>
-                    </button>
-                 </div>
-               )}
+
              </div>
           )}
           {view === 'driver' && (
             <DriverEditor
               data={editableData}
               onBack={() => setView('home')}
-              onSave={handleSave}
-              saving={saving}
-              hasChanges={hasChanges}
             />
           )}
         </main>
@@ -715,16 +830,6 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                onRepairTrailer={handleTrailerRepair}
              />
            </div>
-           {hasChanges && (
-             <div className="fixed bottom-8 right-6 md:right-10 z-50">
-                <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
-                <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer">
-                  <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
-                    {saving ? 'sync' : 'save'}
-                  </span>
-                </button>
-             </div>
-           )}
          </div>
       )}
 
@@ -745,21 +850,70 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                onDiscoverMap={handleDiscoverMap}
              />
            </div>
-           {hasChanges && (
-             <div className="fixed bottom-8 right-6 md:right-10 z-50">
-                <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
-                <button onClick={handleSave} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer">
-                  <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
-                    {saving ? 'sync' : 'save'}
-                  </span>
-                </button>
-             </div>
-           )}
          </div>
       )}
 
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
       {isAboutOpen && <AboutModal onClose={() => setIsAboutOpen(false)} />}
+
+      {/* Save Confirmation Modal */}
+      <SaveConfirmModal
+        isOpen={showConfirmModal}
+        changeLog={changeLog}
+        onConfirm={handleConfirmSave}
+        onCancel={() => setShowConfirmModal(false)}
+        saving={saving}
+      />
+
+      {/* Success Toast Notification */}
+      <div
+        className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[9998] transition-all duration-500 ${
+          showSuccessNotif
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
+        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md shadow-xl">
+          <span className="material-symbols-outlined text-emerald-400 text-xl">check_circle</span>
+          <span className="text-sm font-display font-bold text-emerald-300 uppercase tracking-wider">
+            {t('notif.saveSuccess')}
+          </span>
+        </div>
+      </div>
+
+      {/* Floating Action Group: Undo + Save — kanan bawah */}
+      {hasChanges && (
+        <div className="fixed bottom-8 right-6 md:right-10 z-50 flex flex-col items-center gap-3">
+          {/* Undo Button — di atas tombol Save, lingkaran kecil */}
+          {undoStack.current.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={handleUndo}
+                title={t('undo.tooltip') as string}
+                className="relative flex items-center justify-center w-12 h-12 bg-surface border border-white/10 text-text-muted hover:text-white hover:border-white/30 hover:bg-white/5 rounded-full backdrop-blur-md transition-all active:scale-95 cursor-pointer shadow-lg"
+              >
+                <span className="material-symbols-outlined text-[22px]">undo</span>
+                {undoStack.current.length > 1 && (
+                  <span className="absolute -top-1 -right-1 text-[9px] font-mono font-bold bg-white/20 text-white rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                    {undoStack.current.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Save Button */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary rounded-full blur animate-pulse opacity-50"></div>
+            <button onClick={handleSaveClick} disabled={saving} className="relative flex items-center justify-center w-16 h-16 bg-primary text-black rounded-full shadow-neon hover:shadow-neon-intense hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer">
+              <span className={`material-symbols-outlined text-3xl ${saving ? 'animate-spin' : 'group-hover:rotate-12 transition-transform'}`}>
+                {saving ? 'sync' : 'save'}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
