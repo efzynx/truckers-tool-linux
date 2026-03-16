@@ -4,7 +4,7 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 
 [🇮🇩 Baca dalam Bahasa Indonesia (Read in Indonesian)](README-ID.md)
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
 
 ## ✨ Features
 
@@ -246,7 +246,7 @@ Truckers Tool Linux is free and open-source. If you find it useful, consider sup
 ## 📝 License
 
 
-MIT — feel free to use and modify.
+GNU GPLv3 — feel free to use and modify.
 
 ## 🙏 Credits
 

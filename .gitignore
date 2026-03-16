@@ -49,3 +49,6 @@ settings.yml
 desain/
 backend/
 release/
+
+# AI
+.agents/
