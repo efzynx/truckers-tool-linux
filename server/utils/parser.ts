@@ -589,7 +589,8 @@ export function applyUpdates(
 
   const hasAnyTruckAction = updates.truckRepairAll || updates.truckRefuelAll ||
     (updates.truckRepairIds && updates.truckRepairIds.length > 0) ||
-    (updates.truckRefuelIds && updates.truckRefuelIds.length > 0);
+    (updates.truckRefuelIds && updates.truckRefuelIds.length > 0) ||
+    (updates.customLicensePlates && updates.customLicensePlates.length > 0);
 
   // Pre-scan: collect player truck IDs if needed
   const playerTruckIds = new Set<string>();
