@@ -54,6 +54,9 @@ router.post('/save', async (req, res) => {
         trailerRepairAll?: boolean;
         trailerRepairIds?: string[];
         discoverMap?: boolean;
+        clearLoans?: boolean;
+        economyReset?: boolean;
+        customLicensePlates?: { id: string; plate: string }[];
       };
     };
 
@@ -105,6 +108,9 @@ router.post('/download-save', async (req, res) => {
         trailerRepairAll?: boolean;
         trailerRepairIds?: string[];
         discoverMap?: boolean;
+        clearLoans?: boolean;
+        economyReset?: boolean;
+        customLicensePlates?: { id: string; plate: string }[];
       };
     };
 

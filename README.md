@@ -17,6 +17,8 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 - 📥 **Download Edited File** — Download the edited file to place it back into your save game folder
 - ✏️ **Profile Editor** — Edit money, experience points, and skill levels
 - 🚚 **Trailer Editor** — View and repair all owned trailers (cargo damage & body wear)
+- 🔄 **Economy Reset** — Refresh the Freight Market job list instantly to fix "no jobs available" issues
+- 📝 **Custom License Plates** — Personalize your trucks with direct input for custom license plates
 - 🗺️ **Map Discovery Editor** — Unlock all visited cities on the map
 - 💾 **Save Confirmation Modal** — Review all pending changes before writing to save file
 - ↩️ **Undo History** — Up to 20 levels of undo (`Ctrl+Z`)

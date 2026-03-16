@@ -580,6 +580,8 @@ export function applyUpdates(
     trailerRepairIds?: string[];
     discoverMap?: boolean;
     clearLoans?: boolean;
+    economyReset?: boolean;
+    customLicensePlates?: { id: string; plate: string }[];
   }
 ): string {
   const lines = content.split('\n');
@@ -606,10 +608,16 @@ export function applyUpdates(
     }
   }
 
-  // Build per-truck and per-trailer repair/refuel sets
+  // Build per-truck and per-trailer repair/refuel/plate sets
   const repairIds = new Set<string>(updates.truckRepairIds || []);
   const refuelIds = new Set<string>(updates.truckRefuelIds || []);
   const trailerRepairIds = new Set<string>(updates.trailerRepairIds || []);
+  const customPlatesMap = new Map<string, string>();
+  if (updates.customLicensePlates) {
+    for (const cp of updates.customLicensePlates) {
+      customPlatesMap.set(cp.id, cp.plate);
+    }
+  }
 
   const hasAnyTrailerAction = updates.trailerRepairAll || trailerRepairIds.size > 0;
 
@@ -769,6 +777,18 @@ export function applyUpdates(
       }
     }
 
+    // Economy: Economy Reset via game_time & Map area
+    if (blockType === 'economy' && updates.economyReset) {
+      if (trimmed.startsWith('game_time:')) {
+        const val = parseInt(trimmed.split(':')[1].trim(), 10);
+        if (!isNaN(val)) {
+          // Add 5000 mins (~3.5 days) to expire jobs
+          result.push(line.replace(/game_time:\s*\d+/, `game_time: ${val + 5000}`));
+          continue;
+        }
+      }
+    }
+
     // Economy: Map Discovery
     if (blockType === 'economy' && updates.discoverMap) {
       if (trimmed.startsWith('visited_cities:') && !trimmed.startsWith('visited_cities[')) {
@@ -840,10 +860,11 @@ export function applyUpdates(
       if (handled) continue;
     }
 
-    // Vehicle: repair & refuel (global or per-truck)
+    // Vehicle: repair & refuel (global or per-truck) & custom plate
     if (blockType === 'vehicle' && playerTruckIds.has(blockId)) {
       const shouldRepair = updates.truckRepairAll || repairIds.has(blockId);
       const shouldRefuel = updates.truckRefuelAll || refuelIds.has(blockId);
+      const newCustomPlate = customPlatesMap.get(blockId);
 
       if (shouldRepair) {
         const wearFields = ['engine_wear:', 'transmission_wear:', 'cabin_wear:', 'chassis_wear:',
@@ -863,6 +884,12 @@ export function applyUpdates(
       if (shouldRefuel && trimmed.startsWith('fuel_relative:')) {
         const colonPos = line.indexOf(':');
         result.push(line.substring(0, colonPos + 1) + ' 1');
+        continue;
+      }
+      if (newCustomPlate && trimmed.startsWith('license_plate:')) {
+        const prevCountryMatch = trimmed.match(/\|([^"]+)"/);
+        const country = prevCountryMatch ? prevCountryMatch[1] : 'germany';
+        result.push(` license_plate: "${newCustomPlate}|${country}"`);
         continue;
       }
     }

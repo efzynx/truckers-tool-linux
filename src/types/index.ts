@@ -151,6 +151,8 @@ export interface SaveRequest {
     trailerRepairIds?: string[];
     discoverMap?: boolean;
     clearLoans?: boolean;
+    economyReset?: boolean;
+    customLicensePlates?: { id: string; plate: string }[];
   };
 }
 

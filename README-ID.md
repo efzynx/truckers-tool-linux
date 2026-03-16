@@ -15,6 +15,8 @@ Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Tr
 - 📥 **Unduh Hasil Edit** — Download file hasil edit (`game.sii`) untuk ditaruh kembali ke folder permainan
 - ✏️ **Editor Terpadu** — Mengedit jumlah uang, experience point (XP), status pekerjaan, dan garasi secara bebas
 - 🚚 **Editor Trailer** — Tampilkan dan perbaiki semua trailer milik pemain (kerusakan muatan & badan trailer)
+- 🔄 **Reset Ekonomi** — Segarkan daftar pekerjaan Freight Market seketika untuk mengatasi bug "tidak ada pekerjaan"
+- 📝 **Pelat Nomor Kustom** — Personalisasi truk Anda dengan input pelat nomor kustom secara langsung
 - 🗺️ **Editor Peta** — Buka kunci semua kota yang pernah dikunjungi di peta
 - 💾 **Modal Konfirmasi Simpan** — Tinjau semua perubahan sebelum data ditulis ke save file
 - ↩️ **Riwayat Undo** — Hingga 20 level undo (`Ctrl+Z`)

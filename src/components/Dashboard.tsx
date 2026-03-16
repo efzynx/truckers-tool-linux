@@ -91,6 +91,8 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     trailerRepairIds: string[];
     discoverMap: boolean;
     clearLoans: boolean;
+    economyReset: boolean;
+    customLicensePlates: { id: string; plate: string }[];
   };
   const undoStack = useRef<UndoSnapshot[]>([]);
 
@@ -118,6 +120,12 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   // Track loan action
   const [clearLoans, setClearLoans] = useState(false);
 
+  // Track economy reset
+  const [economyReset, setEconomyReset] = useState(false);
+
+  // Track custom license plates
+  const [customLicensePlates, setCustomLicensePlates] = useState<{ id: string; plate: string }[]>([]);
+
   // ─────────────────────────── Helpers ───────────────────────────
   /** Simpan snapshot saat ini ke undo stack sebelum perubahan */
   const pushUndo = useCallback(() => {
@@ -135,10 +143,12 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
         trailerRepairIds: [...trailerRepairIds],
         discoverMap,
         clearLoans,
+        economyReset,
+        customLicensePlates: [...customLicensePlates],
       },
     ];
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editableData, changeLog, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans]);
+  }, [editableData, changeLog, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, customLicensePlates]);
 
   /** Tambah entry ke change log */
   const addChange = useCallback((entry: Omit<ChangeEntry, 'id'>) => {
@@ -150,6 +160,13 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setClearLoans(true);
     setEditableData(prev => ({ ...prev, loans: [] }));
     addChange({ labelKey: 'change.loansCleared', icon: 'credit_card_off', color: 'text-red-400' });
+    setHasChanges(true);
+  };
+
+  const handleEconomyReset = () => {
+    pushUndo();
+    setEconomyReset(true);
+    addChange({ labelKey: 'Economy Reset', icon: 'currency_exchange', color: 'text-amber-400' });
     setHasChanges(true);
   };
 
@@ -255,6 +272,21 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setHasChanges(true);
   };
 
+  const handleCustomPlate = (truckId: string, plate: string) => {
+    pushUndo();
+    setCustomLicensePlates(prev => {
+      const existing = prev.filter(p => p.id !== truckId);
+      return [...existing, { id: truckId, plate }];
+    });
+    setEditableData(prev => ({
+      ...prev,
+      // Update UI optimistically, wait for re-parsing for full country
+      trucks: prev.trucks.map(tr => tr.id === truckId ? { ...tr, licensePlate: `${plate}|---` } : tr)
+    }));
+    addChange({ labelKey: 'Custom Plate', params: { id: truckId.slice(-6), plate }, icon: 'directions_car', color: 'text-indigo-400' });
+    setHasChanges(true);
+  };
+
   const handleTrailerRepairAll = () => {
     pushUndo();
     setTrailerRepairAll(true);
@@ -304,6 +336,8 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
       trailerRepairIds,
       discoverMap,
       clearLoans,
+      economyReset,
+      customLicensePlates,
     };
     onSave(payload);
     setShowConfirmModal(false);
@@ -318,11 +352,13 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setTrailerRepairIds([]);
     setDiscoverMap(false);
     setClearLoans(false);
+    setEconomyReset(false);
+    setCustomLicensePlates([]);
     // Tampilkan notifikasi sukses
     if (successTimer.current) clearTimeout(successTimer.current);
     setShowSuccessNotif(true);
     successTimer.current = setTimeout(() => setShowSuccessNotif(false), 3000);
-  }, [editableData, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, onSave]);
+  }, [editableData, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, customLicensePlates, onSave]);
 
   // ──────────────────────────── Undo ────────────────────────────
   const handleUndo = useCallback(() => {
@@ -341,6 +377,8 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setTrailerRepairIds(prev.trailerRepairIds);
     setDiscoverMap(prev.discoverMap);
     setClearLoans(prev.clearLoans);
+    setEconomyReset(prev.economyReset);
+    setCustomLicensePlates(prev.customLicensePlates);
     setHasChanges(prev.changeLog.length > 0 || Object.keys(prev.targetGarages).length > 0);
   }, []);
 
@@ -628,6 +666,17 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               </div>
             </button>
 
+            <button onClick={handleEconomyReset} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-amber-400/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer">
+              <div className="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
+              <div className="size-12 shrink-0 rounded-full bg-background-dark border border-white/10 flex items-center justify-center shadow-inner group-hover:border-amber-500/50 group-hover:shadow-[0_0_8px_rgba(245,158,11,0.6)] transition-all duration-300">
+                <span className="material-symbols-outlined text-2xl text-text-main group-hover:text-amber-400 transition-colors">currency_exchange</span>
+              </div>
+              <div className="flex flex-col items-start z-10 text-left">
+                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">ECONOMY RESET</span>
+                <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-amber-400/80 transition-colors">Refresh Job Market</span>
+              </div>
+            </button>
+
             {/* Download Button */}
             <button onClick={handleDownload} disabled={downloading} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-emerald-400/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer sm:col-span-2 disabled:opacity-50 disabled:cursor-not-allowed">
               <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
@@ -737,6 +786,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                    onRefuelAll={handleTruckRefuelAll}
                    onRepairTruck={handleTruckRepair}
                    onRefuelTruck={handleTruckRefuel}
+                   onCustomPlate={handleCustomPlate}
                  />
                </div>
 

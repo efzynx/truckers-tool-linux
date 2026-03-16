@@ -31,11 +31,13 @@ interface TruckEditorProps {
   onRefuelAll: () => void;
   onRepairTruck: (truckId: string) => void;
   onRefuelTruck: (truckId: string) => void;
+  onCustomPlate: (truckId: string, plate: string) => void;
 }
 
-export default function TruckEditor({ trucks, onRepairAll, onRefuelAll, onRepairTruck, onRefuelTruck }: TruckEditorProps) {
+export default function TruckEditor({ trucks, onRepairAll, onRefuelAll, onRepairTruck, onRefuelTruck, onCustomPlate }: TruckEditorProps) {
   const { t } = useLanguage();
   const [expandedTruck, setExpandedTruck] = useState<string | null>(null);
+  const [plateInputs, setPlateInputs] = useState<Record<string, string>>({});
 
   // Sort: player's current truck first, then by brand
   const sortedTrucks = useMemo(() => {
@@ -250,6 +252,40 @@ export default function TruckEditor({ trucks, onRepairAll, onRefuelAll, onRepair
                           })}
                         </div>
                       </div>
+
+                      {/* Custom License Plate Section */}
+                      {truck.isPlayerTruck && (
+                        <div className="mb-4 pt-3 border-t border-white/5">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-sm text-text-muted/80">directions_car</span>
+                              <span className="text-[10px] font-display font-bold uppercase tracking-widest text-text-muted/80">Custom Plate</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={plateInputs[truck.id] ?? ''}
+                              onChange={(e) => setPlateInputs({ ...plateInputs, [truck.id]: e.target.value.toUpperCase() })}
+                              placeholder={truck.licensePlate?.split('|')[0] || 'NEW PLATE'}
+                              maxLength={8}
+                              className="flex-1 bg-background-dark/80 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white placeholder-text-muted/50 focus:outline-none focus:border-primary/50 transition-colors uppercase tracking-widest"
+                            />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const val = plateInputs[truck.id];
+                                if (val) onCustomPlate(truck.id, val.trim());
+                                setPlateInputs({ ...plateInputs, [truck.id]: '' });
+                              }}
+                              disabled={!plateInputs[truck.id]}
+                              className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/50 rounded-lg px-3 py-2 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-sm">save</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Per-Truck Action Buttons */}
                       <div className="grid grid-cols-2 gap-2">
