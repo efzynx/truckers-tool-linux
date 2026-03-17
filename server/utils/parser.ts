@@ -120,6 +120,14 @@ const TRACKED_TYPES = new Set(['bank', 'economy', 'player', 'garage', 'vehicle',
  * Parse the decrypted game.sii content using single-pass line scanning.
  */
 export function parseGameData(content: string): ParsedGameData {
+  // ---- INTEGRITY CHECK START ----
+  const structuralCheck = validateSiiStructure(content);
+  if (!structuralCheck.valid) {
+    console.error('PARSE INTEGRITY ERROR:', structuralCheck.error);
+    throw new Error(`File save rusak: ${structuralCheck.error}`);
+  }
+  // ---- INTEGRITY CHECK END ----
+
   const lines = content.split('\n');
 
   let money = 0;
@@ -619,6 +627,35 @@ export function parseGameData(content: string): ParsedGameData {
 }
 
 /**
+ * Validates the basic structural integrity of an SII file content.
+ */
+export function validateSiiStructure(content: string): { valid: boolean; error?: string } {
+  let openBraces = 0;
+  let closeBraces = 0;
+  
+  // Quick count using regex is faster for large files
+  const openMatches = content.match(/\{/g);
+  const closeMatches = content.match(/\}/g);
+  
+  openBraces = openMatches ? openMatches.length : 0;
+  closeBraces = closeMatches ? closeMatches.length : 0;
+
+  if (openBraces !== closeBraces) {
+    return { 
+      valid: false, 
+      error: `Mismatched braces: found ${openBraces} '{' and ${closeBraces} '}'. Structure is corrupted.` 
+    };
+  }
+
+  // Check if it starts with the expected header (SiiNunit)
+  if (!content.trimStart().startsWith('SiiNunit')) {
+    return { valid: false, error: 'Invalid SII header: Missing SiiNunit declaration.' };
+  }
+
+  return { valid: true };
+}
+
+/**
  * Apply updates to the game.sii content using single-pass line scanning.
  */
 export function applyUpdates(
@@ -1002,5 +1039,29 @@ export function applyUpdates(
     result.push(line);
   }
 
-  return result.join('\n');
+  const updatedContent = result.join('\n');
+
+  // ---- INTEGRITY CHECK START ----
+  
+  // 1. Basic Structure Validation (Braces)
+  const structuralCheck = validateSiiStructure(updatedContent);
+  if (!structuralCheck.valid) {
+    console.error('INTEGRITY ERROR:', structuralCheck.error);
+    throw new Error(structuralCheck.error);
+  }
+
+  // 2. Dry Run Re-Parsing
+  // We try to parse the updated content. If our own parser fails, 
+  // it means we produced something that violates the expected format.
+  try {
+    parseGameData(updatedContent);
+  } catch (err) {
+    console.error('DRY-RUN PARSE ERROR:', err);
+    throw new Error('Integritas data gagal: Hasil modifikasi tidak dapat diproses ulang oleh parser. Simpan dibatalkan.');
+  }
+
+  // ---- INTEGRITY CHECK END ----
+
+  return updatedContent;
 }
+

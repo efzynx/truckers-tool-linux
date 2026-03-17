@@ -17,6 +17,7 @@ function App() {
   const [step, setStep] = useState<AppStep>('welcome');
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [lastProfilesPath, setLastProfilesPath] = useState<string>('');
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [saves, setSaves] = useState<Save[]>([]);
   const [selectedSave, setSelectedSave] = useState<Save | null>(null);
@@ -49,6 +50,7 @@ function App() {
   const handleScanProfiles = useCallback(async (path: string) => {
     setScanLoading(true);
     setScanError(null);
+    setLastProfilesPath(path);
     try {
       const result = await scanProfiles(path);
       if (result.success) {
@@ -63,6 +65,18 @@ function App() {
       setScanLoading(false);
     }
   }, []);
+
+  const refreshProfiles = useCallback(async () => {
+    if (!lastProfilesPath) return;
+    try {
+      const result = await scanProfiles(lastProfilesPath);
+      if (result.success) {
+        setProfiles(result.profiles);
+      }
+    } catch (err) {
+      console.error('Failed to refresh profiles', err);
+    }
+  }, [lastProfilesPath]);
 
   const handleProfileSelect = useCallback(async (profile: Profile) => {
     setSelectedProfile(profile);
@@ -315,6 +329,7 @@ function App() {
           onSelect={handleProfileSelect}
           onBack={() => setStep('path-input')}
           loading={backupLoading}
+          onRefresh={refreshProfiles}
         />
       );
 

@@ -2,7 +2,7 @@
 
 Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Truck Simulator** di Linux. Edit data profil Anda (uang, XP, skill) langsung dari browser — tanpa perlu alat pihak ketiga dari Windows.
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.3--alpha.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.3--alpha.3-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
 
 ## ✨ Fitur
 
@@ -10,6 +10,8 @@ Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Tr
 - 📂 **Pemindai Profil** — Mendeteksi profil otomatis dari path native Linux atau dari environment instalasi Wine/Proton
 - 📤 **Dukungan Upload** — Upload file `.sii` atau `.zip` langsung via browser (tanpa perlu install lokal)
 - 🔓 **Dekripsi Otomatis** — Mendekripsi file save binary SCS secara otomatis (on-the-fly) tanpa software luar
+- 🛡️ **Integritas Data** — Sistem pengecekan "Triple-Check" untuk memastikan struktur file SII (`{ }`) dan header tetap valid sebelum disimpan guna mencegah file korup.
+- ⏪ **Pemulihan Profil Canggih** — Fitur Restore yang powerful dengan pemilih slot save manual, perbandingan statistik detail (Diff), dan opsi pemulihan granular (per-slot) atau profil penuh.
 - 📊 **Dasbor Pintar** — Menampilkan ringkasan profil dengan lengkap: level, XP, uang, dan skill
 - ⚡ **Aksi Cepat** — Tombol instan kontrol sistem seperti Inject €50k, Lunasi Hutang Bank, Tambah 10.000 XP, dan Maksimalkan Semua Skill
 - 📥 **Unduh Hasil Edit** — Download file hasil edit (`game.sii`) untuk ditaruh kembali ke folder permainan

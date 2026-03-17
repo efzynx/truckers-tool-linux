@@ -27,6 +27,33 @@ export async function backupProfile(profilePath: string) {
   return res.json();
 }
 
+export async function compareBackup(profilePath: string, currentSaveName?: string, backupSaveName?: string) {
+  const res = await fetch(`${API_BASE}/compare-backup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profilePath, currentSaveName, backupSaveName }),
+  });
+  return res.json();
+}
+
+export async function restoreSaveGranular(profilePath: string, activeSaveName: string, backupSaveName: string) {
+  const res = await fetch(`${API_BASE}/restore-save-granular`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profilePath, activeSaveName, backupSaveName }),
+  });
+  return res.json();
+}
+
+export async function restoreProfile(profilePath: string) {
+  const res = await fetch(`${API_BASE}/restore-profile`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profilePath }),
+  });
+  return res.json();
+}
+
 export async function scanSaves(profilePath: string) {
   const res = await fetch(`${API_BASE}/scan-saves`, {
     method: 'POST',

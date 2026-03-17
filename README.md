@@ -4,7 +4,7 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 
 [🇮🇩 Baca dalam Bahasa Indonesia (Read in Indonesian)](README-ID.md)
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.3--alpha.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.3--alpha.3-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
 
 ## ✨ Features
 
@@ -12,6 +12,8 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 - 📂 **Profile Scanner** — Auto-detect profiles from native or Wine/Proton paths
 - 📤 **Upload Support** — Upload `.sii` or `.zip` files directly via browser (no local install required)
 - 🔓 **Auto Decrypt** — Decrypt SCS binary save files on-the-fly
+- 🛡️ **Data Integrity** — "Triple-Check" validation system ensuring SII file structure (`{ }`) and headers remain valid before saving to prevent corruption.
+- ⏪ **Advanced Profile Restore** — Powerful restore functionality with manual save slot selector, detailed statistics comparison (Diff), and granular (per-slot) or full profile restore options.
 - 📊 **Dashboard** — View profile overview: level, XP, money, skills
 - ⚡ **Quick Actions** — Fast actions like Inject €50k, Clear Debt, Add 10K XP
 - 📥 **Download Edited File** — Download the edited file to place it back into your save game folder
