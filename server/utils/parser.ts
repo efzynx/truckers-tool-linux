@@ -14,6 +14,18 @@ export interface ParsedGarageData {
   trucks: string[];
 }
 
+export interface ParsedJobData {
+  id: string;
+  cargo: string;
+  sourceCompany: string;
+  targetCompany: string;
+  cargoModelIndex: number;
+  isCargoMarketJob: boolean;
+  startTime: number;
+  plannedDistanceKm: number;
+  urgency: number;
+}
+
 export interface ParsedTruckData {
   id: string;
   brand: string;
@@ -59,6 +71,7 @@ export interface ParsedGameData {
     urgent: number;
     mechanical: number;
   };
+  currentJob: ParsedJobData | null;
   garages: ParsedGarageData[];
   trucks: ParsedTruckData[];
   trailers: ParsedTrailerData[];
@@ -101,7 +114,7 @@ function parseHexFloat(val: string): number {
 }
 
 // Targeted block types we care about
-const TRACKED_TYPES = new Set(['bank', 'economy', 'player', 'garage', 'vehicle', 'vehicle_accessory', 'driver_ai', 'bank_loan', 'trailer']);
+const TRACKED_TYPES = new Set(['bank', 'economy', 'player', 'garage', 'vehicle', 'vehicle_accessory', 'driver_ai', 'bank_loan', 'trailer', 'job_info', 'player_job']);
 
 /**
  * Parse the decrypted game.sii content using single-pass line scanning.
@@ -118,6 +131,11 @@ export function parseGameData(content: string): ParsedGameData {
   const loans: ParsedLoanData[] = [];
   const loanMap = new Map<string, ParsedLoanData>();    // _nameless -> loan data
   const bankLoanIds = new Set<string>();                // loan IDs from bank block
+
+  let gameTime = 0; // Capture game_time from economy
+  let currentJobId = '';
+  let parsedCurrentJob: ParsedJobData | null = null;
+  const jobInfoMap = new Map<string, ParsedJobData>(); // job_info._nameless -> job data
 
   // Player data
   let myTruckId = '';
@@ -234,6 +252,19 @@ export function parseGameData(content: string): ParsedGameData {
               sourceGarage: null
             });
           }
+          if (type === 'job_info' || type === 'player_job') {
+            jobInfoMap.set(blockId, {
+              id: blockId,
+              cargo: '',
+              sourceCompany: '',
+              targetCompany: '',
+              cargoModelIndex: 0,
+              isCargoMarketJob: false,
+              startTime: 0,
+              plannedDistanceKm: 0,
+              urgency: 0
+            });
+          }
           if (type === 'vehicle') {
             curVehicle = {
               id: blockId,
@@ -274,10 +305,7 @@ export function parseGameData(content: string): ParsedGameData {
       if (loanMatch && loanMatch[1] !== 'null') {
         bankLoanIds.add(loanMatch[1]);
       }
-    }
-
-    // ---- Bank Loan ----
-    if (blockType === 'bank_loan' && curLoan) {
+    } else if (blockType === 'bank_loan' && curLoan) {
       if (trimmed.startsWith('amount:')) {
         curLoan.amount = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
       }
@@ -290,12 +318,11 @@ export function parseGameData(content: string): ParsedGameData {
       if (trimmed.startsWith('duration:')) {
         curLoan.duration = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
       }
-    }
-
-    // ---- Economy ----
-    if (blockType === 'economy') {
+    } else if (blockType === 'economy') {
       if (trimmed.startsWith('experience_points:')) {
         experiencePoints = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+      } else if (trimmed.startsWith('game_time:')) {
+        gameTime = parseInt(trimmed.split(':')[1].trim(), 10);
       }
       for (const key of ['adr', 'long_dist', 'heavy', 'fragile', 'urgent', 'mechanical'] as const) {
         if (trimmed.startsWith(key + ':') && !trimmed.startsWith(key + '[')) {
@@ -312,10 +339,11 @@ export function parseGameData(content: string): ParsedGameData {
       if (trimmed.startsWith('unlocked_recruitments:') && !trimmed.startsWith('unlocked_recruitments[')) {
         unlockedRecruitmentsCount = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
       }
-    }
-
-    // ---- Player ----
-    if (blockType === 'player') {
+    } else if (blockType === 'player') {
+      if (trimmed.startsWith('current_job:')) {
+        const jId = trimmed.split(':')[1].trim();
+        if (jId !== 'null') currentJobId = jId;
+      }
       if (trimmed.startsWith('my_truck:')) {
         myTruckId = trimmed.split(':')[1].trim();
       }
@@ -480,7 +508,38 @@ export function parseGameData(content: string): ParsedGameData {
         curDriver.assignedTruck = trimmed.split(':')[1].trim();
       }
     }
-  }
+
+    // ---- job_info / player_job (keduanya format sama) ----
+    if ((blockType === 'job_info' || blockType === 'player_job')) {
+      const j = jobInfoMap.get(blockId);
+      if (j) {
+        if (trimmed.startsWith('cargo:')) {
+          j.cargo = trimmed.split(':')[1].trim();
+        }
+        if (trimmed.startsWith('source_company:')) {
+          j.sourceCompany = trimmed.split(':')[1].trim();
+        }
+        if (trimmed.startsWith('target_company:')) {
+          j.targetCompany = trimmed.split(':')[1].trim();
+        }
+        if (trimmed.startsWith('cargo_model_index:')) {
+          j.cargoModelIndex = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+        }
+        if (trimmed.startsWith('is_cargo_market_job:')) {
+          j.isCargoMarketJob = trimmed.split(':')[1].trim() === 'true';
+        }
+        if (trimmed.startsWith('start_time:')) {
+          j.startTime = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+        }
+        if (trimmed.startsWith('planned_distance_km:')) {
+          j.plannedDistanceKm = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+        }
+        if (trimmed.startsWith('urgency:')) {
+          j.urgency = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+        }
+      }
+    }
+  } // end of main for loop
 
   // ---- Build hired driver list — only from player.drivers[] (skip drivers[0] = player) ----
   for (const driverId of playerDriverIds) {
@@ -551,8 +610,12 @@ export function parseGameData(content: string): ParsedGameData {
       trailers.push(t);
     }
   }
+  
+  if (currentJobId && currentJobId !== 'null') {
+    parsedCurrentJob = jobInfoMap.get(currentJobId) || null;
+  }
 
-  return { money, experiencePoints, skills, garages, trucks, trailers, drivers, loans, mapDiscovery: { visitedCities: visitedCitiesCount, unlockedDealers: unlockedDealersCount, unlockedRecruitments: unlockedRecruitmentsCount } };
+  return { money, experiencePoints, skills, currentJob: parsedCurrentJob, garages, trucks, trailers, drivers, loans, mapDiscovery: { visitedCities: visitedCitiesCount, unlockedDealers: unlockedDealersCount, unlockedRecruitments: unlockedRecruitmentsCount } };
 }
 
 /**
@@ -582,6 +645,7 @@ export function applyUpdates(
     clearLoans?: boolean;
     economyReset?: boolean;
     customLicensePlates?: { id: string; plate: string }[];
+    resetJobTime?: boolean;
   }
 ): string {
   const lines = content.split('\n');
@@ -594,17 +658,39 @@ export function applyUpdates(
 
   // Pre-scan: collect player truck IDs if needed
   const playerTruckIds = new Set<string>();
-  if (hasAnyTruckAction) {
+  let gameTimeValue = 0; // Pre-scan game_time for resetting job
+  let currentJobId = '';
+
+  if (hasAnyTruckAction || updates.resetJobTime) {
     let inPlayer = false;
+    let inEconomy = false;
     for (const line of lines) {
-      if (!inPlayer && line.startsWith('player : ') && line.endsWith('{')) {
+      if (line.startsWith('player : ') && line.endsWith('{')) {
         inPlayer = true;
         continue;
       }
-      if (inPlayer && line === '}') break;
+      if (line.startsWith('economy : ') && line.endsWith('{')) {
+        inEconomy = true;
+        continue;
+      }
+      if ((inPlayer || inEconomy) && line === '}') {
+        inPlayer = false;
+        inEconomy = false;
+        continue;
+      }
       if (inPlayer) {
         const m = line.match(/^\s*trucks\[\d+\]:\s*(\S+)/);
         if (m && m[1] !== 'null') playerTruckIds.add(m[1]);
+
+        if (line.trimStart().startsWith('current_job:')) {
+            const jId = line.trimStart().split(':')[1].trim();
+            if (jId !== 'null') currentJobId = jId;
+        }
+      }
+      if (inEconomy) {
+          if (line.trimStart().startsWith('game_time:')) {
+            gameTimeValue = parseInt(line.trimStart().split(':')[1].trim(), 10);
+          }
       }
     }
   }
@@ -902,6 +988,15 @@ export function applyUpdates(
         result.push(line.substring(0, colonPos + 1) + ' 0');
         continue;
       }
+    }
+
+    // Job Reset Time
+    if ((blockType === 'job_info' || blockType === 'player_job') && updates.resetJobTime && blockId === currentJobId) {
+        if (trimmed.startsWith('start_time:')) {
+            const colonPos = line.indexOf(':');
+            result.push(line.substring(0, colonPos + 1) + ' ' + gameTimeValue);
+            continue;
+        }
     }
 
     result.push(line);

@@ -116,6 +116,18 @@ export interface BankLoan {
   duration: number;       // months
 }
 
+export interface JobData {
+  id: string;
+  cargo: string;
+  sourceCompany: string;
+  targetCompany: string;
+  cargoModelIndex: number;
+  isCargoMarketJob: boolean;
+  startTime: number;
+  plannedDistanceKm: number;
+  urgency: number;
+}
+
 export interface GameData {
   money: number;
   experiencePoints: number;
@@ -127,6 +139,7 @@ export interface GameData {
     urgent: number;
     mechanical: number;
   };
+  currentJob: JobData | null;
   garages: GarageData[];
   trucks: TruckData[];
   trailers: TrailerData[];
@@ -153,6 +166,7 @@ export interface SaveRequest {
     clearLoans?: boolean;
     economyReset?: boolean;
     customLicensePlates?: { id: string; plate: string }[];
+    resetJobTime?: boolean;
   };
 }
 

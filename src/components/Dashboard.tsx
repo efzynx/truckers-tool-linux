@@ -7,13 +7,14 @@ import GarageEditor from './editors/GarageEditor';
 import DriverEditor from './editors/DriverEditor';
 import TrailerEditor from './editors/TrailerEditor';
 import MapEditor from './editors/MapEditor';
+import JobManager from './editors/JobManager';
 import { useLanguage } from '../i18n/LanguageContext';
 import SupportModal from './SupportModal';
 import AboutModal from './AboutModal';
 import SaveConfirmModal from './SaveConfirmModal';
 import type { ChangeEntry } from './SaveConfirmModal';
 
-export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage' | 'driver' | 'trailer' | 'map';
+export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage' | 'driver' | 'trailer' | 'map' | 'job';
 
 export interface UploadContext {
   isUploadMode: boolean;
@@ -93,6 +94,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     clearLoans: boolean;
     economyReset: boolean;
     customLicensePlates: { id: string; plate: string }[];
+    resetJobTime: boolean;
   };
   const undoStack = useRef<UndoSnapshot[]>([]);
 
@@ -126,6 +128,9 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   // Track custom license plates
   const [customLicensePlates, setCustomLicensePlates] = useState<{ id: string; plate: string }[]>([]);
 
+  // Track job editor
+  const [resetJobTime, setResetJobTime] = useState(false);
+
   // ─────────────────────────── Helpers ───────────────────────────
   /** Simpan snapshot saat ini ke undo stack sebelum perubahan */
   const pushUndo = useCallback(() => {
@@ -145,10 +150,11 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
         clearLoans,
         economyReset,
         customLicensePlates: [...customLicensePlates],
+        resetJobTime,
       },
     ];
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editableData, changeLog, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, customLicensePlates]);
+  }, [editableData, changeLog, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, customLicensePlates, resetJobTime]);
 
   /** Tambah entry ke change log */
   const addChange = useCallback((entry: Omit<ChangeEntry, 'id'>) => {
@@ -316,6 +322,23 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setHasChanges(true);
   };
 
+  const handleJobAction = async (updates: { resetJobTime?: boolean; trailerRepairAll?: boolean; truckRepairAll?: boolean }) => {
+    pushUndo();
+    if (updates.resetJobTime) {
+      setResetJobTime(true);
+      addChange({ labelKey: 'Reset Job Deadline', icon: 'update', color: 'text-blue-400' });
+    }
+    if (updates.trailerRepairAll) {
+      setTrailerRepairAll(true);
+      addChange({ labelKey: 'change.trailerRepairAll', icon: 'build', color: 'text-violet-400' });
+    }
+    if (updates.truckRepairAll) {
+      setTruckRepairAll(true);
+      addChange({ labelKey: 'change.truckRepairAll', icon: 'build', color: 'text-orange-400' });
+    }
+    setHasChanges(true);
+  };
+
   // ─────────────── Save: dua tahap (konfirmasi → eksekusi) ───────────────
   /** Buka modal konfirmasi */
   const handleSaveClick = useCallback(() => {
@@ -338,6 +361,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
       clearLoans,
       economyReset,
       customLicensePlates,
+      resetJobTime,
     };
     onSave(payload);
     setShowConfirmModal(false);
@@ -354,11 +378,12 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setClearLoans(false);
     setEconomyReset(false);
     setCustomLicensePlates([]);
+    setResetJobTime(false);
     // Tampilkan notifikasi sukses
     if (successTimer.current) clearTimeout(successTimer.current);
     setShowSuccessNotif(true);
     successTimer.current = setTimeout(() => setShowSuccessNotif(false), 3000);
-  }, [editableData, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, customLicensePlates, onSave]);
+  }, [editableData, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, customLicensePlates, resetJobTime, onSave]);
 
   // ──────────────────────────── Undo ────────────────────────────
   const handleUndo = useCallback(() => {
@@ -379,6 +404,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setClearLoans(prev.clearLoans);
     setEconomyReset(prev.economyReset);
     setCustomLicensePlates(prev.customLicensePlates);
+    setResetJobTime(prev.resetJobTime);
     setHasChanges(prev.changeLog.length > 0 || Object.keys(prev.targetGarages).length > 0);
   }, []);
 
@@ -473,6 +499,10 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
             <button onClick={() => setView('garage')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'garage' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">warehouse</span>
               <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabGarages')}</span>
+            </button>
+            <button onClick={() => setView('job')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'job' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+              <span className="material-symbols-outlined">work</span>
+              <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabJobs')}</span>
             </button>
             <button onClick={() => setView('truck')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'truck' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">local_shipping</span>
@@ -613,6 +643,46 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
             </button>
           </div>
 
+          {editableData.currentJob && (
+           <div className="animate-fade-in">
+              <div className="flex items-center justify-between mb-3">
+                 <h3 className="text-xs uppercase font-display font-bold tracking-widest text-text-main opacity-60">Active Journey</h3>
+              </div>
+              <button 
+                  onClick={() => setView('job')} 
+                  className="w-full relative bg-surface border border-primary/30 hover:border-primary rounded-2xl p-5 text-left transition-all overflow-hidden cursor-pointer group shadow-[0_0_20px_rgba(var(--color-primary),0.1)] hover:shadow-[0_0_30px_rgba(var(--color-primary),0.2)]"
+              >
+                  <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-primary/10 to-transparent"></div>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0">
+                      <span className="material-symbols-outlined text-primary text-3xl">chevron_right</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 relative z-10">
+                      <div className="size-14 rounded-full bg-primary/20 text-primary flex items-center justify-center border border-primary/40 shadow-neon-sm">
+                          <span className="material-symbols-outlined text-2xl">local_shipping</span>
+                      </div>
+                      <div className="flex-1">
+                          <p className="text-[10px] text-primary font-mono uppercase tracking-widest font-bold mb-1">In Progress Delivery</p>
+                          <h4 className="font-display font-bold text-lg text-white tracking-wide uppercase truncate max-w-[80%]">
+                              {editableData.currentJob.cargo.replace('cargo.', '').replace(/_/g, ' ')}
+                          </h4>
+                          <div className="flex items-center gap-3 mt-1.5 opacity-80">
+                              <span className="text-xs font-mono text-text-muted bg-white/5 px-2 py-0.5 rounded-full border border-white/10 uppercase tracking-widest">
+                                {editableData.currentJob.sourceCompany.replace('company.volatile.', '').split('.')[0]} 
+                                <span className="mx-1 text-primary">➔</span> 
+                                {editableData.currentJob.targetCompany.replace('company.volatile.', '').split('.')[0]}
+                              </span>
+                              <span className="text-xs font-mono text-text-muted flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[14px]">straighten</span>
+                                  {editableData.currentJob.plannedDistanceKm} km
+                              </span>
+                          </div>
+                      </div>
+                  </div>
+              </button>
+           </div>
+          )}
+
           {/* Quick Actions Label */}
           <div className="flex items-center gap-3 opacity-60">
             <div className="h-px bg-white/20 flex-1"></div>
@@ -747,7 +817,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
           )}
           {view === 'garage' && (
              <div className="flex-1 flex flex-col pt-24 pb-28 px-4 md:px-10 lg:px-20 w-full z-10 overflow-y-auto no-scrollbar animate-fade-in">
-               <header className="fixed top-0 left-0 right-0 z-40 glass-panel">
+               <header className="fixed top-0 left-0 right-0 md:left-64 lg:left-80 z-40 glass-panel">
                  <div className="flex items-center justify-between px-4 py-4 md:px-10 lg:px-20 mx-auto w-full">
                    <button onClick={() => setView('home')} className="flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer">
                      <span className="material-symbols-outlined text-3xl">chevron_left</span>
@@ -770,7 +840,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
           )}
           {view === 'truck' && (
              <div className="flex-1 flex flex-col pt-24 pb-28 px-4 md:px-10 lg:px-20 w-full z-10 overflow-y-auto no-scrollbar animate-fade-in">
-               <header className="fixed top-0 left-0 right-0 z-40 glass-panel">
+               <header className="fixed top-0 left-0 right-0 md:left-64 lg:left-80 z-40 glass-panel">
                  <div className="flex items-center justify-between px-4 py-4 md:px-10 lg:px-20 mx-auto w-full">
                    <button onClick={() => setView('home')} className="flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer">
                      <span className="material-symbols-outlined text-3xl">chevron_left</span>
@@ -829,6 +899,13 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                 <span className="material-symbols-outlined text-[22px]">warehouse</span>
               </div>
               <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabGarages')}</p>
+            </button>
+
+            <button onClick={() => setView('job')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'job' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
+              <div className={`flex h-8 items-center justify-center rounded-full px-3 ${view === 'job' ? 'shadow-[0_0_15px_rgba(255,140,0,0.3)] bg-primary/10' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]">work</span>
+              </div>
+              <p className="text-[10px] font-medium leading-normal tracking-wide font-display mt-1">{t('dashboard.tabJobs')}</p>
             </button>
             
             <button onClick={() => setView('truck')} className={`flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors cursor-pointer ${view === 'truck' ? 'text-primary' : 'text-text-muted hover:text-white'}`}>
@@ -900,6 +977,16 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
                onDiscoverMap={handleDiscoverMap}
              />
            </div>
+         </div>
+      )}
+
+      {view === 'job' && (
+         <div className="absolute inset-x-0 top-0 bottom-0 md:left-64 lg:left-80 z-40 bg-background-dark animate-fade-in flex flex-col pt-0 pb-0 overflow-y-auto no-scrollbar">
+           <JobManager
+             data={editableData}
+             onBack={() => setView('home')}
+             onSaveData={handleJobAction}
+           />
          </div>
       )}
 

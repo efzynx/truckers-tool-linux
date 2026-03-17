@@ -57,6 +57,7 @@ router.post('/save', async (req, res) => {
         clearLoans?: boolean;
         economyReset?: boolean;
         customLicensePlates?: { id: string; plate: string }[];
+        resetJobTime?: boolean;
       };
     };
 
@@ -111,6 +112,7 @@ router.post('/download-save', async (req, res) => {
         clearLoans?: boolean;
         economyReset?: boolean;
         customLicensePlates?: { id: string; plate: string }[];
+        resetJobTime?: boolean;
       };
     };
 

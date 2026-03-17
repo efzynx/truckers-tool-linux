@@ -106,23 +106,43 @@ get_latest_version() {
   echo "$version"
 }
 
-# Fetch latest pre-release tag from GitHub API
-get_latest_prerelease() {
+# Fetch latest beta version from GitHub API
+get_latest_beta() {
   local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases"
   local json
   json=$(curl -fsSL "$api_url" 2>/dev/null)
   local tag
-  tag=$(echo "$json" | grep -B5 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')
+  tag=$(echo "$json" | grep -B5 '"prerelease": true' | grep '"tag_name"' | grep -i 'beta' | head -1 | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')
   local version
   version=$(echo "$tag" | sed -E 's/^[vV]//')
   echo "$version"
 }
 
-# Get the raw tag name for a pre-release (with v prefix)
-get_latest_prerelease_tag() {
+# Get the raw tag name for a beta release (with v prefix)
+get_latest_beta_tag() {
   local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases"
   local tag
-  tag=$(curl -fsSL "$api_url" 2>/dev/null | grep -B5 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')
+  tag=$(curl -fsSL "$api_url" 2>/dev/null | grep -B5 '"prerelease": true' | grep '"tag_name"' | grep -i 'beta' | head -1 | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')
+  echo "$tag"
+}
+
+# Fetch latest alpha version from GitHub API
+get_latest_alpha() {
+  local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases"
+  local json
+  json=$(curl -fsSL "$api_url" 2>/dev/null)
+  local tag
+  tag=$(echo "$json" | grep -B5 '"prerelease": true' | grep '"tag_name"' | grep -i 'alpha' | head -1 | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')
+  local version
+  version=$(echo "$tag" | sed -E 's/^[vV]//')
+  echo "$version"
+}
+
+# Get the raw tag name for an alpha release (with v prefix)
+get_latest_alpha_tag() {
+  local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases"
+  local tag
+  tag=$(curl -fsSL "$api_url" 2>/dev/null | grep -B5 '"prerelease": true' | grep '"tag_name"' | grep -i 'alpha' | head -1 | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')
   echo "$tag"
 }
 
@@ -454,13 +474,22 @@ do_check_update() {
     info "✅ Sudah versi terbaru!"
   fi
 
-  # Check pre-release
+  # Check beta release
   local beta
-  beta=$(get_latest_prerelease)
+  beta=$(get_latest_beta)
   if [ -n "$beta" ] && version_lt "$CURRENT_VERSION" "$beta"; then
     echo ""
     echo -e "  ${DIM}🧪 Pre-release tersedia: v${beta} (beta/tester)${NC}"
     echo -e "  ${DIM}Jalankan ${BOLD}./ttl.sh update --beta${NC}${DIM} untuk install.${NC}"
+  fi
+
+  # Check alpha release
+  local alpha
+  alpha=$(get_latest_alpha)
+  if [ -n "$alpha" ] && version_lt "$CURRENT_VERSION" "$alpha"; then
+    echo ""
+    echo -e "  ${DIM}🚧 Alpha release tersedia: v${alpha} (eksperimental)${NC}"
+    echo -e "  ${DIM}Jalankan ${BOLD}./ttl.sh update --alpha${NC}${DIM} untuk install.${NC}"
   fi
   echo ""
 }
@@ -469,8 +498,11 @@ do_check_update() {
 
 do_update() {
   local use_beta=false
+  local use_alpha=false
   if [ "$1" = "--beta" ] || [ "$1" = "-b" ]; then
     use_beta=true
+  elif [ "$1" = "--alpha" ] || [ "$1" = "-a" ]; then
+    use_alpha=true
   fi
 
   print_banner
@@ -486,21 +518,21 @@ do_update() {
   info "Versi saat ini: ${BOLD}v${CURRENT_VERSION}${NC}"
 
   if [ "$use_beta" = true ]; then
-    # Update to pre-release
+    # Update to pre-release (beta)
     info "🧪 Mengupdate ke versi ${YELLOW}beta (pre-release)${NC}..."
     echo ""
 
     local beta_tag
-    beta_tag=$(get_latest_prerelease_tag)
+    beta_tag=$(get_latest_beta_tag)
 
     if [ -z "$beta_tag" ]; then
-      error "Tidak ada pre-release yang tersedia."
+      error "Tidak ada beta release yang tersedia."
       exit 1
     fi
 
     local beta_ver
     beta_ver=$(echo "$beta_tag" | sed -E 's/^[vV]//')
-    info "Pre-release terbaru: ${BOLD}v${beta_ver}${NC}"
+    info "Beta terbaru: ${BOLD}v${beta_ver}${NC}"
 
     # Fetch all tags and hard reset
     git fetch origin --tags
@@ -508,6 +540,30 @@ do_update() {
     echo ""
 
     warn "⚠️  Kamu sekarang di versi beta (${beta_tag})."
+    echo -e "  Untuk kembali ke stable: ${BOLD}./ttl.sh update${NC}"
+  elif [ "$use_alpha" = true ]; then
+    # Update to alpha
+    info "🚧 Mengupdate ke versi ${CYAN}alpha (eksperimental)${NC}..."
+    echo ""
+
+    local alpha_tag
+    alpha_tag=$(get_latest_alpha_tag)
+
+    if [ -z "$alpha_tag" ]; then
+      error "Tidak ada alpha release yang tersedia."
+      exit 1
+    fi
+
+    local alpha_ver
+    alpha_ver=$(echo "$alpha_tag" | sed -E 's/^[vV]//')
+    info "Alpha terbaru: ${BOLD}v${alpha_ver}${NC}"
+
+    # Fetch all tags and hard reset
+    git fetch origin --tags
+    git reset --hard "$alpha_tag"
+    echo ""
+
+    warn "⚠️  Kamu sekarang di versi alpha (${alpha_tag})."
     echo -e "  Untuk kembali ke stable: ${BOLD}./ttl.sh update${NC}"
   else
     # Update to stable (main branch)
@@ -569,6 +625,7 @@ show_help() {
   echo ""
   echo -e "${BOLD}Options:${NC}"
   echo "  update --beta                 Update ke pre-release (beta)"
+  echo "  update --alpha                Update ke eksperimental (alpha)"
   echo "  -IS                           Install + setup + start"
   echo ""
   echo -e "${BOLD}Contoh:${NC}"
@@ -581,6 +638,7 @@ show_help() {
   echo "  ./ttl.sh check               # Cek update"
   echo "  ./ttl.sh update              # Update stable"
   echo "  ./ttl.sh update --beta       # Update ke beta"
+  echo "  ./ttl.sh update --alpha      # Update ke alpha"
   echo ""
 }
 

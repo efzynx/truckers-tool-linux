@@ -9,9 +9,11 @@ const REPO_NAME = 'truckers-tool-linux';
 interface VersionInfo {
   stable: string | null;
   beta: string | null;
+  alpha: string | null;
   currentVersion: string;
   stableUrl: string | null;
   betaUrl: string | null;
+  alphaUrl: string | null;
 }
 
 router.get('/check-update', async (_req: Request, res: Response) => {
@@ -25,9 +27,11 @@ router.get('/check-update', async (_req: Request, res: Response) => {
     const result: VersionInfo = {
       stable: null,
       beta: null,
+      alpha: null,
       currentVersion,
       stableUrl: null,
       betaUrl: null,
+      alphaUrl: null,
     };
 
     // Fetch latest stable release
@@ -49,10 +53,16 @@ router.get('/check-update', async (_req: Request, res: Response) => {
       );
       if (releasesRes.ok) {
         const releases = await releasesRes.json();
-        const prerelease = (releases as any[]).find((r) => r.prerelease === true);
-        if (prerelease) {
-          result.beta = (prerelease.tag_name as string).replace(/^[vV]/, '');
-          result.betaUrl = prerelease.html_url;
+        const betaRelease = (releases as any[]).find((r) => r.prerelease === true && String(r.tag_name).toLowerCase().includes('beta'));
+        if (betaRelease) {
+          result.beta = (betaRelease.tag_name as string).replace(/^[vV]/, '');
+          result.betaUrl = betaRelease.html_url;
+        }
+
+        const alphaRelease = (releases as any[]).find((r) => r.prerelease === true && String(r.tag_name).toLowerCase().includes('alpha'));
+        if (alphaRelease) {
+          result.alpha = (alphaRelease.tag_name as string).replace(/^[vV]/, '');
+          result.alphaUrl = alphaRelease.html_url;
         }
       }
     } catch { /* ignore */ }

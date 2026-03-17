@@ -4,9 +4,11 @@ import { useLanguage } from '../i18n/LanguageContext';
 interface VersionInfo {
   stable: string | null;
   beta: string | null;
+  alpha: string | null;
   currentVersion: string;
   stableUrl: string | null;
   betaUrl: string | null;
+  alphaUrl: string | null;
 }
 
 function versionCompare(a: string, b: string): number {
@@ -134,11 +136,15 @@ export default function AboutModal({ onClose }: { onClose: () => void }) {
                    <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest block mb-1">{t('about.version')}</span>
                    <p className="text-sm font-bold text-white font-mono flex items-center gap-2">
                      v{process.env.NEXT_PUBLIC_APP_VERSION}
-                     {(process.env.NEXT_PUBLIC_APP_VERSION || '').includes('-') && (
+                     {(process.env.NEXT_PUBLIC_APP_VERSION || '').includes('-alpha') ? (
+                       <span className="px-1.5 py-0.5 rounded text-[9px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                         ALPHA
+                       </span>
+                     ) : (process.env.NEXT_PUBLIC_APP_VERSION || '').includes('-') ? (
                        <span className="px-1.5 py-0.5 rounded text-[9px] bg-warning/20 text-warning border border-warning/30">
                          BETA
                        </span>
-                     )}
+                     ) : null}
                    </p>
                  </div>
                  {/* Author */}
@@ -235,8 +241,26 @@ export default function AboutModal({ onClose }: { onClose: () => void }) {
                       ) : null}
                     </div>
 
+                    <div className="bg-background-dark border border-white/5 rounded-lg p-3 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-cyan-400 text-[18px]">bug_report</span>
+                        <div>
+                          <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest block">{t('about.branchAlpha')}</span>
+                          <p className="text-white text-xs font-mono font-bold mt-0.5">
+                            {versionInfo.alpha ? `v${versionInfo.alpha}` : 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                      {versionInfo.alpha && isNewer(versionInfo.alpha, versionInfo.currentVersion) ? (
+                        <span className="text-[9px] px-2 py-1 rounded bg-cyan-500/20 text-cyan-400 font-bold tracking-widest border border-cyan-500/30 uppercase">{t('about.statusAvailable')}</span>
+                      ) : versionInfo.alpha ? (
+                        <span className="text-[9px] px-2 py-1 rounded bg-white/5 text-text-muted font-bold tracking-widest uppercase">{t('about.statusCurrent')}</span>
+                      ) : null}
+                    </div>
+
                     {(isNewer(versionInfo.stable, versionInfo.currentVersion) ||
-                      isNewer(versionInfo.beta, versionInfo.currentVersion)) && (
+                      isNewer(versionInfo.beta, versionInfo.currentVersion) ||
+                      isNewer(versionInfo.alpha, versionInfo.currentVersion)) && (
                       <div className="bg-black/30 border border-white/5 rounded-lg p-3 mt-3">
                         <p className="text-[10px] font-bold text-primary mb-2 tracking-widest uppercase">{t('about.updateCmdTitle')}</p>
                         <div className="font-mono text-xs text-white space-y-1.5">
@@ -248,6 +272,11 @@ export default function AboutModal({ onClose }: { onClose: () => void }) {
                           {isNewer(versionInfo.beta, versionInfo.currentVersion) && (
                             <p className="flex items-center gap-2">
                               <span className="text-warning">&gt;</span> ./ttl.sh update --beta
+                            </p>
+                          )}
+                          {isNewer(versionInfo.alpha, versionInfo.currentVersion) && (
+                            <p className="flex items-center gap-2">
+                              <span className="text-cyan-400">&gt;</span> ./ttl.sh update --alpha
                             </p>
                           )}
                         </div>

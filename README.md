@@ -4,7 +4,7 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 
 [🇮🇩 Baca dalam Bahasa Indonesia (Read in Indonesian)](README-ID.md)
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.3--alpha.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
 
 ## ✨ Features
 
@@ -16,6 +16,7 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 - ⚡ **Quick Actions** — Fast actions like Inject €50k, Clear Debt, Add 10K XP
 - 📥 **Download Edited File** — Download the edited file to place it back into your save game folder
 - ✏️ **Profile Editor** — Edit money, experience points, and skill levels
+- 💼 **Job Management** — View current active job, reset deadline, and fix cargo damage
 - 🚚 **Trailer Editor** — View and repair all owned trailers (cargo damage & body wear)
 - 🔄 **Economy Reset** — Refresh the Freight Market job list instantly to fix "no jobs available" issues
 - 📝 **Custom License Plates** — Personalize your trucks with direct input for custom license plates

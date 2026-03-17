@@ -2,7 +2,7 @@
 
 Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Truck Simulator** di Linux. Edit data profil Anda (uang, XP, skill) langsung dari browser — tanpa perlu alat pihak ketiga dari Windows.
 
-![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
+![Dashboard Preview](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.3--alpha.2-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
 
 ## ✨ Fitur
 
@@ -14,6 +14,7 @@ Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Tr
 - ⚡ **Aksi Cepat** — Tombol instan kontrol sistem seperti Inject €50k, Lunasi Hutang Bank, Tambah 10.000 XP, dan Maksimalkan Semua Skill
 - 📥 **Unduh Hasil Edit** — Download file hasil edit (`game.sii`) untuk ditaruh kembali ke folder permainan
 - ✏️ **Editor Terpadu** — Mengedit jumlah uang, experience point (XP), status pekerjaan, dan garasi secara bebas
+- 💼 **Manajemen Pekerjaan** — Lihat kargo aktif, reset waktu tenggat, dan perbaiki kargo tanpa damage
 - 🚚 **Editor Trailer** — Tampilkan dan perbaiki semua trailer milik pemain (kerusakan muatan & badan trailer)
 - 🔄 **Reset Ekonomi** — Segarkan daftar pekerjaan Freight Market seketika untuk mengatasi bug "tidak ada pekerjaan"
 - 📝 **Pelat Nomor Kustom** — Personalisasi truk Anda dengan input pelat nomor kustom secara langsung

@@ -113,7 +113,7 @@ export default function ProfileEditor({ data, onChange, onBack, hasChanges, onCl
     <div className="flex-1 flex flex-col pt-24 pb-28 px-4 md:px-10 lg:px-20 w-full z-10 overflow-y-auto no-scrollbar">
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 glass-panel">
+      <header className="fixed top-0 left-0 right-0 md:left-64 lg:left-80 z-40 glass-panel">
         <div className="flex items-center justify-between px-4 py-4 md:px-10 lg:px-20 mx-auto w-full">
           <button
             onClick={onBack}
