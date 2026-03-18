@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import * as fs from 'fs/promises';
+import * as path from 'path';
 import { parseGameData, applyUpdates } from '../utils/parser.js';
+import { parseModDependencies } from '../utils/modInspector.js';
+import { SIIDecryptor } from '@trucky/sii-decrypt-ts';
 
 const router = Router();
 
@@ -133,6 +136,47 @@ router.post('/download-save', async (req, res) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('❌ Download error:', message);
+    res.status(500).json({ success: false, error: message });
+  }
+});
+
+/**
+ * POST /api/save/mods
+ * Membaca info.sii di folder yang sama dengan game.sii untuk melacak mod yang aktif.
+ */
+router.post('/save/mods', async (req, res) => {
+  try {
+    const { filePath } = req.body as { filePath: string };
+
+    if (!filePath) {
+      res.status(400).json({ success: false, error: 'filePath wajib diisi' });
+      return;
+    }
+
+    // Ganti game.sii menjadi info.sii di folder yang sama
+    const dir = path.dirname(filePath);
+    const infoPath = path.join(dir, 'info.sii');
+
+    try {
+      await fs.access(infoPath);
+    } catch {
+      res.status(404).json({ success: false, error: 'File info.sii tidak ditemukan. Mod Inspector tidak tersedia.' });
+      return;
+    }
+
+    console.log(`🔍 Inspecting mods for: ${infoPath}`);
+    const result = SIIDecryptor.decrypt(infoPath, true);
+
+    if (!result.string_content) {
+      res.status(500).json({ success: false, error: 'File info.sii tidak memiliki konten teks.' });
+      return;
+    }
+
+    const mods = parseModDependencies(result.string_content);
+    res.json({ success: true, mods });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Mod Inspector error:', message);
     res.status(500).json({ success: false, error: message });
   }
 });

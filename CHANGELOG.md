@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.4-alpha.3] - 2026-03-19
+
+### Added
+- **Mod Inspector**: Fitur untuk melihat daftar Mod dan DLC yang aktif dari file `info.sii` langsung di Dashboard untuk profil atau save game terpilih.
+- **Tampilan**: Mengubah `background-position` hero image di `WelcomeScreen.tsx` dari `bg-center` / `bg-bottom` ke persentase `bg-[center_65%]` agar truck tidak terpotong di layar lebar.
+
+
 ## [1.1.4-alpha.2] - 2026-03-19
 
 ### Added

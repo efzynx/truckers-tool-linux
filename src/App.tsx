@@ -374,6 +374,7 @@ function App() {
           downloading={downloading}
           onBack={handleExit}
           profileId={selectedProfile?.name || ''}
+          saveFilePath={siiFilePath}
           uploadContext={{
             isUploadMode,
             isZipUpload,

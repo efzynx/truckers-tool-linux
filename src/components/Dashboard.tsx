@@ -11,6 +11,7 @@ import JobManager from './editors/JobManager';
 import { useLanguage } from '../i18n/LanguageContext';
 import SupportModal from './SupportModal';
 import AboutModal from './AboutModal';
+import ModInspectorModal from './ModInspectorModal';
 import SaveConfirmModal from './SaveConfirmModal';
 import type { ChangeEntry } from './SaveConfirmModal';
 
@@ -33,6 +34,7 @@ interface DashboardProps {
   onBack: () => void;
   profileId: string;
   uploadContext?: UploadContext;
+  saveFilePath?: string;
 }
 
 /** Level calculation helpers */
@@ -68,7 +70,7 @@ function xpForLevel(level: number): number {
 let _changeIdCounter = 0;
 function makeChangeId() { return `chg_${++_changeIdCounter}`; }
 
-export default function Dashboard({ data, onSave, onDownload, saving, downloading, onBack, profileId, uploadContext }: DashboardProps) {
+export default function Dashboard({ data, onSave, onDownload, saving, downloading, onBack, profileId, uploadContext, saveFilePath }: DashboardProps) {
   const [view, setView] = useState<DashboardView>('home');
   const [editableData, setEditableData] = useState<GameData>({ ...data });
   const [hasChanges, setHasChanges] = useState(false);
@@ -101,6 +103,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   // Modal & notification state
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessNotif, setShowSuccessNotif] = useState(false);
+  const [isModInspectorOpen, setIsModInspectorOpen] = useState(false);
   const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Track individual garage upgrades
@@ -747,6 +750,18 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               </div>
             </button>
 
+            {/* Mod Inspector Card */}
+            <button onClick={() => setIsModInspectorOpen(true)} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-primary/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer">
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
+              <div className="size-12 shrink-0 rounded-full bg-background-dark border border-white/10 flex items-center justify-center shadow-inner group-hover:border-primary/50 group-hover:shadow-neon-sm transition-all duration-300">
+                <span className="material-symbols-outlined text-2xl text-text-main group-hover:text-primary transition-colors">discover_tune</span>
+              </div>
+              <div className="flex flex-col items-start z-10 text-left">
+                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">MOD INSPECTOR</span>
+                <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-primary/80 transition-colors">Daftar Mod & DLC Aktif</span>
+              </div>
+            </button>
+
             {/* Download Button */}
             <button onClick={handleDownload} disabled={downloading} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-emerald-400/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer sm:col-span-2 disabled:opacity-50 disabled:cursor-not-allowed">
               <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
@@ -992,6 +1007,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
 
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
       {isAboutOpen && <AboutModal onClose={() => setIsAboutOpen(false)} />}
+      <ModInspectorModal isOpen={isModInspectorOpen} onClose={() => setIsModInspectorOpen(false)} saveFilePath={saveFilePath} />
 
       {/* Save Confirmation Modal */}
       <SaveConfirmModal

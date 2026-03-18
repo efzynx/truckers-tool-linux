@@ -49,7 +49,7 @@ export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
           className="group relative flex-1 w-full overflow-hidden border-b-2 border-background-dark hover:border-ets-orange transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-ets-orange/50 cursor-pointer"
         >
           <div 
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
+            className="absolute inset-0 bg-cover bg-[center_65%] transition-transform duration-700 group-hover:scale-105" 
             style={{ backgroundImage: "url('/images/ets2_hero.png')" }}
           ></div>
           {/* Gradient Overlay */}
@@ -84,7 +84,7 @@ export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
           className="group relative flex-1 w-full overflow-hidden border-t-2 border-background-dark hover:border-ats-red transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-ats-red/50 cursor-pointer"
         >
           <div 
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
+            className="absolute inset-0 bg-cover bg-[center_65%] transition-transform duration-700 group-hover:scale-105" 
             style={{ backgroundImage: "url('/images/ats_hero.png')" }}
           ></div>
           {/* Gradient Overlay */}
