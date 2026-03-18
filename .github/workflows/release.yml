@@ -147,7 +147,7 @@ jobs:
             $SHORT_CHANGELOG
 
             📖 Baca changelog lengkap:
-            https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}
+            https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md
 
             ━━━━━━━━━━━━━━━
             🔗 View Release
