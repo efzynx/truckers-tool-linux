@@ -8,6 +8,7 @@ export const en: TranslationDoc = {
   "welcome.subtitle": "Select a game to start",
   "welcome.selectETS2": "Select Euro Truck Simulator 2",
   "welcome.selectATS": "Select American Truck Simulator",
+  "welcome.docs": "Documentation",
   // PathInput.tsx
   "path.title": "Profile Location",
   "path.label": "Profile Path",

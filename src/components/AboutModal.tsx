@@ -12,14 +12,51 @@ interface VersionInfo {
 }
 
 function versionCompare(a: string, b: string): number {
-  const pa = a.split(/[-.]/).map((x) => (isNaN(Number(x)) ? 0 : Number(x)));
-  const pb = b.split(/[-.]/).map((x) => (isNaN(Number(x)) ? 0 : Number(x)));
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const na = pa[i] || 0;
-    const nb = pb[i] || 0;
+  const isPreA = a.includes('-');
+  const isPreB = b.includes('-');
+  
+  const baseA = a.split('-')[0].split('.').map(Number);
+  const baseB = b.split('-')[0].split('.').map(Number);
+
+  // Compare base version first
+  for (let i = 0; i < 3; i++) {
+    const na = baseA[i] || 0;
+    const nb = baseB[i] || 0;
     if (na < nb) return -1;
     if (na > nb) return 1;
   }
+
+  // Base versions are equal. 
+  // If one is pre-release and other is not, the non-pre-release is HIGHER.
+  if (isPreA && !isPreB) return -1; // a is pre, b is stable -> a < b
+  if (!isPreA && isPreB) return 1;  // a is stable, b is pre -> a > b
+
+  // Both are pre-releases, compare the pre-release parts
+  if (isPreA && isPreB) {
+    const preA = a.split('-')[1];
+    const preB = b.split('-')[1];
+    
+    const [tagA, numA] = preA.split('.');
+    const [tagB, numB] = preB.split('.');
+    
+    const tagRank = (tag: string) => {
+      if (tag === 'alpha') return 1;
+      if (tag === 'beta') return 2;
+      return 0;
+    };
+    
+    const rankA = tagRank(tagA);
+    const rankB = tagRank(tagB);
+    
+    if (rankA < rankB) return -1;
+    if (rankA > rankB) return 1;
+    
+    const nA = Number(numA) || 0;
+    const nB = Number(numB) || 0;
+    if (nA < nB) return -1;
+    if (nA > nB) return 1;
+  }
+
   return 0;
 }
 

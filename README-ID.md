@@ -3,7 +3,7 @@
 Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Truck Simulator** di Linux. Edit data profil Anda (uang, XP, skill) langsung dari browser — tanpa perlu alat pihak ketiga dari Windows.
 
 [🇺🇸 Read in English](README.md)
-[📖 Dokumentasi Lengkap (Bahasa Indonesia)](https://github.com/efzynx/ttl-docs)
+[📖 Dokumentasi Lengkap (Bahasa Indonesia)](https://docs.ttl.efzyn.my.id/id/)
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/5e24ae57-1105-4c20-9898-d50ba566b7ee" width="100%" autoplay muted loop></video>

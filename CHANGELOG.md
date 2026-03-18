@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.1.4-alpha.1] - 2026-03-19
+
+### Added
+- **Docs Button**: Added a Documentation button in the welcome screen header with dynamic links based on language.
+- **Translations**: Added tooltip translations for the documentation button in both dictionaries.
+
+### Fixed
+- **Version Comparison**: Fixed `versionCompare` logic in `AboutModal.tsx` to handle pre-release hierarchies correctly, fixing invalid OTA status.
+
 ## [1.1.3] - 2026-03-19
 
 ### Added

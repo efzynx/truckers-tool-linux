@@ -9,13 +9,22 @@ interface WelcomeScreenProps {
 }
 
 export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isSupportOpen, setIsSupportOpen] = useState(false);
 
   return (
     <div className="bg-background-dark text-text-main font-body antialiased overflow-hidden h-screen w-full select-none">
       {/* Top Right Utilities Fixed Position */}
       <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
+        <a 
+          href={`https://docs.ttl.efzyn.my.id/${language}/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={t('welcome.docs')}
+          className="flex items-center justify-center size-9 md:size-10 rounded-xl bg-surface/80 border border-white/10 backdrop-blur-md shadow-lg text-text-muted hover:text-primary hover:bg-white/5 transition-all"
+        >
+          <span className="material-symbols-outlined text-[20px]">menu_book</span>
+        </a>
         <button 
           onClick={() => setIsSupportOpen(true)}
           title={t('support.btnOpen')}

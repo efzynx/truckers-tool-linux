@@ -8,6 +8,7 @@ export const id = {
   "welcome.subtitle": "Pilih game untuk mulai",
   "welcome.selectETS2": "Pilih Euro Truck Simulator 2",
   "welcome.selectATS": "Pilih American Truck Simulator",
+  "welcome.docs": "Dokumentasi",
   // PathInput.tsx
   "path.title": "Lokasi Profil",
   "path.label": "Path Profil",
