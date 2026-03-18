@@ -132,16 +132,26 @@ jobs:
           RELEASE_TITLE: ${{ steps.notes.outputs.title }}
           RELEASE_BODY: ${{ steps.notes.outputs.body }}
         run: |
-          TEXT="🚀 New Release
+          # ambil hanya 20 baris pertama changelog
+          SHORT_CHANGELOG=$(echo "$RELEASE_BODY" | sed -n '/### Added/,/### Fixed/p' | head -n 20)
 
-          $RELEASE_TITLE
+          TEXT="🚀 NEW RELEASE
 
-          Branch: ${{ github.ref_name }}
-          Tag: ${{ steps.version.outputs.tag }}
+            🌿 Branch: ${{ github.ref_name }}
+            🏷 Tag: ${{ steps.version.outputs.tag }}
 
-          $RELEASE_BODY
+            ━━━━━━━━━━━━━━━
+            📋 CHANGELOG
+            ━━━━━━━━━━━━━━━
 
-          🔗 https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
+            $SHORT_CHANGELOG
+
+            📖 Baca changelog lengkap:
+            https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}
+
+            ━━━━━━━━━━━━━━━
+            🔗 View Release
+            https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
 
           DATA=$(jq -n \
             --arg chat_id "${{ secrets.TELEGRAM_CHAT_ID }}" \
