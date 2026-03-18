@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3-beta.1] - 2026-03-18
+
+### Added
+- **Data Integrity System:** Implemented a robust "Triple-Check" validation system for SII files. The app now verifies brace balancing (`{ }`) and header validity (`SiiNunit`) both during loading and before writing to disk to prevent save game corruption.
+- **Advanced Profile Restore:** Completely overhauled the restore functionality. Users can now choose specifically which backup save slot to restore from and which active slot to overwrite (Granular Restore).
+- **Live Data Comparison (Diff):** Before confirming a restore, a detailed comparison table is shown, covering Money, XP, all 6 Skills, Assets (Trucks, Trailers, Garages, Drivers), Map discovery, and active Jobs.
+- **Granular vs Nuclear Restore:** Added options to either restore a single save slot (Safe) or the entire profile directory including `profile.sii` (Nuclear).
+- **Consistency & UX:** Success notifications for restore actions now use the same Emerald toast style as the Dashboard. Navigation is now seamless with background data refreshing, eliminating the need for full page reloads.
+- **Full i18n Support:** Added comprehensive Indonesian and English translations for all restore-related interfaces and messages.
+- **Job Editor / Management:** New dedicated view for active cargo. Easily reset delivery deadlines to gain maximum time or fix cargo damage completely to 0% to prevent delivery penalties.
+- **Job Editor Consistency:** Aligned the header positioning for all internal sub-menus (Job, Profile, Driver, User) with the sidebar layout to fix overlapping visual bugs on desktop views.
+- **Economy Reset:** Added a new "Economy Reset" quick action button to the Dashboard. Instantly refreshes the in-game Freight Market job list by advancing internal game time, fixing "no jobs available" issues commonly caused by mod changes.
+- **Custom License Plates:** Added a custom license plate text input for player-owned trucks within the Truck Editor. Supports up to 8 characters and automatically preserves the truck's registered country formatting.
+
+### Fixed
+- **HTML Nesting Error:** Fixed a hydration warning where a button was nested within another button in the Profile List.
+- **Backend Stability:** Fixed a critical server-side crash caused by missing variable initializations in the profile routes.
+- **Custom License Plate Persistence:** Fixed an issue where the parser wouldn't save custom plate changes unless accompanied by a truck repair/refuel action.
+
 ## [1.1.3-alpha.3] - 2026-03-17
 
 ### Added
