@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-03-19
+
+### Added
+- **Data Integrity System:** Added "Triple-Check" validation for SII files on load/save to prevent save corruption.
+- **Advanced Profile Restore:** Overhauled restore with manual slot selector, live stats diff, and granular options.
+- **Job Editor:** Dedicated view for active cargo, deadline resets, and 0% damage repairs.
+- **Economy Reset:** Dashboard quick action button to instantly refresh Freight Market job listings.
+- **Custom License Plates:** Personalized up to 8 characters editing for owned trucks with country formatting.
+- **Telegram Bot Workflow:** Integrated CI/CD Telegram notify step with cleaner styling outputs and truncated logs.
+
+### Fixed
+- Core backend crashes, dialog HTML nesting hydration errors, overlaps, and modal position stability.
+
 ## [1.1.3-beta.4] - 2026-03-19
 
 ### Changed
