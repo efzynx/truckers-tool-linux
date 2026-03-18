@@ -133,7 +133,12 @@ jobs:
           RELEASE_BODY: ${{ steps.notes.outputs.body }}
         run: |
           # ambil hanya 20 baris pertama changelog
-          SHORT_CHANGELOG=$(echo "$RELEASE_BODY" | sed -n '/### Added/,/### Fixed/, /### Changed/, /### Removed/, /### Fixed/p' | head -n 20)
+          SHORT_CHANGELOG=$(echo "$RELEASE_BODY" | awk '
+          /^### (Added|Changed|Fixed|Removed)/ {flag=1}
+          /^## / {flag=0}
+          /^### / && !/^### (Added|Changed|Fixed|Removed)/ {flag=0}
+          flag {print}
+          ' | head -n 20)
 
           TEXT="🚀 NEW RELEASE
 

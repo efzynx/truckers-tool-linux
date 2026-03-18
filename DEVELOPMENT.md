@@ -1,6 +1,6 @@
 # Catatan Pengembangan (Development Log)
 
-**Versi Sekarang**: `1.1.4-alpha.1`
+**Versi Sekarang**: `1.1.4-alpha.2`
 
 ## Perubahan Sesi Ini
 

@@ -3,6 +3,7 @@ import type { GameType } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import LanguageToggle from './LanguageToggle';
 import SupportModal from './SupportModal';
+import AboutModal from './AboutModal';
 
 interface WelcomeScreenProps {
   onSelect: (game: GameType) => void;
@@ -11,6 +12,7 @@ interface WelcomeScreenProps {
 export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
   const { t, language } = useLanguage();
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   return (
     <div className="bg-background-dark text-text-main font-body antialiased overflow-hidden h-screen w-full select-none">
@@ -111,12 +113,13 @@ export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
         </button>
 
         {/* Version Badge */}
-        <div className="absolute bottom-6 right-6 z-20 pointer-events-none hidden sm:block">
-          <div className="glass-panel px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span className="font-mono text-xs text-text-muted tracking-wider">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
-          </div>
-        </div>
+        <button 
+          onClick={() => setIsAboutOpen(true)}
+          className="absolute bottom-6 right-6 z-20 glass-panel px-3 py-1 rounded-full border border-white/10 flex items-center gap-2 hover:bg-white/5 active:scale-95 transition-all cursor-pointer shadow-lg group"
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse group-hover:bg-emerald-400"></div>
+          <span className="font-mono text-xs text-text-muted group-hover:text-white tracking-wider transition-colors">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
+        </button>
 
         {/* Center Divider Ornament */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none flex items-center gap-4 w-full justify-center">
@@ -135,6 +138,7 @@ export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
       ></div>
 
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
+      {isAboutOpen && <AboutModal onClose={() => setIsAboutOpen(false)} />}
     </div>
   );
 }

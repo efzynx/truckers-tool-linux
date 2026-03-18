@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.4-alpha.2] - 2026-03-19
+
+### Added
+- **Clickable Version Badge**: Enabled clicking on the version badge in `WelcomeScreen` to open `AboutModal` (System Info & Updates checking).
+
+### Changed
+- **Responsive Layout**: Version badge is now visible on all screen sizes (previously hidden on mobile).
+
+### Fixed
+- **CI/CD Workflow**: Fixed full-changelog extract logic in `.github/workflows/release.yml` using `awk` to strictly extract log sections and prevent footer matches for Telegram notifications.
+
 ## [1.1.4-alpha.1] - 2026-03-19
 
 ### Added
