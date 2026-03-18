@@ -6,32 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.1.4-alpha.3] - 2026-03-19
+## [1.1.4-beta.1] - 2026-03-19
 
 ### Added
 - **Mod Inspector**: Fitur untuk melihat daftar Mod dan DLC yang aktif dari file `info.sii` langsung di Dashboard untuk profil atau save game terpilih.
-- **Tampilan**: Mengubah `background-position` hero image di `WelcomeScreen.tsx` dari `bg-center` / `bg-bottom` ke persentase `bg-[center_65%]` agar truck tidak terpotong di layar lebar.
-
-
-## [1.1.4-alpha.2] - 2026-03-19
-
-### Added
-- **Clickable Version Badge**: Enabled clicking on the version badge in `WelcomeScreen` to open `AboutModal` (System Info & Updates checking).
+- **Clickable Version Badge**: Mengaktifkan klik pada badge versi di `WelcomeScreen` untuk membuka profil/tentang sistem.
+- **Docs Button**: Tombol navigasi ke portal dokumentasi dinamis di header welcome screen.
+- **Tampilan**: Mengubah `background-position` hero image di `WelcomeScreen.tsx` ke persentase `bg-[center_65%]` agar tidak terpotong di desktop.
 
 ### Changed
-- **Responsive Layout**: Version badge is now visible on all screen sizes (previously hidden on mobile).
+- **Responsive Layout**: Version badge sekarang dapat terlihat di semua ukuran layar (sebelumnya tersembunyi pada mode mobile).
 
 ### Fixed
-- **CI/CD Workflow**: Fixed full-changelog extract logic in `.github/workflows/release.yml` using `awk` to strictly extract log sections and prevent footer matches for Telegram notifications.
-
-## [1.1.4-alpha.1] - 2026-03-19
-
-### Added
-- **Docs Button**: Added a Documentation button in the welcome screen header with dynamic links based on language.
-- **Translations**: Added tooltip translations for the documentation button in both dictionaries.
-
-### Fixed
-- **Version Comparison**: Fixed `versionCompare` logic in `AboutModal.tsx` to handle pre-release hierarchies correctly, fixing invalid OTA status.
+- **CI/CD Workflow**: Perbaikan logika extract full-changelog untuk notifikasi Telegram di GitHub Actions.
+- **Version Comparison**: Perbaikan `versionCompare` untuk penanganan urutan hierarki pre-release yang aman.
 
 ## [1.1.3] - 2026-03-19
 
