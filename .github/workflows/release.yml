@@ -3,6 +3,7 @@ name: Auto Release
 on:
   push:
     branches: [main, beta, alpha, rc]
+  workflow_dispatch:
 
 permissions:
   contents: write
