@@ -128,15 +128,18 @@ jobs:
 
       - name: Notify Telegram
         if: steps.check_tag.outputs.exists == 'false'
+        env:
+          RELEASE_TITLE: ${{ steps.notes.outputs.title }}
+          RELEASE_BODY: ${{ steps.notes.outputs.body }}
         run: |
           TEXT="🚀 New Release
 
-          ${{ steps.notes.outputs.title }}
+          $RELEASE_TITLE
 
           Branch: ${{ github.ref_name }}
           Tag: ${{ steps.version.outputs.tag }}
 
-          ${{ steps.notes.outputs.body }}
+          $RELEASE_BODY
 
           🔗 https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
 
@@ -147,8 +150,7 @@ jobs:
             '{
               chat_id: $chat_id,
               message_thread_id: ($thread_id | tonumber),
-              text: $text,
-              parse_mode: "Markdown"
+              text: $text
             }')
 
           curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
