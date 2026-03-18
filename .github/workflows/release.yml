@@ -125,6 +125,30 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
+        - name: Notify Telegram via Bot
+          if: steps.check_tag.outputs.exists == 'false'
+          run: |
+            DATA=$(jq -n \
+              --arg title "${{ steps.notes.outputs.title }}" \
+              --arg tag "${{ steps.version.outputs.tag }}" \
+              --arg branch "${{ github.ref_name }}" \
+              --arg repo "${{ github.repository }}" \
+              --arg thread "${{ secrets.TELEGRAM_THREAD_ID }}" \
+              '{
+                command: "/release_webhook",
+                options: {
+                  title: $title,
+                  tag: $tag,
+                  branch: $branch,
+                  repo: $repo,
+                  thread_id: $thread
+                }
+              }')
+
+            curl -X POST https://api.telebotcreator.com/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/runCommand \
+              -H "Content-Type: application/json" \
+              -d "$DATA"
+      
   build-desktop:
     needs: release
     if: needs.release.result == 'success' && needs.release.outputs.exists == 'false'

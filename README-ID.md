@@ -1,107 +1,115 @@
 # 🚛 Truckers Tool Linux
-### Editor Save Game Terbaik untuk ETS2 & ATS
 
-Editor save game berbasis web yang canggih, dirancang khusus untuk **Euro Truck Simulator 2** dan **American Truck Simulator** di Linux. Modifikasi profil, kelola armada, dan amankan progres Anda dengan antarmuka Glassmorphism yang modern.
+Editor save game berbasis web untuk **Euro Truck Simulator 2** dan **American Truck Simulator** di Linux. Edit data profil Anda (uang, XP, skill) langsung dari browser — tanpa perlu alat pihak ketiga dari Windows.
 
 [🇺🇸 Read in English](README.md)
+[📖 Dokumentasi Lengkap (Bahasa Indonesia)](https://github.com/efzynx/ttl-docs)
 
 <div align="center">
-  <br />
-  <video src="https://github.com/user-attachments/assets/5e24ae57-1105-4c20-9898-d50ba566b7ee" width="100%" autoplay muted loop style="border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); shadow: 0 20px 50px rgba(0,0,0,0.5);"></video>
-  <br />
-  <p><i>Pratinjau video antarmuka Truckers Tool Linux.</i></p>
-  <br />
-
-  ![Platform](https://img.shields.io/badge/Platform-Linux-blue?style=for-the-badge&logo=linux)
-  ![Version](https://img.shields.io/badge/Version-1.1.3--alpha.3-orange?style=for-the-badge)
-  ![License](https://img.shields.io/badge/License-GPL--3.0-green?style=for-the-badge)
+  <video src="https://github.com/user-attachments/assets/5e24ae57-1105-4c20-9898-d50ba566b7ee" width="100%" autoplay muted loop></video>
 </div>
 
----
+![Platform](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.3--alpha.3-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
 
-## 🌟 Sorotan Utama
+## ✨ Fitur
 
-### 🛡️ Integritas & Keamanan Data
-*   **Validasi Triple-Check:** Memverifikasi struktur file SII (`{ }`) dan header (`SiiNunit`) secara otomatis sebelum menyimpan untuk mencegah game crash.
-*   **Sistem Restore Granular:** Tidak sekadar mengembalikan profil—pilih slot save spesifik yang ingin dipulihkan. Bandingkan statistik (Uang, XP, Skill, Aset) secara langsung sebelum konfirmasi.
-*   **Backup Otomatis:** Setiap modifikasi akan membuat salinan cadangan (`.bak`) dari folder profil Anda.
-
-### 💼 Manajemen Armada Elit
-*   **Aksi Global:** Perbaiki dan isi bensin seluruh armada truk dan trailer hanya dengan satu klik.
-*   **Pelat Nomor Kustom:** Input teks kustom secara langsung dengan tetap mempertahankan format negara asal.
-*   **Ekspansi Garasi:** Buka dan tingkatkan semua garasi di peta menjadi ukuran "Besar" seketika.
-
-### 🗺️ Dunia & Ekonomi
-*   **Penemuan Peta:** Buka kunci semua kota yang pernah dikunjungi di seluruh peta secara instan.
-*   **Reset Ekonomi:** Majukan waktu game untuk menyegarkan daftar Freight Market dan memperbaiki bug "Tidak ada pekerjaan".
-*   **Matriks Skill:** Maksimalkan ADR, Long Distance, dan skill supir lainnya dalam sekejap.
-
----
+- 🎮 **Pilihan Game** — Mendukung modifikasi untuk ETS2 dan ATS.
+- 📂 **Pemindai Profil** — Mendeteksi profil otomatis dari path native Linux atau dari environment instalasi Wine/Proton.
+- 📤 **Dukungan Upload** — Upload file `.sii` atau `.zip` langsung via browser (tanpa perlu install lokal).
+- 🔓 **Dekripsi Otomatis** — Mendekripsi file save binary SCS secara otomatis (on-the-fly) tanpa software luar.
+- 🛡️ **Integritas Data** — Sistem pengecekan "Triple-Check" untuk memastikan struktur file SII dan header tetap valid sebelum disimpan guna mencegah file korup.
+- ⏪ **Pemulihan Profil Canggih** — Fitur Restore yang powerful dengan pemilih slot save manual, perbandingan statistik detail (Diff), dan opsi pemulihan granular (per-slot) atau profil penuh.
+- 📊 **Dasbor Pintar** — Menampilkan ringkasan profil dengan lengkap: level, XP, uang, dan skill.
+- ⚡ **Aksi Cepat** — Tombol instan kontrol sistem seperti Inject €50k, Lunasi Hutang Bank, Tambah 10.000 XP, dan Maksimalkan Semua Skill.
+- 📥 **Unduh Hasil Edit** — Download file hasil edit (`game.sii`) untuk ditaruh kembali ke folder permainan.
+- ✏️ **Editor Terpadu** — Mengedit jumlah uang, experience point (XP), status pekerjaan, dan garasi secara bebas.
+- 💼 **Manajemen Pekerjaan** — Lihat kargo aktif, reset waktu tenggat, dan perbaiki kargo tanpa damage.
+- 🚚 **Editor Trailer** — Tampilkan dan perbaiki semua trailer milik pemain (kerusakan muatan & badan trailer).
+- 🔄 **Reset Ekonomi** — Segarkan daftar pekerjaan Freight Market seketika untuk mengatasi bug "tidak ada pekerjaan".
+- 📝 **Pelat Nomor Kustom** — Personalisasi truk Anda dengan input pelat nomor kustom secara langsung.
+- 🗺️ **Editor Peta** — Buka kunci semua kota yang pernah dikunjungi di seluruh peta secara instan.
+- 💾 **Modal Konfirmasi Simpan** — Tinjau semua perubahan sebelum data ditulis ke save file.
+- ↩️ **Riwayat Undo** — Hingga 20 level undo (`Ctrl+Z`).
+- 🔔 **Notifikasi Simpan Berhasil** — Toast konfirmasi setelah setiap penyimpanan (Konsisten di semua fitur).
+- 🐛 **Pelapor Bug GitHub Issues** — Laporkan bug langsung dari aplikasi dengan info versi terisi otomatis.
+- 💾 **Backup Otomatis** — Membuat salinan (`.bak`) sebelum file asli dimodifikasi.
+- 🌐 **Dukungan Multibahasa** — Tersedia dalam Bahasa Indonesia dan Inggris secara penuh.
 
 ## 📋 Persyaratan Sistem
 
-| Persyaratan | Spesifikasi |
-| :--- | :--- |
-| **OS** | Linux (Ubuntu, Fedora, SteamOS/Steam Deck, dll.) |
-| **Environment** | Native, Wine, atau Proton (Steam) |
-| **Runtime** | Node.js v18 atau lebih tinggi |
-| **Game** | ETS2 / ATS (Harus ditutup saat mengedit) |
-
----
+- **Git**
+- **Node.js** v18+ (script bisa install otomatis via nvm)
+- **PM2** (opsional, untuk production/server deployment)
+- **ETS2/ATS** installed (native Linux, Wine, or Proton) — atau upload file langsung
 
 ## 🚀 Instalasi Cepat
 
-### 1. Pasang & Setup
-Jalankan perintah ini di terminal Anda untuk memulai:
+### 1. Download installer script
 
 ```bash
-# Download installer
 curl -fsSL https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/ttl.sh -o ttl.sh
 chmod +x ttl.sh
+```
 
-# Jalankan setup lengkap (Install + Konfigurasi + Jalankan)
+### 2. Jalankan setup sekaligus
+
+```bash
 ./ttl.sh -IS
 ```
 
-### 2. Akses Dasbor
-Buka browser dan navigasikan ke:
-**`http://localhost:3214`**
+Buka browser di **http://localhost:3214** 🎉
 
----
+## 🖥️ Deployment Server (PM2)
 
-## 🎮 Cara Penggunaan
+Untuk menjalankan di server/VPS:
 
-### A. Mode Path Lokal (Direkomendasikan untuk Desktop/Steam Deck)
-1.  Pilih Game Anda (ETS2 atau ATS).
-2.  Tempel path profil Anda (contoh: `~/.steam/steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2/profiles/`).
-3.  Scan dan pilih Profil Supir Anda.
-4.  Modifikasi data dan tekan **Simpan** (pojok kanan bawah).
+```bash
+npm run build
+npm run pm2:start
+```
 
-### B. Mode Upload (Untuk Akses Web)
-1.  Pilih Game Anda.
-2.  Upload file `game.sii` atau arsip `profiles.zip`.
-3.  Edit statistik Anda di dasbor.
-4.  Unduh file yang telah dimodifikasi dan timpa save lokal Anda.
+## ▶️ Cara Penggunaan
 
----
+### Mode Local Path
+1. Pilih Game → Masukkan Path Profil → Scan & Pilih Profil → Edit → Simpan.
+
+### Mode Upload File
+1. Pilih Game → Tab Upload → Unggah `.sii` atau `.zip` → Edit → Download.
 
 ## 🏗️ Tech Stack
-*   **Frontend:** Next.js 16 + React 19 + TypeScript
-*   **Styling:** Tailwind CSS v4 (Modern Glassmorphism)
-*   **Backend:** Node.js Express (API Privat)
-*   **Dekripsi:** `@trucky/sii-decrypt-ts`
 
----
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16 + React 19 + TypeScript |
+| Styling | Tailwind CSS v4 |
+| Backend | Node.js Express (API Privat) |
+| Decryption | [@trucky/sii-decrypt-ts](https://www.npmjs.com/package/@trucky/sii-decrypt-ts) |
+
+## 📁 Struktur Proyek
+
+```
+truckers-tool-linux/
+├── server/                    # Backend API (Express)
+│   ├── routes/
+│   │   ├── profiles.ts        # Logika Profile, Backup, & Restore
+│   │   └── save.ts            # Logika Manipulasi SII
+│   └── utils/
+│       └── parser.ts          # Engine Line-Scanner & Integrity Check
+├── src/                       # Frontend React app
+│   ├── components/
+│   │   ├── Dashboard.tsx      # Dasbor Utama
+│   │   ├── ProfileList.tsx    # List Profil dengan Notifikasi Sukses
+│   │   └── RestoreCompareModal.tsx # Modal Perbandingan Restore & Selector
+│   └── hooks/useApi.ts        # API Client untuk Fitur Baru
+├── package.json
+└── README.md
+```
 
 ## ❤️ Dukung Proyek Ini
-Truckers Tool Linux gratis dan open-source. Bantu kami menjaga server tetap berjalan dan kopi tetap tersedia!
 
 [![Trakteer](https://img.shields.io/badge/Trakteer-Dukung%20Saya-red?style=flat-square&logo=buymeacoffee&logoColor=white)](https://trakteer.id/efzyn/gift)
 [![Saweria](https://img.shields.io/badge/Saweria-Donasi-yellow?style=flat-square&logo=ko-fi&logoColor=black)](https://saweria.co/efzynx)
 
----
-
 ## 📝 Lisensi
-Didistribusikan di bawah lisensi **GNU GPLv3**. Silakan gunakan, modifikasi, dan bagikan.
 
-**SCS Software Disclaimer:** Alat ini tidak berafiliasi dengan atau didukung oleh SCS Software. Gunakan dengan risiko Anda sendiri.
+GNU GPLv3.
