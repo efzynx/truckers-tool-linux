@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3-beta.2] - 2026-03-19
+
+### Changed
+- **Telegram Notification Bot:** Updated notification message template with a cleaner visual style, new emojis, and a truncated changelog summary (max 20 lines).
+
+### Fixed
+- **CI/CD Workflow:** Fixed YAML parse error (`Implicit keys need to be on a single line`) inside `.github/workflows/release.yml` by passing variables via Environment Variables (`env`) for stability.
+
 ## [1.1.3-beta.1] - 2026-03-18
 
 ### Added
