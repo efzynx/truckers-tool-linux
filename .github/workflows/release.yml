@@ -146,13 +146,25 @@ jobs:
               }
             }')
 
+          TEXT="🚀 New Release
+
+            ${{ steps.notes.outputs.title }}
+            Branch: ${{ github.ref_name }}
+            Tag: ${{ steps.version.outputs.tag }}"
+
+          DATA=$(jq -n \
+            --arg chat_id "${{ secrets.TELEGRAM_CHAT_ID }}" \
+            --arg thread_id "${{ secrets.TELEGRAM_THREAD_ID }}" \
+            --arg text "$TEXT" \
+            '{
+              chat_id: $chat_id,
+              message_thread_id: ($thread_id | tonumber),
+              text: $text
+            }')
+
           curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
             -H "Content-Type: application/json" \
-            -d "{
-              \"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\",
-              \"message_thread_id\": \"${{ secrets.TELEGRAM_THREAD_ID }}\",
-              \"text\": \"🚀 New Release\n\n${{ steps.notes.outputs.title }}\nBranch: ${{ github.ref_name }}\nTag: ${{ steps.version.outputs.tag }}\""
-            }"
+            -d "$DATA"
       
   build-desktop:
     needs: release
