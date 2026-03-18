@@ -146,16 +146,13 @@ jobs:
               }
             }')
 
-          curl -X POST https://api.telebotcreator.com/webhook/${{ secrets.TELEGRAM_BOT_TOKEN }} \
+          curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
             -H "Content-Type: application/json" \
-            -d '{
-              "event": "release",
-              "title": "...",
-              "tag": "...",
-              "branch": "...",
-              "repo": "...",
-              "thread_id": "..."
-            }'
+            -d "{
+              \"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\",
+              \"message_thread_id\": \"${{ secrets.TELEGRAM_THREAD_ID }}\",
+              \"text\": \"🚀 New Release\n\n${{ steps.notes.outputs.title }}\nBranch: ${{ github.ref_name }}\nTag: ${{ steps.version.outputs.tag }}\""
+            }"
       
   build-desktop:
     needs: release
