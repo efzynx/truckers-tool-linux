@@ -146,7 +146,7 @@ jobs:
               }
             }')
 
-          curl -X POST https://api.telebotcreator.com/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/runCommand \
+          curl -X POST https://api.telebotcreator.com/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/run \
             -H "Content-Type: application/json" \
             -d "$DATA"
       
