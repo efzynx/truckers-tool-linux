@@ -146,9 +146,16 @@ jobs:
               }
             }')
 
-          curl -X POST https://api.telebotcreator.com/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/run \
+          curl -X POST https://api.telebotcreator.com/webhook/${{ secrets.TELEGRAM_BOT_TOKEN }} \
             -H "Content-Type: application/json" \
-            -d "$DATA"
+            -d '{
+              "event": "release",
+              "title": "...",
+              "tag": "...",
+              "branch": "...",
+              "repo": "...",
+              "thread_id": "..."
+            }'
       
   build-desktop:
     needs: release
