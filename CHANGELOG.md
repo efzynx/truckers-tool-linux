@@ -6,20 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.1.4-beta.1] - 2026-03-19
+## [1.1.4] - 2026-03-23
 
 ### Added
-- **Mod Inspector**: Fitur untuk melihat daftar Mod dan DLC yang aktif dari file `info.sii` langsung di Dashboard untuk profil atau save game terpilih.
-- **Clickable Version Badge**: Mengaktifkan klik pada badge versi di `WelcomeScreen` untuk membuka profil/tentang sistem.
-- **Docs Button**: Tombol navigasi ke portal dokumentasi dinamis di header welcome screen.
-- **Tampilan**: Mengubah `background-position` hero image di `WelcomeScreen.tsx` ke persentase `bg-[center_65%]` agar tidak terpotong di desktop.
+- **Mod Inspector**: Feature to view the list of active Mods and DLCs from the `info.sii` file directly on the Dashboard for the selected profile or save game.
+- **Clickable Version Badge**: Enabled clicking on the version badge in `WelcomeScreen` to open the profile/about system.
+- **Docs Button**: Navigation button to the dynamic documentation portal in the welcome screen header.
+- **Visuals**: Changed `background-position` of the hero image in `WelcomeScreen.tsx` to `bg-[center_65%]` to prevent it from being cut off on desktop.
 
 ### Changed
-- **Responsive Layout**: Version badge sekarang dapat terlihat di semua ukuran layar (sebelumnya tersembunyi pada mode mobile).
+- **Documentation Links**: Updated documentation URLs for dynamic language routing.
+- **Backend API Domain**: Updated backend API endpoints in the desktop app.
+- **Responsive Layout**: Version badge is now visible on all screen sizes (previously hidden on mobile mode).
 
 ### Fixed
-- **CI/CD Workflow**: Perbaikan logika extract full-changelog untuk notifikasi Telegram di GitHub Actions.
-- **Version Comparison**: Perbaikan `versionCompare` untuk penanganan urutan hierarki pre-release yang aman.
+- **CI/CD Workflow**: Fixed full-changelog extraction logic for Telegram notifications in GitHub Actions.
+- **Version Comparison**: Fixed `versionCompare` to handle pre-release hierarchy order safely.
 
 ## [1.1.3] - 2026-03-19
 

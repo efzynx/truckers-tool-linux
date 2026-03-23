@@ -51,10 +51,6 @@ desain/
 backend/
 release/
 
-# AI
-.agents/
-
-
 IMPLEMENTATION-PLAN-RESTORE.md
 DEVELOPMENT.md
 ttl-docs/

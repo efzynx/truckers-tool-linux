@@ -19,7 +19,7 @@ export default function WelcomeScreen({ onSelect }: WelcomeScreenProps) {
       {/* Top Right Utilities Fixed Position */}
       <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
         <a 
-          href={`https://docs.ttl.efzyn.my.id/${language}/`}
+          href={`https://docs.ttl.my.id/${language}/`}
           target="_blank"
           rel="noopener noreferrer"
           title={t('welcome.docs')}

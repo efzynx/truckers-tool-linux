@@ -211,7 +211,7 @@ jobs:
         env:
           CLIENT_API_KEY: ${{ secrets.CLIENT_API_KEY }}
           NEXT_PUBLIC_CLIENT_API_KEY: ${{ secrets.NEXT_PUBLIC_CLIENT_API_KEY }}
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api-ttl.efzyn.my.id/api/v1' }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api.ttl.my.id/api/v1' }}
         run: npm run build:all && npx electron-builder --publish never
 
       - name: "🔍 Debug: List build output"
