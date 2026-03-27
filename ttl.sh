@@ -295,15 +295,157 @@ EOF
   echo ""
 }
 
+# ─── Install Desktop (AppImage) ──────────────────────────────────────────────────────
+
+do_install_desktop() {
+  info "Memulai instalasi Desktop App (AppImage)..."
+  echo ""
+
+  # 1. Cek Node.js via NVM (v24)
+  info "Memeriksa dependensi Node.js v24..."
+  export NVM_DIR="$HOME/.nvm"
+  if [ -s "$NVM_DIR/nvm.sh" ]; then
+    # shellcheck disable=SC1091
+    \. "$NVM_DIR/nvm.sh"
+  fi
+  
+  if ! command -v node &>/dev/null || [ "$(node -v | cut -d. -f1)" != "v24" ]; then
+    info "Mengunduh dan memasang nvm..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+    # shellcheck disable=SC1091
+    \. "$HOME/.nvm/nvm.sh"
+    info "Memasang Node.js v24..."
+    nvm install 24
+  else
+    info "Node.js v24 sudah terinstall."
+  fi
+
+  # 2. Cek AppImageLauncher
+  echo ""
+  info "Memeriksa AppImageLauncher..."
+  if ! command -v appimagelauncher &>/dev/null; then
+    warn "AppImageLauncher tidak ditemukan."
+    if [ -f /etc/os-release ]; then
+      # shellcheck disable=SC1091
+      source /etc/os-release
+      if [[ "$ID" == "arch" || "$ID_LIKE" == *"arch"* ]]; then
+        info "Terdeteksi distribusi berbasis Arch Linux."
+        read -rp "Apakah Anda ingin menginstall AppImageLauncher via AUR? (y/N): " confirm_aur
+        if [[ "$confirm_aur" =~ ^[Yy]$ ]]; then
+          if command -v yay &>/dev/null; then
+            yay -S appimagelauncher
+          elif command -v paru &>/dev/null; then
+            paru -S appimagelauncher
+          else
+            warn "AUR helper (yay/paru) tidak ditemukan. Silakan install manual."
+          fi
+        fi
+      else
+        info "Untuk distro diluar Arch Linux (seperti Ubuntu, Fedora, dsb):"
+        echo -e "  Silakan download rilis ${BOLD}stable${NC} (.deb, .rpm) dari repository GitHub resmi:"
+        echo -e "  ${CYAN}https://github.com/TheAssassin/AppImageLauncher/releases${NC}"
+        echo -e "  Mohon untuk ${BOLD}TIDAK${NC} menggunakan pre-release!"
+        echo ""
+      fi
+    fi
+  else
+    info "AppImageLauncher sudah terinstall."
+  fi
+  
+  # 3. Pilih versi AppImage
+  echo ""
+  echo "Pilih versi AppImage yang ingin diunduh:"
+  echo "  1) Stable (Rekomendasi)"
+  echo "  2) Beta (Pre-release)"
+  echo "  3) Alpha (Eksperimental)"
+  read -rp "Pilihan [1/2/3] (default: 1): " ver_choice
+  
+  local version_type="stable"
+  if [ "$ver_choice" = "2" ]; then
+    version_type="beta"
+  elif [ "$ver_choice" = "3" ]; then
+    version_type="alpha"
+  fi
+  
+  echo ""
+  info "Mencari tautan rilis untuk versi $version_type..."
+  local download_url=""
+  
+  if [ "$version_type" = "stable" ]; then
+    download_url=$(curl -fsSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" 2>/dev/null | grep '"browser_download_url"' | grep -i '\.AppImage"' | head -1 | sed -E 's/.*"browser_download_url":\s*"([^"]+)".*/\1/')
+  elif [ "$version_type" = "beta" ]; then
+    local b_tag
+    b_tag=$(get_latest_beta_tag)
+    if [ -n "$b_tag" ]; then
+      download_url=$(curl -fsSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/tags/${b_tag}" 2>/dev/null | grep '"browser_download_url"' | grep -i '\.AppImage"' | head -1 | sed -E 's/.*"browser_download_url":\s*"([^"]+)".*/\1/')
+    fi
+  elif [ "$version_type" = "alpha" ]; then
+    local a_tag
+    a_tag=$(get_latest_alpha_tag)
+    if [ -n "$a_tag" ]; then
+      download_url=$(curl -fsSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/tags/${a_tag}" 2>/dev/null | grep '"browser_download_url"' | grep -i '\.AppImage"' | head -1 | sed -E 's/.*"browser_download_url":\s*"([^"]+)".*/\1/')
+    fi
+  fi
+  
+  if [ -z "$download_url" ]; then
+    error "Gagal menemukan tautan download (.AppImage) untuk versi $version_type."
+    exit 1
+  fi
+  
+  info "Mengunduh AppImage dari:"
+  info "$download_url"
+  
+  local apps_dir="$HOME/Applications"
+  mkdir -p "$apps_dir"
+  
+  # Extract filename from URL
+  local filename
+  filename=$(basename "$download_url")
+  local target_path="$apps_dir/$filename"
+  
+  curl -L "$download_url" -o "$target_path"
+  chmod +x "$target_path"
+  
+  echo ""
+  info "✅ Instalasi Desktop App Selesai!"
+  echo -e "  File AppImage telah disimpan di ${BOLD}$target_path${NC}"
+  echo -e "  Jika AppImageLauncher terinstall aktif, fitur integrasi menu aplikasi akan berjalan otomatis."
+  echo ""
+}
+
 # ─── Install ──────────────────────────────────────────────────────
 
 do_install() {
+  local target_type="$1"
   print_banner
   info "Memulai instalasi Truckers Tool Linux..."
   echo ""
 
+  if [ "$target_type" = "-w" ] || [ "$target_type" = "webapp" ]; then
+    target_type="webapp"
+  elif [ "$target_type" = "-d" ] || [ "$target_type" = "desktopapp" ]; then
+    target_type="desktopapp"
+  else
+    echo "Pilih tipe instalasi:"
+    echo "  1) Web App (Lokal)"
+    echo "  2) Desktop App (AppImage)"
+    read -rp "Pilihan [1/2] (default: 1): " install_choice
+    
+    if [ "$install_choice" = "2" ]; then
+      target_type="desktopapp"
+    else
+      target_type="webapp"
+    fi
+    echo ""
+  fi
+
+  if [ "$target_type" = "desktopapp" ]; then
+    do_install_desktop
+    return 0
+  fi
+
   # Check prerequisites
-  info "Memeriksa prasyarat..."
+  info "Memeriksa prasyarat (Web App)..."
 
   if ! check_command git; then
     error "git tidak ditemukan. Install dengan: sudo apt install git"
@@ -613,7 +755,9 @@ show_help() {
   echo "  ./ttl.sh <command>"
   echo ""
   echo -e "${BOLD}Commands:${NC}"
-  echo "  install,  -i,  --install     Install app (clone + npm install)"
+  echo "  install,  -i,  --install     Install app (default prompt)"
+  echo "  install -d, -Id              Install versi desktop (AppImage)"
+  echo "  install -w, -Iw              Install versi web (Lokal)"
   echo "  setup,         --setup       Generate settings.yml (interaktif)"
   echo "  start,    -s,  --start       Jalankan web app (PM2/npm start)"
   echo "  stop,          --stop        Stop app (PM2)"
@@ -630,7 +774,9 @@ show_help() {
   echo ""
   echo -e "${BOLD}Contoh:${NC}"
   echo "  ./ttl.sh node                # Install Node.js"
-  echo "  ./ttl.sh install             # Install app"
+  echo "  ./ttl.sh install             # Install app (interaktif)"
+  echo "  ./ttl.sh -Id                 # Install Desktop App"
+  echo "  ./ttl.sh -Iw                 # Install Web App"
   echo "  ./ttl.sh setup               # Generate settings.yml"
   echo "  ./ttl.sh start               # Jalankan web app"
   echo "  ./ttl.sh stop                # Stop web app"
@@ -650,7 +796,9 @@ if [ $# -eq 0 ]; then
 fi
 
 case "$1" in
-  install|-i|--install)       do_install ;;
+  install|-i|--install)       do_install "$2" ;;
+  -Id)                        do_install "-d" ;;
+  -Iw)                        do_install "-w" ;;
   setup|--setup)              do_setup ;;
   start|-s|--start)           do_start ;;
   stop|--stop)                do_stop ;;

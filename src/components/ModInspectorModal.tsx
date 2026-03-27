@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getMods } from '../hooks/useApi';
 
 export interface ModItem {
   type: string;
@@ -29,15 +30,7 @@ export default function ModInspectorModal({ isOpen, onClose, saveFilePath }: Mod
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/save/mods', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ filePath: saveFilePath }),
-      });
-
-      const result = await res.json();
+      const result = await getMods(saveFilePath as string);
       if (result.success) {
         setMods(result.mods || []);
       } else {

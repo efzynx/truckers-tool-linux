@@ -81,6 +81,15 @@ export async function parseContent(content: string) {
   return res.json();
 }
 
+export async function getMods(filePath: string) {
+  const res = await fetch(`${API_BASE}/save/mods`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filePath }),
+  });
+  return res.json();
+}
+
 export async function saveChanges(
   filePath: string,
   content: string,
