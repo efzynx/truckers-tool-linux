@@ -16,13 +16,6 @@ export interface AppSettings {
     email: string;
     contact: string;
   };
-  smtp: {
-    host: string;
-    port: number;
-    secure: boolean;
-    user: string;
-    pass: string;
-  };
   paths: {
     ets2: string;
     ats: string;
@@ -43,13 +36,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   admin: {
     email: 'admin@example.com',
     contact: 'Admin',
-  },
-  smtp: {
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    user: '',
-    pass: '',
   },
   paths: {
     ets2: '~/Documents/Euro Truck Simulator 2/profiles/',
@@ -103,7 +89,6 @@ export function loadSettings(): AppSettings {
       _settings = {
         app: { ...DEFAULT_SETTINGS.app, ...(parsed?.app || {}) },
         admin: { ...DEFAULT_SETTINGS.admin, ...(parsed?.admin || {}) },
-        smtp: { ...DEFAULT_SETTINGS.smtp, ...(parsed?.smtp || {}) },
         paths: { ...DEFAULT_SETTINGS.paths, ...(parsed?.paths || {}) },
         upload: { ...DEFAULT_SETTINGS.upload, ...(parsed?.upload || {}) },
       };

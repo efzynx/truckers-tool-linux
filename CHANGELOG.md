@@ -6,13 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.1.5-beta.1] - 2026-03-30
+## [1.1.5] - 2026-03-30
 
 ### Added
 - **Desktop Installer (AppImage):** Updated `ttl.sh` installer script to interactively and directly support Desktop App (AppImage) installations, including specific CLI arguments (`-Id`, `-Iw`, etc.).
 - **Desktop Dependencies:** Implemented OS detection to handle `AppImageLauncher` requirements automatically or via instructions, and added automated `Node.js v24` dependency installation via `nvm`.
 
+### Removed
+- **SMTP Configuration**: Removed unused SMTP configuration prompts from the interactive `./ttl.sh setup` script and internal system settings, as a dedicated backend is now used for the support module.
+
 ### Fixed
+- **PM2 Initialization**: Auto-create `logs` directory in `ecosystem.config.cjs` to prevent `ENOENT` crashes during server startups.
 - **Mod Inspector (Desktop App):** Fixed a bug where Mod Inspector would throw a `<!DOCTYPE` JSON parsing error on Desktop by modifying `ModInspectorModal` to rely on the dynamic API base from `useApi.ts` instead of a hardcoded relative path.
 
 ## [1.1.4] - 2026-03-23

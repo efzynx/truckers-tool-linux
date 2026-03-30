@@ -231,15 +231,6 @@ do_setup() {
   admin_contact="${admin_contact:-Admin}"
   echo ""
 
-  echo -e "${BOLD}── SMTP Relay (opsional, tekan Enter untuk skip) ──${NC}"
-  read -rp "SMTP host [smtp.gmail.com]: " smtp_host
-  smtp_host="${smtp_host:-smtp.gmail.com}"
-  read -rp "SMTP port [587]: " smtp_port
-  smtp_port="${smtp_port:-587}"
-  read -rp "SMTP user (email): " smtp_user
-  read -rsp "SMTP pass (hidden): " smtp_pass
-  echo ""
-  echo ""
 
   echo -e "${BOLD}── Game Paths ──${NC}"
   local default_ets2="~/Documents/Euro Truck Simulator 2/profiles/"
@@ -270,13 +261,6 @@ app:
 admin:
   email: "${admin_email}"
   contact: "${admin_contact}"
-
-smtp:
-  host: "${smtp_host}"
-  port: ${smtp_port}
-  secure: false
-  user: "${smtp_user}"
-  pass: "${smtp_pass}"
 
 paths:
   ets2: "${path_ets2}"
