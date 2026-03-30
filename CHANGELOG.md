@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.1.5-alpha.1] - 2026-03-27
+## [1.1.5-beta.1] - 2026-03-30
 
 ### Added
 - **Desktop Installer (AppImage):** Updated `ttl.sh` installer script to interactively and directly support Desktop App (AppImage) installations, including specific CLI arguments (`-Id`, `-Iw`, etc.).

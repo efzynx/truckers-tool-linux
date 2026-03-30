@@ -9,7 +9,7 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
   <video src="https://github.com/user-attachments/assets/5e24ae57-1105-4c20-9898-d50ba566b7ee" width="100%" autoplay muted loop></video>
 </div>
 
-![Platform](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.3-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
+![Platform](https://img.shields.io/badge/Platform-Linux-blue?style=flat-square) ![Node](https://img.shields.io/badge/Node.js-18%2B-green?style=flat-square) ![Version](https://img.shields.io/badge/Version-1.1.5--beta.1-brightgreen?style=flat-square) ![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)
 
 ## ✨ Features
 
@@ -89,7 +89,9 @@ npm run pm2:start
 
 | Command | Description |
 |---|---|
-| `./ttl.sh install` | Install app (clone repo + npm install) |
+| `./ttl.sh install` | Install app (interactive setup) |
+| `./ttl.sh -Id` | Install Desktop App (AppImage) |
+| `./ttl.sh -Iw` | Install Web App (Local server) |
 | `./ttl.sh setup` | Generate settings.yml (interactive) |
 | `./ttl.sh start` | Run web app (PM2 if available, fallback npm start) |
 | `./ttl.sh stop` | Stop app (PM2) |
