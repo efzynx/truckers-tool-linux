@@ -4,6 +4,14 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 
+try {
+  if (!fs.existsSync('./logs')) {
+    fs.mkdirSync('./logs');
+  }
+} catch (err) {
+  // abaikan error jika tidak bisa membuat folder
+}
+
 // Read settings
 let portFrontend = 3214;
 let portBackend = 8097;
