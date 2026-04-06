@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.6-alpha.1] - 2026-04-07
+
+### Added
+- **Installer Language Selection**: Added bilingual (English / Bahasa Indonesia) language picker to `ttl.sh`. Language preference is saved to `~/.config/ttl/language` and reused on subsequent runs — no repeated prompts. A `msg()` dual-language helper function is used throughout the script for all user-facing messages.
+- **`npm start` Script**: Added a `start` script to `package.json` that runs `next start -p 3214` and `node dist-server/index.cjs` concurrently via `concurrently`. This serves as a production-mode foreground alternative to PM2.
+
+### Fixed
+- **PM2 Handling in `./ttl.sh start`**: Replaced the broken `npm start` fallback (script did not exist in `package.json`) with a proper PM2 flow. PM2 is now the recommended runner. If PM2 is not installed, the script explains its purpose and offers to install it via `npm install -g pm2`. If the user declines, the app falls back to `npm start` in foreground mode (Ctrl+C to stop).
+- **AppImageLauncher Auto-Integrate**: After downloading the Desktop App AppImage to `~/Applications`, the installer now automatically attempts integration. It first tries `ail-cli integrate` (silent, no popup). If unavailable, it launches the AppImage in the background via `nohup` to trigger AppImageLauncher's native "Integrate and Run" popup automatically.
+
+### Removed
+- **Admin Email/Contact from Setup Config**: Removed the `── Admin Contact ──` prompt block (email and name inputs) from `./ttl.sh setup`. The `admin` section is also removed from the generated `settings.yml` template, as bug report routing is fully managed by the external backend via environment variables — users do not need to configure this.
+
 ## [1.1.5] - 2026-03-30
 
 ### Added

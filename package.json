@@ -1,7 +1,7 @@
 {
   "name": "truckers-tool-linux",
   "private": true,
-  "version": "1.1.5",
+  "version": "1.1.6-alpha.1",
   "type": "module",
   "main": "dist-electron/main.cjs",
   "homepage": "./",
@@ -14,6 +14,7 @@
     "build:backend": "tsup server/index.ts --format cjs --out-dir dist-server",
     "build:electron": "tsup electron/main.ts electron/preload.ts --format cjs --out-dir dist-electron --external electron,electron-updater,electron-serve",
     "build:all": "npm run build:frontend && npm run build:backend && npm run build:electron",
+    "start": "concurrently -n \"next,api\" -c \"cyan,yellow\" \"next start -p 3214\" \"node dist-server/index.cjs\"",
     "pack": "npm run build:all && electron-builder --dir",
     "dist": "npm run build:all && electron-builder",
     "pm2:start": "pm2 start ecosystem.config.cjs",
