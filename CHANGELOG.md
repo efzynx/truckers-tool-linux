@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.6-alpha.2] - 2026-04-07
+
+### Added
+- **Full Bilingual Translation (EN/ID) in `ttl.sh`**: All user-facing messages across every function (`do_install`, `do_install_node`, `do_install_desktop`, `do_setup`, `do_start`, `do_stop`, `do_check_update`, `do_update`, `show_help`) now fully respect the selected language using the `msg()` helper. Previously, only a subset of messages were translated.
+- **`./ttl.sh lang` Command**: New command to change the language preference at any time without re-running the full installer. Supports `lang en` (English), `lang id` (Indonesian), and `lang` (interactive re-picker). Changes are saved instantly to `~/.config/ttl/language`.
+- **`set_language()` Internal Helper**: Added internal function to set language preference directly, used by the `lang` command.
+
 ## [1.1.6-alpha.1.1] - 2026-04-07
 
 ### Fixed

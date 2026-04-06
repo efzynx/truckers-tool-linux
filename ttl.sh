@@ -74,6 +74,26 @@ pick_language() {
   echo ""
 }
 
+# Change language directly (used by do_lang)
+set_language() {
+  local lang="$1"
+  mkdir -p "$TTL_CONFIG_DIR"
+  if [ "$lang" = "id" ] || [ "$lang" = "en" ]; then
+    echo "$lang" > "$TTL_LANG_FILE"
+    TTL_LANG="$lang"
+    if [ "$lang" = "id" ]; then
+      echo -e "${GREEN}[INFO]${NC} ✅ Bahasa berhasil diubah ke Bahasa Indonesia."
+    else
+      echo -e "${GREEN}[INFO]${NC} ✅ Language changed to English."
+    fi
+  else
+    echo -e "${RED}[ERROR]${NC} Invalid language. Use: en or id"
+    echo "  Example: ./ttl.sh lang en"
+    echo "  Example: ./ttl.sh lang id"
+    exit 1
+  fi
+}
+
 # Dual-language message helper
 # Usage: msg "English" "Indonesia"
 msg() {
@@ -195,22 +215,22 @@ do_install_node() {
   print_banner
 
   if check_command node && check_node_version; then
-    info "Node.js sudah terinstall: $(node -v)"
-    read -rp "Install ulang via nvm? (y/N): " confirm
+    info "$(msg "Node.js is already installed: $(node -v)" "Node.js sudah terinstall: $(node -v)")"
+    read -rp "$(msg "Reinstall via nvm? (y/N): " "Install ulang via nvm? (y/N): ")" confirm
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
       return 0
     fi
   fi
 
-  info "Menginstall Node.js via nvm..."
+  info "$(msg "Installing Node.js via nvm..." "Menginstall Node.js via nvm...")"
   echo ""
 
   # Install nvm
   if [ ! -d "$HOME/.nvm" ]; then
-    info "Downloading nvm..."
+    info "$(msg "Downloading nvm..." "Mengunduh nvm...")"
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
   else
-    info "nvm sudah terinstall."
+    info "$(msg "nvm is already installed." "nvm sudah terinstall.")"
   fi
 
   # Load nvm
@@ -219,11 +239,11 @@ do_install_node() {
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
   # Install Node.js
-  info "Downloading dan installing Node.js..."
+  info "$(msg "Downloading and installing Node.js..." "Mengunduh dan menginstall Node.js...")"
   nvm install 24
   echo ""
 
-  info "✅ Node.js terinstall!"
+  info "✅ $(msg "Node.js installed!" "Node.js terinstall!")"
   echo -e "  Node: ${BOLD}$(node -v)${NC}"
   echo -e "  npm:  ${BOLD}$(npm -v)${NC}"
   echo ""
@@ -308,11 +328,11 @@ SETTINGSEOF
 # ─── Install Desktop (AppImage) ──────────────────────────────────────────────────────
 
 do_install_desktop() {
-  info "Memulai instalasi Desktop App (AppImage)..."
+  info "$(msg "Starting Desktop App (AppImage) installation..." "Memulai instalasi Desktop App (AppImage)...")"
   echo ""
 
-  # 1. Cek Node.js via NVM (v24)
-  info "Memeriksa dependensi Node.js v24..."
+  # 1. Check Node.js via NVM (v24)
+  info "$(msg "Checking Node.js v24 dependency..." "Memeriksa dependensi Node.js v24...")"
   export NVM_DIR="$HOME/.nvm"
   if [ -s "$NVM_DIR/nvm.sh" ]; then
     # shellcheck disable=SC1091
@@ -320,55 +340,55 @@ do_install_desktop() {
   fi
   
   if ! command -v node &>/dev/null || [ "$(node -v | cut -d. -f1)" != "v24" ]; then
-    info "Mengunduh dan memasang nvm..."
+    info "$(msg "Downloading and installing nvm..." "Mengunduh dan memasang nvm...")"
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
     # shellcheck disable=SC1091
     \. "$HOME/.nvm/nvm.sh"
-    info "Memasang Node.js v24..."
+    info "$(msg "Installing Node.js v24..." "Memasang Node.js v24...")"
     nvm install 24
   else
-    info "Node.js v24 sudah terinstall."
+    info "$(msg "Node.js v24 is already installed." "Node.js v24 sudah terinstall.")"
   fi
 
-  # 2. Cek AppImageLauncher
+  # 2. Check AppImageLauncher
   echo ""
-  info "Memeriksa AppImageLauncher..."
+  info "$(msg "Checking AppImageLauncher..." "Memeriksa AppImageLauncher...")"
   if ! command -v appimagelauncher &>/dev/null; then
-    warn "AppImageLauncher tidak ditemukan."
+    warn "$(msg "AppImageLauncher not found." "AppImageLauncher tidak ditemukan.")"
     if [ -f /etc/os-release ]; then
       # shellcheck disable=SC1091
       source /etc/os-release
       if [[ "$ID" == "arch" || "$ID_LIKE" == *"arch"* ]]; then
-        info "Terdeteksi distribusi berbasis Arch Linux."
-        read -rp "Apakah Anda ingin menginstall AppImageLauncher via AUR? (y/N): " confirm_aur
+        info "$(msg "Detected Arch Linux-based distribution." "Terdeteksi distribusi berbasis Arch Linux.")"
+        read -rp "$(msg "Install AppImageLauncher via AUR? (y/N): " "Install AppImageLauncher via AUR? (y/N): ")" confirm_aur
         if [[ "$confirm_aur" =~ ^[Yy]$ ]]; then
           if command -v yay &>/dev/null; then
             yay -S appimagelauncher
           elif command -v paru &>/dev/null; then
             paru -S appimagelauncher
           else
-            warn "AUR helper (yay/paru) tidak ditemukan. Silakan install manual."
+            warn "$(msg "AUR helper (yay/paru) not found. Please install manually." "AUR helper (yay/paru) tidak ditemukan. Silakan install manual.")"
           fi
         fi
       else
-        info "Untuk distro diluar Arch Linux (seperti Ubuntu, Fedora, dsb):"
-        echo -e "  Silakan download rilis ${BOLD}stable${NC} (.deb, .rpm) dari repository GitHub resmi:"
+        info "$(msg "For non-Arch distros (Ubuntu, Fedora, etc):" "Untuk distro diluar Arch Linux (seperti Ubuntu, Fedora, dsb):")" 
+        echo -e "  $(msg "Please download the ${BOLD}stable${NC} release (.deb, .rpm) from the official GitHub repository:" "Silakan download rilis ${BOLD}stable${NC} (.deb, .rpm) dari repository GitHub resmi:")"
         echo -e "  ${CYAN}https://github.com/TheAssassin/AppImageLauncher/releases${NC}"
-        echo -e "  Mohon untuk ${BOLD}TIDAK${NC} menggunakan pre-release!"
+        echo -e "  $(msg "Please do ${BOLD}NOT${NC} use pre-releases!" "Mohon untuk ${BOLD}TIDAK${NC} menggunakan pre-release!")"
         echo ""
       fi
     fi
   else
-    info "AppImageLauncher sudah terinstall."
+    info "$(msg "AppImageLauncher is already installed." "AppImageLauncher sudah terinstall.")"
   fi
   
-  # 3. Pilih versi AppImage
+  # 3. Select AppImage version
   echo ""
-  echo "Pilih versi AppImage yang ingin diunduh:"
-  echo "  1) Stable (Rekomendasi)"
+  msg "Select AppImage version to download:" "Pilih versi AppImage yang ingin diunduh:"
+  echo "  1) Stable ($(msg 'Recommended' 'Rekomendasi'))"
   echo "  2) Beta (Pre-release)"
-  echo "  3) Alpha (Eksperimental)"
-  read -rp "Pilihan [1/2/3] (default: 1): " ver_choice
+  echo "  3) Alpha ($(msg 'Experimental' 'Eksperimental'))"
+  read -rp "$(msg 'Choice [1/2/3] (default: 1): ' 'Pilihan [1/2/3] (default: 1): ')" ver_choice
   
   local version_type="stable"
   if [ "$ver_choice" = "2" ]; then
@@ -378,7 +398,7 @@ do_install_desktop() {
   fi
   
   echo ""
-  info "Mencari tautan rilis untuk versi $version_type..."
+  info "$(msg "Looking for release link for $version_type version..." "Mencari tautan rilis untuk versi $version_type...")"
   local download_url=""
   
   if [ "$version_type" = "stable" ]; then
@@ -398,11 +418,11 @@ do_install_desktop() {
   fi
   
   if [ -z "$download_url" ]; then
-    error "Gagal menemukan tautan download (.AppImage) untuk versi $version_type."
+    error "$(msg "Failed to find download link (.AppImage) for $version_type version." "Gagal menemukan tautan download (.AppImage) untuk versi $version_type.")"
     exit 1
   fi
   
-  info "Mengunduh AppImage dari:"
+  info "$(msg "Downloading AppImage from:" "Mengunduh AppImage dari:")"
   info "$download_url"
   
   local apps_dir="$HOME/Applications"
@@ -450,7 +470,7 @@ do_install_desktop() {
 do_install() {
   local target_type="$1"
   print_banner
-  info "Memulai instalasi Truckers Tool Linux..."
+  info "$(msg "Starting Truckers Tool Linux installation..." "Memulai instalasi Truckers Tool Linux...")"
   echo ""
 
   if [ "$target_type" = "-w" ] || [ "$target_type" = "webapp" ]; then
@@ -458,10 +478,10 @@ do_install() {
   elif [ "$target_type" = "-d" ] || [ "$target_type" = "desktopapp" ]; then
     target_type="desktopapp"
   else
-    echo "Pilih tipe instalasi:"
-    echo "  1) Web App (Lokal)"
+    msg "Select installation type:" "Pilih tipe instalasi:"
+    echo "  1) Web App ($(msg 'Local' 'Lokal'))"
     echo "  2) Desktop App (AppImage)"
-    read -rp "Pilihan [1/2] (default: 1): " install_choice
+    read -rp "$(msg 'Choice [1/2] (default: 1): ' 'Pilihan [1/2] (default: 1): ')" install_choice
     
     if [ "$install_choice" = "2" ]; then
       target_type="desktopapp"
@@ -477,20 +497,20 @@ do_install() {
   fi
 
   # Check prerequisites
-  info "Memeriksa prasyarat (Web App)..."
+  info "$(msg "Checking prerequisites (Web App)..." "Memeriksa prasyarat (Web App)...")"
 
   if ! check_command git; then
-    error "git tidak ditemukan. Install dengan: sudo apt install git"
+    error "$(msg "git not found. Install with: sudo apt install git" "git tidak ditemukan. Install dengan: sudo apt install git")"
     exit 1
   fi
 
   if ! check_command node || ! check_node_version; then
-    warn "Node.js v${MIN_NODE_VERSION}+ tidak ditemukan."
+    warn "$(msg "Node.js v${MIN_NODE_VERSION}+ not found." "Node.js v${MIN_NODE_VERSION}+ tidak ditemukan.")"
     echo ""
-    echo -e "  Jalankan ${BOLD}./ttl.sh node${NC} untuk install Node.js via nvm."
-    echo -e "  Atau install manual dari ${CYAN}https://nodejs.org${NC}"
+    echo -e "  $(msg "Run ${BOLD}./ttl.sh node${NC} to install Node.js via nvm." "Jalankan ${BOLD}./ttl.sh node${NC} untuk install Node.js via nvm.")"
+    echo -e "  $(msg "Or install manually from ${CYAN}https://nodejs.org${NC}" "Atau install manual dari ${CYAN}https://nodejs.org${NC}")"
     echo ""
-    read -rp "Install Node.js sekarang via nvm? (Y/n): " confirm
+    read -rp "$(msg 'Install Node.js now via nvm? (Y/n): ' 'Install Node.js sekarang via nvm? (Y/n): ')" confirm
     if [[ ! "$confirm" =~ ^[Nn]$ ]]; then
       do_install_node
     else
@@ -498,44 +518,44 @@ do_install() {
     fi
   fi
 
-  info "✅ Prasyarat terpenuhi (Node $(node -v), npm $(npm -v))"
+  info "✅ $(msg "Prerequisites met (Node $(node -v), npm $(npm -v))" "Prasyarat terpenuhi (Node $(node -v), npm $(npm -v))")"
   echo ""
 
   # Clone repo
   if [ -d "$INSTALL_DIR" ]; then
-    warn "Direktori $INSTALL_DIR sudah ada."
-    read -rp "Hapus dan install ulang? (y/N): " confirm
+    warn "$(msg "Directory $INSTALL_DIR already exists." "Direktori $INSTALL_DIR sudah ada.")"
+    read -rp "$(msg 'Delete and reinstall? (y/N): ' 'Hapus dan install ulang? (y/N): ')" confirm
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
       rm -rf "$INSTALL_DIR"
     else
-      info "Instalasi dibatalkan."
+      info "$(msg "Installation cancelled." "Instalasi dibatalkan.")"
       exit 0
     fi
   fi
 
-  info "Cloning repository..."
+  info "$(msg "Cloning repository..." "Mengkloning repository...")"
   git clone "$REPO_URL" "$INSTALL_DIR"
   echo ""
 
   # Install dependencies
-  info "Menginstall dependencies..."
+  info "$(msg "Installing dependencies..." "Menginstall dependensi...")"
   cd "$INSTALL_DIR"
   npm install
   echo ""
 
   # Prompt to run setup
   echo ""
-  read -rp "Jalankan setup konfigurasi settings.yml sekarang? (Y/n): " confirm
+  read -rp "$(msg 'Run settings.yml configuration setup now? (Y/n): ' 'Jalankan setup konfigurasi settings.yml sekarang? (Y/n): ')" confirm
   if [[ ! "$confirm" =~ ^[Nn]$ ]]; then
     do_setup
   else
-    info "Kamu bisa menjalankan ${BOLD}./ttl.sh setup${NC} nanti untuk membuat settings.yml."
+    info "$(msg "You can run ${BOLD}./ttl.sh setup${NC} later to create settings.yml." "Kamu bisa menjalankan ${BOLD}./ttl.sh setup${NC} nanti untuk membuat settings.yml.")"
   fi
 
-  info "✅ Instalasi selesai! (v${CURRENT_VERSION})"
+  info "✅ $(msg "Installation complete! (v${CURRENT_VERSION})" "Instalasi selesai! (v${CURRENT_VERSION})")"
   echo ""
-  echo -e "  ${BOLD}Lokasi:${NC}    $INSTALL_DIR"
-  echo -e "  ${BOLD}Jalankan:${NC}  ./ttl.sh start"
+  echo -e "  ${BOLD}$(msg 'Location:' 'Lokasi:')${NC}    $INSTALL_DIR"
+  echo -e "  ${BOLD}$(msg 'Run:' 'Jalankan:')${NC}  ./ttl.sh start"
   echo ""
 }
 
@@ -545,8 +565,8 @@ do_start() {
   print_banner
 
   if [ ! -d "$INSTALL_DIR" ]; then
-    error "Truckers Tool belum terinstall."
-    echo -e "  Jalankan: ${BOLD}./ttl.sh install${NC}"
+    error "$(msg "Truckers Tool is not installed." "Truckers Tool belum terinstall.")"
+    echo -e "  $(msg "Run:" "Jalankan:") ${BOLD}./ttl.sh install${NC}"
     exit 1
   fi
 
@@ -556,7 +576,7 @@ do_start() {
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 2>/dev/null
 
   if ! check_command node; then
-    error "Node.js tidak ditemukan. Jalankan: ./ttl.sh node"
+    error "$(msg "Node.js not found. Run: ./ttl.sh node" "Node.js tidak ditemukan. Jalankan: ./ttl.sh node")"
     exit 1
   fi
 
@@ -564,8 +584,8 @@ do_start() {
 
   # Check settings.yml
   if [ ! -f "settings.yml" ]; then
-    warn "settings.yml tidak ditemukan."
-    read -rp "Buat settings.yml sekarang? (Y/n): " confirm
+    warn "$(msg "settings.yml not found." "settings.yml tidak ditemukan.")"
+    read -rp "$(msg 'Create settings.yml now? (Y/n): ' 'Buat settings.yml sekarang? (Y/n): ')" confirm
     if [[ ! "$confirm" =~ ^[Nn]$ ]]; then
       do_setup
     fi
@@ -576,13 +596,13 @@ do_start() {
   local port_be
   port_be=$(read_settings_value "port_backend" "$DEFAULT_PORT_BACKEND")
 
-  info "Menjalankan Truckers Tool Linux v${CURRENT_VERSION}..."
+  info "$(msg "Starting Truckers Tool Linux v${CURRENT_VERSION}..." "Menjalankan Truckers Tool Linux v${CURRENT_VERSION}...")"
   info "🌐 Web App: ${BOLD}http://localhost:${port_fe}${NC}"
   info "📡 API:     ${BOLD}http://localhost:${port_be}${NC}"
   echo ""
 
   # Build first
-  info "Membangun production build..."
+  info "$(msg "Building production build..." "Membangun production build...")"
   npm run build
   echo ""
 
@@ -625,14 +645,14 @@ do_stop() {
   print_banner
 
   if ! check_command pm2; then
-    error "PM2 tidak terinstall. Install dengan: npm install -g pm2"
+    error "$(msg "PM2 is not installed. Install with: npm install -g pm2" "PM2 tidak terinstall. Install dengan: npm install -g pm2")"
     exit 1
   fi
 
-  info "Menghentikan Truckers Tool..."
+  info "$(msg "Stopping Truckers Tool..." "Menghentikan Truckers Tool...")"
   cd "$INSTALL_DIR" 2>/dev/null || true
   pm2 stop ecosystem.config.cjs 2>/dev/null || pm2 stop ttl-frontend ttl-backend 2>/dev/null || true
-  info "✅ App dihentikan."
+  info "✅ $(msg "App stopped." "App dihentikan.")"
   echo ""
 }
 
@@ -640,27 +660,27 @@ do_stop() {
 
 do_check_update() {
   print_banner
-  info "Versi saat ini: ${BOLD}v${CURRENT_VERSION}${NC}"
-  info "Memeriksa update dari GitHub Releases..."
+  info "$(msg "Current version:" "Versi saat ini:") ${BOLD}v${CURRENT_VERSION}${NC}"
+  info "$(msg "Checking for updates from GitHub Releases..." "Memeriksa update dari GitHub Releases...")"
   echo ""
 
   local latest
   latest=$(get_latest_version)
 
   if [ -z "$latest" ]; then
-    warn "Tidak bisa mengambil info release. Cek koneksi internet."
+    warn "$(msg "Could not fetch release info. Check internet connection." "Tidak bisa mengambil info release. Cek koneksi internet.")"
     echo ""
     return
   fi
 
-  info "Versi terbaru (stable): ${BOLD}v${latest}${NC}"
+  info "$(msg "Latest stable version:" "Versi terbaru (stable):") ${BOLD}v${latest}${NC}"
 
   if version_lt "$CURRENT_VERSION" "$latest"; then
     echo ""
-    warn "🆕 Update tersedia! v${CURRENT_VERSION} → v${latest}"
-    echo -e "  Jalankan ${BOLD}./ttl.sh update${NC} untuk update."
+    warn "🆕 $(msg "Update available! v${CURRENT_VERSION} → v${latest}" "Update tersedia! v${CURRENT_VERSION} → v${latest}")"
+    echo -e "  $(msg "Run ${BOLD}./ttl.sh update${NC} to update." "Jalankan ${BOLD}./ttl.sh update${NC} untuk update.")"
   else
-    info "✅ Sudah versi terbaru!"
+    info "✅ $(msg "Already up to date!" "Sudah versi terbaru!")"
   fi
 
   # Check beta release
@@ -668,8 +688,8 @@ do_check_update() {
   beta=$(get_latest_beta)
   if [ -n "$beta" ] && version_lt "$CURRENT_VERSION" "$beta"; then
     echo ""
-    echo -e "  ${DIM}🧪 Pre-release tersedia: v${beta} (beta/tester)${NC}"
-    echo -e "  ${DIM}Jalankan ${BOLD}./ttl.sh update --beta${NC}${DIM} untuk install.${NC}"
+    echo -e "  ${DIM}🧪 $(msg "Pre-release available: v${beta} (beta/tester)" "Pre-release tersedia: v${beta} (beta/tester)")${NC}"
+    echo -e "  ${DIM}$(msg "Run ${BOLD}./ttl.sh update --beta${NC}${DIM} to install." "Jalankan ${BOLD}./ttl.sh update --beta${NC}${DIM} untuk install.")${NC}"
   fi
 
   # Check alpha release
@@ -677,8 +697,8 @@ do_check_update() {
   alpha=$(get_latest_alpha)
   if [ -n "$alpha" ] && version_lt "$CURRENT_VERSION" "$alpha"; then
     echo ""
-    echo -e "  ${DIM}🚧 Alpha release tersedia: v${alpha} (eksperimental)${NC}"
-    echo -e "  ${DIM}Jalankan ${BOLD}./ttl.sh update --alpha${NC}${DIM} untuk install.${NC}"
+    echo -e "  ${DIM}🚧 $(msg "Alpha release available: v${alpha} (experimental)" "Alpha release tersedia: v${alpha} (eksperimental)")${NC}"
+    echo -e "  ${DIM}$(msg "Run ${BOLD}./ttl.sh update --alpha${NC}${DIM} to install." "Jalankan ${BOLD}./ttl.sh update --alpha${NC}${DIM} untuk install.")${NC}"
   fi
   echo ""
 }
@@ -697,66 +717,61 @@ do_update() {
   print_banner
 
   if [ ! -d "$INSTALL_DIR" ]; then
-    error "Truckers Tool belum terinstall."
-    echo -e "  Jalankan: ${BOLD}./ttl.sh install${NC}"
+    error "$(msg "Truckers Tool is not installed." "Truckers Tool belum terinstall.")"
+    echo -e "  $(msg "Run:" "Jalankan:") ${BOLD}./ttl.sh install${NC}"
     exit 1
   fi
 
   cd "$INSTALL_DIR"
 
-  info "Versi saat ini: ${BOLD}v${CURRENT_VERSION}${NC}"
+  info "$(msg "Current version:" "Versi saat ini:") ${BOLD}v${CURRENT_VERSION}${NC}"
 
   if [ "$use_beta" = true ]; then
-    # Update to pre-release (beta)
-    info "🧪 Mengupdate ke versi ${YELLOW}beta (pre-release)${NC}..."
+    info "🧪 $(msg "Updating to ${YELLOW}beta (pre-release)${NC} version..." "Mengupdate ke versi ${YELLOW}beta (pre-release)${NC}...")"
     echo ""
 
     local beta_tag
     beta_tag=$(get_latest_beta_tag)
 
     if [ -z "$beta_tag" ]; then
-      error "Tidak ada beta release yang tersedia."
+      error "$(msg "No beta release available." "Tidak ada beta release yang tersedia.")"
       exit 1
     fi
 
     local beta_ver
     beta_ver=$(echo "$beta_tag" | sed -E 's/^[vV]//')
-    info "Beta terbaru: ${BOLD}v${beta_ver}${NC}"
+    info "$(msg "Latest beta:" "Beta terbaru:") ${BOLD}v${beta_ver}${NC}"
 
-    # Fetch all tags and hard reset
     git fetch origin --tags
     git reset --hard "$beta_tag"
     echo ""
 
-    warn "⚠️  Kamu sekarang di versi beta (${beta_tag})."
-    echo -e "  Untuk kembali ke stable: ${BOLD}./ttl.sh update${NC}"
+    warn "⚠️  $(msg "You are now on beta version (${beta_tag})." "Kamu sekarang di versi beta (${beta_tag}).")"
+    echo -e "  $(msg "To go back to stable:" "Untuk kembali ke stable:") ${BOLD}./ttl.sh update${NC}"
   elif [ "$use_alpha" = true ]; then
-    # Update to alpha
-    info "🚧 Mengupdate ke versi ${CYAN}alpha (eksperimental)${NC}..."
+    info "🚧 $(msg "Updating to ${CYAN}alpha (experimental)${NC} version..." "Mengupdate ke versi ${CYAN}alpha (eksperimental)${NC}...")"
     echo ""
 
     local alpha_tag
     alpha_tag=$(get_latest_alpha_tag)
 
     if [ -z "$alpha_tag" ]; then
-      error "Tidak ada alpha release yang tersedia."
+      error "$(msg "No alpha release available." "Tidak ada alpha release yang tersedia.")"
       exit 1
     fi
 
     local alpha_ver
     alpha_ver=$(echo "$alpha_tag" | sed -E 's/^[vV]//')
-    info "Alpha terbaru: ${BOLD}v${alpha_ver}${NC}"
+    info "$(msg "Latest alpha:" "Alpha terbaru:") ${BOLD}v${alpha_ver}${NC}"
 
-    # Fetch all tags and hard reset
     git fetch origin --tags
     git reset --hard "$alpha_tag"
     echo ""
 
-    warn "⚠️  Kamu sekarang di versi alpha (${alpha_tag})."
-    echo -e "  Untuk kembali ke stable: ${BOLD}./ttl.sh update${NC}"
+    warn "⚠️  $(msg "You are now on alpha version (${alpha_tag})." "Kamu sekarang di versi alpha (${alpha_tag}).")"
+    echo -e "  $(msg "To go back to stable:" "Untuk kembali ke stable:") ${BOLD}./ttl.sh update${NC}"
   else
-    # Update to stable (main branch)
-    info "Mengupdate ke versi ${GREEN}stable${NC}..."
+    info "$(msg "Updating to ${GREEN}stable${NC} version..." "Mengupdate ke versi ${GREEN}stable${NC}...")"
     echo ""
 
     git fetch origin main
@@ -764,16 +779,14 @@ do_update() {
   fi
   echo ""
 
-  # Reinstall dependencies
-  info "Mengupdate dependencies..."
+  info "$(msg "Updating dependencies..." "Mengupdate dependensi...")"
   npm install
   echo ""
 
-  # Update script itself outside the install directory
   if [ -f "$INSTALL_DIR/ttl.sh" ]; then
     local external_script="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
     if [ "$external_script" != "$INSTALL_DIR/ttl.sh" ] && [ -w "$external_script" ]; then
-      info "Mengupdate script ttl.sh di luar direktori instalasi..."
+      info "$(msg "Updating ttl.sh script outside install directory..." "Mengupdate script ttl.sh di luar direktori instalasi...")"
       if [ "$use_beta" = true ]; then
         curl -fsSL "https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/refs/heads/beta/ttl.sh" -o "$external_script" || cp -f "$INSTALL_DIR/ttl.sh" "$external_script"
       else
@@ -783,8 +796,8 @@ do_update() {
     fi
   fi
 
-  info "✅ Update selesai!"
-  echo -e "  Jalankan ${BOLD}./ttl.sh start${NC} untuk memulai."
+  info "✅ $(msg "Update complete!" "Update selesai!")"
+  echo -e "  $(msg "Run ${BOLD}./ttl.sh start${NC} to start." "Jalankan ${BOLD}./ttl.sh start${NC} untuk memulai.")"
   echo ""
 }
 
@@ -796,42 +809,63 @@ do_version() {
 
 # ─── Help ─────────────────────────────────────────────────────────
 
+# ─── Language Switch ──────────────────────────────────────────────
+
+do_lang() {
+  local target_lang="$1"
+  if [ -n "$target_lang" ]; then
+    set_language "$target_lang"
+  else
+    # Interactive picker without saving — overwrite saved file
+    rm -f "$TTL_LANG_FILE"
+    pick_language
+    if [ "$TTL_LANG" = "id" ]; then
+      echo -e "${GREEN}[INFO]${NC} ✅ Bahasa tersimpan: Bahasa Indonesia"
+    else
+      echo -e "${GREEN}[INFO]${NC} ✅ Language saved: English"
+    fi
+  fi
+}
+
 show_help() {
   print_banner
-  echo -e "${BOLD}Penggunaan:${NC}"
+  echo -e "${BOLD}$(msg 'Usage:' 'Penggunaan:')${NC}"
   echo "  ./ttl.sh <command>"
   echo ""
-  echo -e "${BOLD}Commands:${NC}"
-  echo "  install,  -i,  --install     Install app (default prompt)"
-  echo "  install -d, -Id              Install versi desktop (AppImage)"
-  echo "  install -w, -Iw              Install versi web (Lokal)"
-  echo "  setup,         --setup       Generate settings.yml (interaktif)"
-  echo "  start,    -s,  --start       Jalankan web app (PM2/npm start)"
-  echo "  stop,          --stop        Stop app (PM2)"
-  echo "  update,   -u,  --update      Update ke versi terbaru"
-  echo "  check,    -c,  --check       Cek update (via GitHub Releases)"
-  echo "  node,     -n,  --node        Install Node.js via nvm"
-  echo "  version,  -v,  --version     Tampilkan versi saat ini"
-  echo "  help,     -h,  --help        Tampilkan bantuan ini"
+  echo -e "${BOLD}$(msg 'Commands:' 'Perintah:')${NC}"
+  echo "  install,  -i,  --install     $(msg 'Install app (interactive)' 'Install app (interaktif)')"
+  echo "  install -d, -Id              $(msg 'Install Desktop App (AppImage)' 'Install versi desktop (AppImage)')"
+  echo "  install -w, -Iw              $(msg 'Install Web App (Local)' 'Install versi web (Lokal)')"
+  echo "  setup,         --setup       $(msg 'Generate settings.yml (interactive)' 'Generate settings.yml (interaktif)')"
+  echo "  start,    -s,  --start       $(msg 'Start web app (PM2/npm start)' 'Jalankan web app (PM2/npm start)')"
+  echo "  stop,          --stop        $(msg 'Stop app (PM2)' 'Hentikan app (PM2)')"
+  echo "  update,   -u,  --update      $(msg 'Update to latest version' 'Update ke versi terbaru')"
+  echo "  check,    -c,  --check       $(msg 'Check update (via GitHub Releases)' 'Cek update (via GitHub Releases)')"
+  echo "  node,     -n,  --node        $(msg 'Install Node.js via nvm' 'Install Node.js via nvm')"
+  echo "  lang                         $(msg 'Change language (en/id)' 'Ganti bahasa (en/id)')"
+  echo "  version,  -v,  --version     $(msg 'Show current version' 'Tampilkan versi saat ini')"
+  echo "  help,     -h,  --help        $(msg 'Show this help' 'Tampilkan bantuan ini')"
   echo ""
-  echo -e "${BOLD}Options:${NC}"
-  echo "  update --beta                 Update ke pre-release (beta)"
-  echo "  update --alpha                Update ke eksperimental (alpha)"
+  echo -e "${BOLD}$(msg 'Options:' 'Opsi:')${NC}"
+  echo "  update --beta                 $(msg 'Update to pre-release (beta)' 'Update ke pre-release (beta)')"
+  echo "  update --alpha                $(msg 'Update to experimental (alpha)' 'Update ke eksperimental (alpha)')"
   echo "  -IS                           Install + setup + start"
   echo ""
-  echo -e "${BOLD}Contoh:${NC}"
-  echo "  ./ttl.sh node                # Install Node.js"
-  echo "  ./ttl.sh install             # Install app (interaktif)"
-  echo "  ./ttl.sh -Id                 # Install Desktop App"
-  echo "  ./ttl.sh -Iw                 # Install Web App"
-  echo "  ./ttl.sh setup               # Generate settings.yml"
-  echo "  ./ttl.sh start               # Jalankan web app"
-  echo "  ./ttl.sh stop                # Stop web app"
+  echo -e "${BOLD}$(msg 'Examples:' 'Contoh:')${NC}"
+  echo "  ./ttl.sh node                # $(msg 'Install Node.js' 'Install Node.js')"
+  echo "  ./ttl.sh install             # $(msg 'Install app (interactive)' 'Install app (interaktif)')"
+  echo "  ./ttl.sh -Id                 # $(msg 'Install Desktop App' 'Install Desktop App')"
+  echo "  ./ttl.sh -Iw                 # $(msg 'Install Web App' 'Install Web App')"
+  echo "  ./ttl.sh setup               # $(msg 'Generate settings.yml' 'Generate settings.yml')"
+  echo "  ./ttl.sh start               # $(msg 'Start web app' 'Jalankan web app')"
+  echo "  ./ttl.sh stop                # $(msg 'Stop web app' 'Hentikan web app')"
   echo "  ./ttl.sh -IS                 # Install + setup + start"
-  echo "  ./ttl.sh check               # Cek update"
-  echo "  ./ttl.sh update              # Update stable"
-  echo "  ./ttl.sh update --beta       # Update ke beta"
-  echo "  ./ttl.sh update --alpha      # Update ke alpha"
+  echo "  ./ttl.sh check               # $(msg 'Check update' 'Cek update')"
+  echo "  ./ttl.sh update              # $(msg 'Update stable' 'Update ke stable')"
+  echo "  ./ttl.sh update --beta       # $(msg 'Update to beta' 'Update ke beta')"
+  echo "  ./ttl.sh update --alpha      # $(msg 'Update to alpha' 'Update ke alpha')"
+  echo "  ./ttl.sh lang en             # $(msg 'Switch to English' 'Ganti ke Bahasa Inggris')"
+  echo "  ./ttl.sh lang id             # $(msg 'Switch to Indonesian' 'Ganti ke Bahasa Indonesia')"
   echo ""
 }
 
@@ -855,11 +889,12 @@ case "$1" in
   update|-u|--update)         do_update "$2" ;;
   check|-c|--check)           do_check_update ;;
   node|-n|--node)             do_install_node ;;
+  lang|--lang)                do_lang "$2" ;;
   version|-v|--version)       do_version ;;
   -IS)                        do_install; do_setup; do_start ;;
   help|-h|--help)             show_help ;;
   *)
-    error "Command tidak dikenal: $1"
+    error "$(msg "Unknown command: $1" "Command tidak dikenal: $1")"
     echo ""
     show_help
     exit 1
