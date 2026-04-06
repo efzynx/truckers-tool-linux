@@ -6,37 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.1.6-alpha.3] - 2026-04-07
-
-### Fixed
-- **Bug report CORS error on fresh install (`src/hooks/useApi.ts`)**: `NEXT_PUBLIC_API_URL` is a build-time baked variable — when the app is installed from source without `.env.local`, the variable is `undefined` and the fallback was `http://localhost:3000/api/v1`, causing a CORS error. Fixed by hardcoding `https://api.ttl.my.id/api/v1` as the production fallback. Also hardcoded `PRODUCTION_API_KEY` as fallback so the request is always authenticated without requiring manual env setup.
-- **Admin email hardcoded in `backend/src/services/report.service.js`**: Previously, if `ADMIN_EMAIL` env variable was not set on the external backend server, email sending was silently skipped. Fixed by adding `me@efzyn.my.id` as the default fallback so reports are always delivered.
-- **Default admin email updated in `server/utils/settings.ts`**: Changed the misleading `admin@example.com` default to `me@efzyn.my.id`.
-
-## [1.1.6-alpha.2] - 2026-04-07
+## [1.1.6-beta.1] - 2026-04-07
 
 ### Added
-- **Full Bilingual Translation (EN/ID) in `ttl.sh`**: All user-facing messages across every function (`do_install`, `do_install_node`, `do_install_desktop`, `do_setup`, `do_start`, `do_stop`, `do_check_update`, `do_update`, `show_help`) now fully respect the selected language using the `msg()` helper. Previously, only a subset of messages were translated.
-- **`./ttl.sh lang` Command**: New command to change the language preference at any time without re-running the full installer. Supports `lang en` (English), `lang id` (Indonesian), and `lang` (interactive re-picker). Changes are saved instantly to `~/.config/ttl/language`.
-- **`set_language()` Internal Helper**: Added internal function to set language preference directly, used by the `lang` command.
-
-## [1.1.6-alpha.1.1] - 2026-04-07
-
-### Fixed
-- **CI/CD: Build Desktop Tag Propagation**: Fixed `build-desktop` job failing with "GitHub Releases requires a tag" error. The job now reads the version tag directly from `package.json` instead of relying on `needs.release.outputs.tag`, which was not properly propagated during re-runs. Also added `overwrite_files: true` to allow asset re-uploads on re-runs.
-
-## [1.1.6-alpha.1] - 2026-04-07
-
-### Added
-- **Installer Language Selection**: Added bilingual (English / Bahasa Indonesia) language picker to `ttl.sh`. Language preference is saved to `~/.config/ttl/language` and reused on subsequent runs — no repeated prompts. A `msg()` dual-language helper function is used throughout the script for all user-facing messages.
+- **Full Bilingual Translation (EN/ID) in `ttl.sh`**: Added bilingual language picker to `ttl.sh`. Language preference is saved to `~/.config/ttl/language` and reused on subsequent runs. All user-facing messages across every function (`do_install`, `do_install_node`, `do_install_desktop`, `do_setup`, `do_start`, `do_stop`, `do_check_update`, `do_update`, `show_help`) now fully respect the selected language using the `msg()` helper.
+- **`./ttl.sh lang` Command**: New command to change the language preference at any time without re-running the full installer. Supports `lang en` (English), `lang id` (Indonesian), and `lang` (interactive re-picker).
 - **`npm start` Script**: Added a `start` script to `package.json` that runs `next start -p 3214` and `node dist-server/index.cjs` concurrently via `concurrently`. This serves as a production-mode foreground alternative to PM2.
 
 ### Fixed
-- **PM2 Handling in `./ttl.sh start`**: Replaced the broken `npm start` fallback (script did not exist in `package.json`) with a proper PM2 flow. PM2 is now the recommended runner. If PM2 is not installed, the script explains its purpose and offers to install it via `npm install -g pm2`. If the user declines, the app falls back to `npm start` in foreground mode (Ctrl+C to stop).
-- **AppImageLauncher Auto-Integrate**: After downloading the Desktop App AppImage to `~/Applications`, the installer now automatically attempts integration. It first tries `ail-cli integrate` (silent, no popup). If unavailable, it launches the AppImage in the background via `nohup` to trigger AppImageLauncher's native "Integrate and Run" popup automatically.
+- **Bug report CORS error on fresh install**: Fixed an issue where submitting a bug report on a fresh installation without a `.env.local` file would fail with a CORS error due to an incorrect fallback API URL (`localhost:3000`). The fallback API URL and API Key are now hardcoded to the production values, ensuring reports can always be submitted without manual setup.
+- **Support Email Delivery (Backend)**: Added `me@efzyn.my.id` as the default fallback for support report delivery in `backend/src/services/report.service.js` so emails are always sent even if `ADMIN_EMAIL` is unset.
+- **Support Email Default Setting**: Changed the misleading `admin@example.com` default to `me@efzyn.my.id` in `server/utils/settings.ts`.
+- **CI/CD Build Desktop Tag Propagation**: Fixed `build-desktop` job failing with "GitHub Releases requires a tag" error. The job now reads the version tag directly from `package.json` instead of relying on `needs.release.outputs.tag`. Added `overwrite_files: true` to allow asset re-uploads on re-runs.
+- **PM2 Handling in `./ttl.sh start`**: Replaced the broken `npm start` fallback with a proper PM2 flow. PM2 is now the recommended runner. If PM2 is not installed, the app falls back to `npm start` in foreground mode (Ctrl+C to stop).
+- **AppImageLauncher Auto-Integrate**: After downloading the Desktop App AppImage to `~/Applications`, the installer now automatically attempts integration using `ail-cli integrate` or launching the AppImage in the background via `nohup` to trigger the popup.
 
 ### Removed
-- **Admin Email/Contact from Setup Config**: Removed the `── Admin Contact ──` prompt block (email and name inputs) from `./ttl.sh setup`. The `admin` section is also removed from the generated `settings.yml` template, as bug report routing is fully managed by the external backend via environment variables — users do not need to configure this.
+- **Admin Email/Contact from Setup Config**: Removed the admin email and name inputs from `./ttl.sh setup` and the `settings.yml` template, as bug report routing is fully managed by the external backend.
 
 ## [1.1.5] - 2026-03-30
 
