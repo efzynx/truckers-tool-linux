@@ -235,14 +235,23 @@ jobs:
           fi
           echo "========================================="
 
+      - name: Get release tag
+        id: build_tag
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "📆 Uploading assets for tag: v$VERSION"
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.release.outputs.tag }}
+          tag_name: ${{ steps.build_tag.outputs.tag }}
           files: |
             release/*.AppImage
             release/*.exe
             release/*.zip
           fail_on_unmatched_files: false
+          overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
