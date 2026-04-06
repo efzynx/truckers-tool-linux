@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.6-alpha.3] - 2026-04-07
+
+### Fixed
+- **Bug report CORS error on fresh install (`src/hooks/useApi.ts`)**: `NEXT_PUBLIC_API_URL` is a build-time baked variable — when the app is installed from source without `.env.local`, the variable is `undefined` and the fallback was `http://localhost:3000/api/v1`, causing a CORS error. Fixed by hardcoding `https://api.ttl.my.id/api/v1` as the production fallback. Also hardcoded `PRODUCTION_API_KEY` as fallback so the request is always authenticated without requiring manual env setup.
+- **Admin email hardcoded in `backend/src/services/report.service.js`**: Previously, if `ADMIN_EMAIL` env variable was not set on the external backend server, email sending was silently skipped. Fixed by adding `me@efzyn.my.id` as the default fallback so reports are always delivered.
+- **Default admin email updated in `server/utils/settings.ts`**: Changed the misleading `admin@example.com` default to `me@efzyn.my.id`.
+
 ## [1.1.6-alpha.2] - 2026-04-07
 
 ### Added

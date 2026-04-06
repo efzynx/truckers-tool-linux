@@ -34,8 +34,8 @@ const DEFAULT_SETTINGS: AppSettings = {
     port_backend: 8097,
   },
   admin: {
-    email: 'admin@example.com',
-    contact: 'Admin',
+    email: 'me@efzyn.my.id',
+    contact: 'efzyn',
   },
   paths: {
     ets2: '~/Documents/Euro Truck Simulator 2/profiles/',

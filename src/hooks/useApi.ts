@@ -188,13 +188,19 @@ export async function sendSupportReport(data: { name: string; appVersion?: strin
     return response.data;
   }
 
-  // Fallback for Web/Browser execution (NextJS directly) using NEXT_PUBLIC Env variables
-  const externalApiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+  // Fallback for Web/Browser execution (NextJS directly) using NEXT_PUBLIC Env variables.
+  // Production API URL is hardcoded as the default so the report always works
+  // even when running from a fresh install without .env.local configured.
+  const PRODUCTION_API_URL = 'https://api.ttl.my.id/api/v1';
+  const PRODUCTION_API_KEY = 'KXqOVzDyKdz9iAgbhzC3oOdn';
+  const externalApiBase = process.env.NEXT_PUBLIC_API_URL || PRODUCTION_API_URL;
+  const apiKey = process.env.NEXT_PUBLIC_CLIENT_API_KEY || PRODUCTION_API_KEY;
+  
   const res = await fetch(`${externalApiBase}/report`, {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
-      'X-API-Key': process.env.NEXT_PUBLIC_CLIENT_API_KEY || '' 
+      'X-API-Key': apiKey
     },
     body: JSON.stringify(formattedData),
   });
