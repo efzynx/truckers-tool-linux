@@ -69,13 +69,21 @@ chmod +x ttl.sh
 
 ### 2. Pilih Metode Instalasi
 
+Anda dapat memilih untuk menginstal **Desktop App** (Aplikasi Mandiri) atau **Web App** (Server Lokal).
+
+**Untuk Desktop App (Disarankan)**
 ```bash
-./ttl.sh -Id   # Install versi Desktop App (AppImage)
+./ttl.sh -Id
+```
+*Catatan: Script ini akan mendeteksi sistem operasi Anda secara otomatis dan mendownload Paket Native yang sesuai (`.pacman`, `.deb`, `.rpm`) atau `.AppImage`.*
+
+**Untuk Web App**
+```bash
 ./ttl.sh -Iw   # Install versi Web App Lokal
 ./ttl.sh -IS   # Install Web App + Setup + Start otomatis
 ```
 
-Buka browser di **http://localhost:3214** 🎉
+Jika Anda menginstal versi Web App, buka browser di **http://localhost:3214** 🎉
 
 ## 🖥️ Deployment Server (PM2)
 

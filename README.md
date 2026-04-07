@@ -72,14 +72,23 @@ chmod +x ttl.sh
 ./ttl.sh node
 ```
 
-### 3. Install & setup
+### 3. Choose Installation Mode
 
+You can choose to install the **Desktop App** (Standalone) or the **Web App** (Local Server).
+
+**For Desktop App (Recommended)**
+```bash
+./ttl.sh -Id
+```
+*Note: This will automatically detect your OS and install the correct Native Package (`.deb`, `.rpm`, `.pacman`) or `.AppImage`.*
+
+**For Web App**
 ```bash
 # Install + setup + start all at once
 ./ttl.sh -IS
 ```
 
-Open your browser at **http://localhost:3214** 🎉
+If you installed the Web App, open your browser at **http://localhost:3214** 🎉
 
 ## ⚙️ Configuration (settings.yml)
 
@@ -106,7 +115,7 @@ npm run pm2:start
 | Command | Description |
 |---|---|
 | `./ttl.sh install` | Install app (interactive setup) |
-| `./ttl.sh -Id` | Install Desktop App (AppImage) |
+| `./ttl.sh -Id` | Install Desktop App (Native / AppImage) |
 | `./ttl.sh -Iw` | Install Web App (Local server) |
 | `./ttl.sh setup` | Generate settings.yml (interactive) |
 | `./ttl.sh start` | Run web app (PM2 if available, fallback npm start) |

@@ -207,6 +207,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Linux build dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
       - name: Build Application
         env:
           CLIENT_API_KEY: ${{ secrets.CLIENT_API_KEY }}
@@ -224,7 +228,7 @@ jobs:
             echo "✅ release/ folder exists"
             echo ""
             echo "--- All files ---"
-            find release/ -type f -name "*.AppImage" -o -name "*.exe" -o -name "*.zip" -o -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" | head -20
+            find release/ -type f -name "*.AppImage" -o -name "*.pacman" -o -name "*.exe" -o -name "*.zip" -o -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" | head -20
             echo ""
             echo "--- Full listing ---"
             ls -la release/ || true
@@ -249,6 +253,9 @@ jobs:
           tag_name: ${{ steps.build_tag.outputs.tag }}
           files: |
             release/*.AppImage
+            release/*.pacman
+            release/*.deb
+            release/*.rpm
             release/*.exe
             release/*.zip
           fail_on_unmatched_files: false

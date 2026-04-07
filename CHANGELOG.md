@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.6-1] - 2026-04-08
+
+### Changed
+- Updated `electron-builder.yml` to support building native Linux packages (`.deb`, `.rpm`, `.pacman`) alongside `.AppImage`. Added maintainer info.
+- Added `author` field to `package.json` for proper electron-builder metadata generation.
+- Revamped `do_install_desktop` function in `ttl.sh` installer script:
+  - Added specific detection for Arch Linux (`pacman`), Debian/Ubuntu (`deb`), and RHEL/Fedora/SUSE (`rpm`).
+  - Added user option to pick between Native Package (recommended) or AppImage.
+  - Automatically fetches the corresponding native file from GitHub Releases and triggers `apt`/`pacman`/`dnf` package installations automatically.
+  - Simplified and improved the AppImageLauncher installation text guidelines as a fallback.
+- Updated `README.md` and `README-ID.md` Quick Start sections to clarify separate Web App and Desktop App installation flows and describe the new native installer capabilities.
+- Updated GitHub Actions workflow (`.github/workflows/release.yml`) to automatically install required Linux dependencies (`rpm`) and upload the new Native Package formats (`.pacman`, `.deb`, `.rpm`) onto the GitHub Release artifacts alongside the `.AppImage`.
+
 ## [1.1.6] - 2026-04-07
 
 ### Added

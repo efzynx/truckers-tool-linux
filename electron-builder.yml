@@ -19,8 +19,13 @@ win:
     - portable
   icon: build/icon.ico
 linux:
-  target: AppImage
+  target: 
+    - pacman
+    - AppImage
+    - deb
+    - rpm
   category: Utility
+  maintainer: "efzyn <me@efzyn.my.id>"
   icon: build/icon.png
 nsis:
   oneClick: false

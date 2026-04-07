@@ -350,41 +350,42 @@ do_install_desktop() {
     info "$(msg "Node.js v24 is already installed." "Node.js v24 sudah terinstall.")"
   fi
 
-  # 2. Check AppImageLauncher
+  # 2. Package Detection and Download
   echo ""
-  info "$(msg "Checking AppImageLauncher..." "Memeriksa AppImageLauncher...")"
-  if ! command -v appimagelauncher &>/dev/null; then
-    warn "$(msg "AppImageLauncher not found." "AppImageLauncher tidak ditemukan.")"
-    if [ -f /etc/os-release ]; then
-      # shellcheck disable=SC1091
-      source /etc/os-release
-      if [[ "$ID" == "arch" || "$ID_LIKE" == *"arch"* ]]; then
-        info "$(msg "Detected Arch Linux-based distribution." "Terdeteksi distribusi berbasis Arch Linux.")"
-        read -rp "$(msg "Install AppImageLauncher via AUR? (y/N): " "Install AppImageLauncher via AUR? (y/N): ")" confirm_aur
-        if [[ "$confirm_aur" =~ ^[Yy]$ ]]; then
-          if command -v yay &>/dev/null; then
-            yay -S appimagelauncher
-          elif command -v paru &>/dev/null; then
-            paru -S appimagelauncher
-          else
-            warn "$(msg "AUR helper (yay/paru) not found. Please install manually." "AUR helper (yay/paru) tidak ditemukan. Silakan install manual.")"
-          fi
-        fi
-      else
-        info "$(msg "For non-Arch distros (Ubuntu, Fedora, etc):" "Untuk distro diluar Arch Linux (seperti Ubuntu, Fedora, dsb):")" 
-        echo -e "  $(msg "Please download the ${BOLD}stable${NC} release (.deb, .rpm) from the official GitHub repository:" "Silakan download rilis ${BOLD}stable${NC} (.deb, .rpm) dari repository GitHub resmi:")"
-        echo -e "  ${CYAN}https://github.com/TheAssassin/AppImageLauncher/releases${NC}"
-        echo -e "  $(msg "Please do ${BOLD}NOT${NC} use pre-releases!" "Mohon untuk ${BOLD}TIDAK${NC} menggunakan pre-release!")"
-        echo ""
-      fi
+  local pkg_ext="AppImage"
+  local native_pkg=""
+  if [ -f /etc/os-release ]; then
+    # shellcheck disable=SC1091
+    source /etc/os-release
+    if [[ "$ID" == "arch" || "$ID_LIKE" == *"arch"* ]]; then
+      native_pkg="pacman"
+      info "$(msg "Detected Arch Linux." "Terdeteksi Arch Linux.")"
+    elif [[ "$ID" == "debian" || "$ID" == "ubuntu" || "$ID_LIKE" == *"debian"* || "$ID_LIKE" == *"ubuntu"* ]]; then
+      native_pkg="deb"
+      info "$(msg "Detected Debian/Ubuntu-based Linux." "Terdeteksi Debian/Ubuntu Linux.")"
+    elif [[ "$ID" == "fedora" || "$ID" == "centos" || "$ID_LIKE" == *"fedora"* || "$ID_LIKE" == *"rhel"* || "$ID_LIKE" == *"suse"* ]]; then
+      native_pkg="rpm"
+      info "$(msg "Detected RHEL/Fedora/SUSE-based Linux." "Terdeteksi RHEL/Fedora/SUSE Linux.")"
+    fi
+  fi
+
+  if [ -n "$native_pkg" ]; then
+    echo "  1) Native Package (.$native_pkg) - $(msg 'Recommended' 'Rekomendasi')"
+    echo "  2) AppImage"
+    read -rp "$(msg 'Choice [1/2] (default: 1): ' 'Pilihan [1/2] (default: 1): ')" pkg_choice
+    if [ "$pkg_choice" = "2" ]; then
+      pkg_ext="AppImage"
+    else
+      pkg_ext="$native_pkg"
     fi
   else
-    info "$(msg "AppImageLauncher is already installed." "AppImageLauncher sudah terinstall.")"
+    pkg_ext="AppImage"
+    info "$(msg "Unknown distribution. Proceeding with AppImage." "Distribusi tidak diketahui. Melanjutkan dengan AppImage.")"
   fi
-  
-  # 3. Select AppImage version
+
+  # 3. Select Version
   echo ""
-  msg "Select AppImage version to download:" "Pilih versi AppImage yang ingin diunduh:"
+  msg "Select version to download:" "Pilih versi yang ingin diunduh:"
   echo "  1) Stable ($(msg 'Recommended' 'Rekomendasi'))"
   echo "  2) Beta (Pre-release)"
   echo "  3) Alpha ($(msg 'Experimental' 'Eksperimental'))"
@@ -398,70 +399,99 @@ do_install_desktop() {
   fi
   
   echo ""
-  info "$(msg "Looking for release link for $version_type version..." "Mencari tautan rilis untuk versi $version_type...")"
+  info "$(msg "Looking for release link for $version_type version ($pkg_ext)..." "Mencari tautan rilis untuk versi $version_type ($pkg_ext)...")"
   local download_url=""
   
   if [ "$version_type" = "stable" ]; then
-    download_url=$(curl -fsSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" 2>/dev/null | grep '"browser_download_url"' | grep -i '\.AppImage"' | head -1 | sed -E 's/.*"browser_download_url":\s*"([^"]+)".*/\1/')
+    download_url=$(curl -fsSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" 2>/dev/null | grep '"browser_download_url"' | grep -i "\.${pkg_ext}\"" | head -1 | sed -E 's/.*"browser_download_url":\s*"([^"]+)".*/\1/')
   elif [ "$version_type" = "beta" ]; then
     local b_tag
     b_tag=$(get_latest_beta_tag)
     if [ -n "$b_tag" ]; then
-      download_url=$(curl -fsSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/tags/${b_tag}" 2>/dev/null | grep '"browser_download_url"' | grep -i '\.AppImage"' | head -1 | sed -E 's/.*"browser_download_url":\s*"([^"]+)".*/\1/')
+      download_url=$(curl -fsSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/tags/${b_tag}" 2>/dev/null | grep '"browser_download_url"' | grep -i "\.${pkg_ext}\"" | head -1 | sed -E 's/.*"browser_download_url":\s*"([^"]+)".*/\1/')
     fi
   elif [ "$version_type" = "alpha" ]; then
     local a_tag
     a_tag=$(get_latest_alpha_tag)
     if [ -n "$a_tag" ]; then
-      download_url=$(curl -fsSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/tags/${a_tag}" 2>/dev/null | grep '"browser_download_url"' | grep -i '\.AppImage"' | head -1 | sed -E 's/.*"browser_download_url":\s*"([^"]+)".*/\1/')
+      download_url=$(curl -fsSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/tags/${a_tag}" 2>/dev/null | grep '"browser_download_url"' | grep -i "\.${pkg_ext}\"" | head -1 | sed -E 's/.*"browser_download_url":\s*"([^"]+)".*/\1/')
     fi
   fi
   
   if [ -z "$download_url" ]; then
-    error "$(msg "Failed to find download link (.AppImage) for $version_type version." "Gagal menemukan tautan download (.AppImage) untuk versi $version_type.")"
+    error "$(msg "Failed to find download link (.$pkg_ext) for $version_type version." "Gagal menemukan tautan download (.$pkg_ext) untuk versi $version_type.")"
     exit 1
   fi
   
-  info "$(msg "Downloading AppImage from:" "Mengunduh AppImage dari:")"
+  info "$(msg "Downloading from:" "Mengunduh dari:")"
   info "$download_url"
   
+  local dl_dir="$HOME/Downloads"
   local apps_dir="$HOME/Applications"
-  mkdir -p "$apps_dir"
-  
-  # Extract filename from URL
+  local target_path=""
   local filename
   filename=$(basename "$download_url")
-  local target_path="$apps_dir/$filename"
+
+  if [ "$pkg_ext" = "AppImage" ]; then
+    mkdir -p "$apps_dir"
+    target_path="$apps_dir/$filename"
+  else
+    mkdir -p "$dl_dir"
+    target_path="$dl_dir/$filename"
+  fi
   
   curl -L "$download_url" -o "$target_path"
-  chmod +x "$target_path"
-
-  # ── Auto-integrate with AppImageLauncher ──
+  
+  # 4. Installation Handling
   echo ""
-  info "$(msg 'Triggering AppImageLauncher integration...' 'Memicu integrasi AppImageLauncher...')"
-  if command -v ail-cli &>/dev/null; then
-    # ail-cli is available — integrate silently without a popup
-    if ail-cli integrate "$target_path" 2>/dev/null; then
-      info "$(msg '✅ Successfully integrated into app menu!' '✅ Berhasil diintegrasikan ke menu aplikasi!')"
+  if [ "$pkg_ext" = "AppImage" ]; then
+    chmod +x "$target_path"
+    info "$(msg "Checking AppImageLauncher..." "Memeriksa AppImageLauncher...")"
+    if ! command -v appimagelauncher &>/dev/null; then
+      warn "$(msg "AppImageLauncher not found. To integrate AppImage into your application menu:" "AppImageLauncher tidak ditemukan. Untuk mengintegrasikan AppImage ke menu aplikasi Anda:")"
+      if [[ "$ID" == "arch" || "$ID_LIKE" == *"arch"* ]]; then
+        echo -e "  $(msg "Install via AUR:" "Install via AUR:")"
+        echo -e "  ${CYAN}yay -S appimagelauncher${NC} $(msg "or" "atau") ${CYAN}paru -S appimagelauncher${NC}"
+      else
+        echo -e "  $(msg "Please download the ${BOLD}stable${NC} release (.deb, .rpm) from the official GitHub repository:" "Silakan download rilis ${BOLD}stable${NC} (.deb, .rpm) dari repository GitHub resmi:")"
+        echo -e "  ${CYAN}https://github.com/TheAssassin/AppImageLauncher/releases${NC}"
+      fi
+      echo ""
+      warn "$(msg "Without AppImageLauncher, you have to run it manually:" "Tanpa AppImageLauncher, Anda harus menjalankannya secara manual:")"
+      echo -e "  cd ~/Applications && ./${filename}"
     else
-      warn "$(msg 'ail-cli integration failed. Try running the AppImage manually to trigger the popup.' 'Integrasi ail-cli gagal. Coba jalankan AppImage secara manual untuk memicu popup.')"
+      info "$(msg 'Triggering AppImageLauncher integration...' 'Memicu integrasi AppImageLauncher...')"
+      if command -v ail-cli &>/dev/null; then
+        if ail-cli integrate "$target_path" 2>/dev/null; then
+          info "$(msg '✅ Successfully integrated into app menu!' '✅ Berhasil diintegrasikan ke menu aplikasi!')"
+        else
+          warn "$(msg 'ail-cli integration failed. Try running the AppImage manually to trigger the popup.' 'Integrasi ail-cli gagal. Coba jalankan AppImage secara manual untuk memicu popup.')"
+        fi
+      else
+        info "$(msg 'Launching AppImage to trigger integration popup...' 'Menjalankan AppImage untuk memunculkan popup integrasi...')"
+        nohup "$target_path" &>/dev/null &
+        sleep 2
+        info "$(msg 'AppImageLauncher popup should now be visible.' 'Popup AppImageLauncher seharusnya sudah muncul.')"
+        msg "  → Select 'Integrate and Run' to add TTL to your app menu." "  → Pilih 'Integrate and Run' untuk menambahkan TTL ke menu aplikasi."
+      fi
     fi
-  elif command -v appimagelauncher &>/dev/null; then
-    # Launch AppImage in background to trigger the AppImageLauncher integration popup
-    info "$(msg 'Launching AppImage to trigger integration popup...' 'Menjalankan AppImage untuk memunculkan popup integrasi...')"
-    nohup "$target_path" &>/dev/null &
-    sleep 2
     echo ""
-    info "$(msg 'AppImageLauncher popup should now be visible.' 'Popup AppImageLauncher seharusnya sudah muncul.')"
-    msg "  → Select 'Integrate and Run' to add TTL to your app menu." "  → Pilih 'Integrate and Run' untuk menambahkan TTL ke menu aplikasi."
+    info "✅ $(msg 'AppImage downloaded successfully!' 'AppImage berhasil diunduh!')"
+    echo -e "  $(msg 'File saved to' 'File disimpan di') ${BOLD}$target_path${NC}"
   else
-    warn "$(msg 'AppImageLauncher is not active. To integrate manually:' 'AppImageLauncher tidak aktif. Untuk integrasi manual:')"
-    echo -e "  cd ~/Applications && ./${filename}"
+    info "✅ $(msg 'Native package downloaded successfully!' 'Paket Native berhasil diunduh!')"
+    echo -e "  $(msg 'File saved to' 'File disimpan di') ${BOLD}$target_path${NC}"
+    echo ""
+    info "$(msg "Installing the package..." "Menginstal paket...")"
+    if [ "$pkg_ext" = "pacman" ]; then
+      sudo pacman -U "$target_path"
+    elif [ "$pkg_ext" = "deb" ]; then
+      sudo apt install "$target_path" -y || sudo dpkg -i "$target_path"
+    elif [ "$pkg_ext" = "rpm" ]; then
+      sudo dnf install "$target_path" -y || sudo rpm -i "$target_path"
+    fi
+    info "✅ $(msg 'Installation completed! You can launch Truckers Tool Linux from your app menu.' 'Instalasi selesai! Anda dapat menjalankan Truckers Tool Linux dari menu aplikasi.')"
   fi
-
-  echo ""
-  info "✅ $(msg 'Desktop App installation complete!' 'Instalasi Desktop App selesai!')"
-  echo -e "  $(msg 'AppImage saved to' 'File AppImage disimpan di') ${BOLD}$target_path${NC}"
   echo ""
 }
 
