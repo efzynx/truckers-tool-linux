@@ -6,27 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.1.6-beta.2] - 2026-04-07
+## [1.1.6] - 2026-04-07
 
 ### Added
+- **Full Bilingual Translation (EN/ID) in `ttl.sh`**: Added bilingual language picker to `ttl.sh`. Language preference is saved to `~/.config/ttl/language` and reused on subsequent runs. All user-facing messages across every function (`do_install`, `do_install_node`, `do_install_desktop`, `do_setup`, `do_start`, `do_stop`, `do_check_update`, `do_update`, `show_help`) now fully respect the selected language using the `msg()` helper.
+- **`./ttl.sh lang` Command**: New command to change the language preference at any time without re-running the full installer. Supports `lang en` (English), `lang id` (Indonesian), and `lang` (interactive re-picker).
+- **`npm start` Script**: Added a `start` script to `package.json` that runs `next start -p 3214` and `node dist-server/index.cjs` concurrently via `concurrently`. This serves as a production-mode foreground alternative to PM2.
 - **Game Version in Bug Reports**: Added the `gameVersion` field to the email template in `backend/src/services/report.service.js` so that bug reports clearly identify the game environment.
 - **Beta and Alpha Installation Guides**: Updated `README.md` to include explicit `curl` installation commands for the Beta and Alpha release channels, providing users with easier access to pre-releases.
 - **Telegram Links**: Added Telegram group link (t.me/TruckersTool) to both English and Indonesian README documentations for community support.
 
 ### Fixed
 - **Support Report Missing Fields**: Fixed `gameVersion` and `os` missing from bug reports due to missing extraction in `backend/src/controllers/report.controller.js` and missing mapping in `src/hooks/useApi.ts`. The backend and frontend now correctly parse and map the OS (`from logs.platform`) and Game Version strings.
-
-### Security
-- **Dependency Audit Fix**: Resolved 10 npm vulnerabilities across dependencies (`next`, `lodash`, `electron`, `path-to-regexp`, `picomatch`, `tar`, `nodemailer`, `multer`, etc.) by running `npm audit fix`, achieving 0 known vulnerabilities.
-
-## [1.1.6-beta.1] - 2026-04-07
-
-### Added
-- **Full Bilingual Translation (EN/ID) in `ttl.sh`**: Added bilingual language picker to `ttl.sh`. Language preference is saved to `~/.config/ttl/language` and reused on subsequent runs. All user-facing messages across every function (`do_install`, `do_install_node`, `do_install_desktop`, `do_setup`, `do_start`, `do_stop`, `do_check_update`, `do_update`, `show_help`) now fully respect the selected language using the `msg()` helper.
-- **`./ttl.sh lang` Command**: New command to change the language preference at any time without re-running the full installer. Supports `lang en` (English), `lang id` (Indonesian), and `lang` (interactive re-picker).
-- **`npm start` Script**: Added a `start` script to `package.json` that runs `next start -p 3214` and `node dist-server/index.cjs` concurrently via `concurrently`. This serves as a production-mode foreground alternative to PM2.
-
-### Fixed
 - **Bug report CORS error on fresh install**: Fixed an issue where submitting a bug report on a fresh installation without a `.env.local` file would fail with a CORS error due to an incorrect fallback API URL (`localhost:3000`). The fallback API URL and API Key are now hardcoded to the production values, ensuring reports can always be submitted without manual setup.
 - **Support Email Delivery (Backend)**: Added `me@efzyn.my.id` as the default fallback for support report delivery in `backend/src/services/report.service.js` so emails are always sent even if `ADMIN_EMAIL` is unset.
 - **Support Email Default Setting**: Changed the misleading `admin@example.com` default to `me@efzyn.my.id` in `server/utils/settings.ts`.
@@ -36,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - **Admin Email/Contact from Setup Config**: Removed the admin email and name inputs from `./ttl.sh setup` and the `settings.yml` template, as bug report routing is fully managed by the external backend.
+
+### Security
+- **Dependency Audit Fix**: Resolved 10 npm vulnerabilities across dependencies (`next`, `lodash`, `electron`, `path-to-regexp`, `picomatch`, `tar`, `nodemailer`, `multer`, etc.) by running `npm audit fix`, achieving 0 known vulnerabilities.
 
 ## [1.1.5] - 2026-03-30
 
