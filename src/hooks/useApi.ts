@@ -167,6 +167,7 @@ export async function sendSupportReport(data: { name: string; appVersion?: strin
     username: data.name,
     version: data.appVersion || data.version || 'unknown',
     gameVersion: data.gameVersion || data.version || 'unknown',
+    os: data.logs?.platform || 'Unknown',
     message: data.message,
     logs: data.logs,
     type: 'Bug Tracker',

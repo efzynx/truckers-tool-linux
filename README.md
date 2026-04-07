@@ -4,6 +4,7 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 
 [🇮🇩 Baca dalam Bahasa Indonesia (Read in Indonesian)](README-ID.md)
 [📖 Full Documentation (English)](https://docs.ttl.efzyn.my.id/en/)
+[💬 Join Telegram Group](https://t.me/TruckersTool)
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/5e24ae57-1105-4c20-9898-d50ba566b7ee" width="100%" autoplay muted loop></video>
@@ -45,8 +46,23 @@ A web-based save editor for **Euro Truck Simulator 2** and **American Truck Simu
 
 ### 1. Download installer script
 
+Choose the release channel you want to install:
+
+**Stable Release (Recommended)**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/ttl.sh -o ttl.sh
+chmod +x ttl.sh
+```
+
+**Beta Release**
+```bash
+curl -fsSL https://raw.githubusercontent.com/efzynx/truckers-tool-linux/beta/ttl.sh -o ttl.sh
+chmod +x ttl.sh
+```
+
+**Alpha Release**
+```bash
+curl -fsSL https://raw.githubusercontent.com/efzynx/truckers-tool-linux/alpha/ttl.sh -o ttl.sh
 chmod +x ttl.sh
 ```
 

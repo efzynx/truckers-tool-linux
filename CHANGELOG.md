@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.6-beta.2] - 2026-04-07
+
+### Added
+- **Game Version in Bug Reports**: Added the `gameVersion` field to the email template in `backend/src/services/report.service.js` so that bug reports clearly identify the game environment.
+- **Beta and Alpha Installation Guides**: Updated `README.md` to include explicit `curl` installation commands for the Beta and Alpha release channels, providing users with easier access to pre-releases.
+- **Telegram Links**: Added Telegram group link (t.me/TruckersTool) to both English and Indonesian README documentations for community support.
+
+### Fixed
+- **Support Report Missing Fields**: Fixed `gameVersion` and `os` missing from bug reports due to missing extraction in `backend/src/controllers/report.controller.js` and missing mapping in `src/hooks/useApi.ts`. The backend and frontend now correctly parse and map the OS (`from logs.platform`) and Game Version strings.
+
+### Security
+- **Dependency Audit Fix**: Resolved 10 npm vulnerabilities across dependencies (`next`, `lodash`, `electron`, `path-to-regexp`, `picomatch`, `tar`, `nodemailer`, `multer`, etc.) by running `npm audit fix`, achieving 0 known vulnerabilities.
+
 ## [1.1.6-beta.1] - 2026-04-07
 
 ### Added
