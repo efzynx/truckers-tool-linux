@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Truckers Tool Linux -- for ALL',
-  description: 'Local Save Editor for Euro Truck Simulator 2 and American Truck Simulator',
+  title: 'Truckers Tool Linux | 4All',
+  description: 'Save Editor for Euro Truck Simulator 2 and American Truck Simulator',
   icons: {
     icon: '/icon.webp'
   }

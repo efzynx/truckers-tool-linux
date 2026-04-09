@@ -66,6 +66,7 @@ export default function AboutModal({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'donate'>('info');
   const { t } = useLanguage();
+  const isDesktop = typeof window !== 'undefined' && 'electronAPI' in window;
 
   const checkUpdate = useCallback(async () => {
     setChecking(true);
@@ -84,9 +85,9 @@ export default function AboutModal({ onClose }: { onClose: () => void }) {
         setVersionInfo(response.data);
       } else {
         // Web mode fallback
-        const API_BASE = typeof window !== 'undefined' && 'electronAPI' in window ? 'http://localhost:8097/api' : '/api';
+        const API_BASE = '/api';
         const res = await fetch(`${API_BASE}/check-update`);
-        if (!res.ok) throw new Error('Failed to fetch');
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status} ${res.statusText}`);
         const data = await res.json();
         setVersionInfo(data);
       }
@@ -303,17 +304,17 @@ export default function AboutModal({ onClose }: { onClose: () => void }) {
                         <div className="font-mono text-xs text-white space-y-1.5">
                           {isNewer(versionInfo.stable, versionInfo.currentVersion) && (
                             <p className="flex items-center gap-2">
-                              <span className="text-success">&gt;</span> ./ttl.sh update
+                              <span className="text-success">&gt;</span> ./ttl.sh update{isDesktop ? ' -d' : ''}
                             </p>
                           )}
                           {isNewer(versionInfo.beta, versionInfo.currentVersion) && (
                             <p className="flex items-center gap-2">
-                              <span className="text-warning">&gt;</span> ./ttl.sh update --beta
+                              <span className="text-warning">&gt;</span> ./ttl.sh update{isDesktop ? ' -d' : ''} --beta
                             </p>
                           )}
                           {isNewer(versionInfo.alpha, versionInfo.currentVersion) && (
                             <p className="flex items-center gap-2">
-                              <span className="text-cyan-400">&gt;</span> ./ttl.sh update --alpha
+                              <span className="text-cyan-400">&gt;</span> ./ttl.sh update{isDesktop ? ' -d' : ''} --alpha
                             </p>
                           )}
                         </div>

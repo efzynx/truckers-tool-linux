@@ -34,7 +34,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     port_backend: 8097,
   },
   admin: {
-    email: 'me@efzyn.my.id',
+    email: 'support@ttl.my.id',
     contact: 'efzyn',
   },
   paths: {

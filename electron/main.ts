@@ -99,9 +99,11 @@ app.whenReady().then(() => {
       const result = {
         stable: null as string | null,
         beta: null as string | null,
+        alpha: null as string | null,
         currentVersion,
         stableUrl: null as string | null,
         betaUrl: null as string | null,
+        alphaUrl: null as string | null,
       };
 
       try {
@@ -125,10 +127,17 @@ app.whenReady().then(() => {
         );
         if (releasesRes.ok) {
           const releases = await releasesRes.json();
-          const prerelease = (releases as any[]).find((r: any) => r.prerelease === true);
-          if (prerelease) {
-            result.beta = (prerelease.tag_name as string).replace(/^[vV]/, '');
-            result.betaUrl = prerelease.html_url;
+          
+          const betaRelease = (releases as any[]).find((r: any) => r.prerelease === true && String(r.tag_name).toLowerCase().includes('beta'));
+          if (betaRelease) {
+            result.beta = (betaRelease.tag_name as string).replace(/^[vV]/, '');
+            result.betaUrl = betaRelease.html_url;
+          }
+          
+          const alphaRelease = (releases as any[]).find((r: any) => r.prerelease === true && String(r.tag_name).toLowerCase().includes('alpha'));
+          if (alphaRelease) {
+            result.alpha = (alphaRelease.tag_name as string).replace(/^[vV]/, '');
+            result.alphaUrl = alphaRelease.html_url;
           }
         }
       } catch (e) {

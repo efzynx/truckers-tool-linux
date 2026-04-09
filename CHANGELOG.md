@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.7-alpha.2] - 2026-04-09
+
+### Added
+- **Desktop App CLI Auto-Updater**: Added support for `-d` or `--desktop` flag in `./ttl.sh update`. This automates detection and installation of native packages (.pacman, .deb, .rpm) or AppImage based on the user's Linux distribution.
+- **Enhanced Update Suggestions**: `AboutModal.tsx` now conditionally displays the `-d` flag in suggested update commands specifically for Desktop users.
+
+### Changed
+- **Optimized `ttl.sh` Sync**: The external `ttl.sh` script now updates via local file copy from the installation directory instead of `curl` from GitHub, ensuring perfect version synchronization.
+- **Report Email Configuration**: Updated bug report routing settings. Changed sender (`SMTP_FROM`) to `user.report@ttl.my.id` and recipient (`ADMIN_EMAIL`) to `support@ttl.my.id`.
+- **Enabled Linux Build Targets**: Re-enabled native Linux package targets (pacman, deb, rpm) in `electron-builder.yml`.
+
+### Fixed
+- **IPC Update Detection**: Fixed `network:checkUpdate` in `electron/main.ts` to properly fetch and categorize both beta and alpha releases from GitHub.
+- **OTA Web Connection**: Fixed "Failed to check for updates" error in the web version by correcting the `API_BASE` fallback logic in `AboutModal.tsx`.
 
 ## [1.1.7-alpha.1] - 2026-04-08
 

@@ -328,7 +328,10 @@ SETTINGSEOF
 # ─── Install Desktop (AppImage) ──────────────────────────────────────────────────────
 
 do_install_desktop() {
-  info "$(msg "Starting Desktop App (AppImage) installation..." "Memulai instalasi Desktop App (AppImage)...")"
+  local req_version="$1"
+  local req_auto="$2"
+  
+  info "$(msg "Starting Desktop App (AppImage/Native) installation..." "Memulai instalasi Desktop App (AppImage/Native)...")"
   echo ""
 
   # 1. Check Node.js via NVM (v24)
@@ -369,33 +372,46 @@ do_install_desktop() {
     fi
   fi
 
-  if [ -n "$native_pkg" ]; then
-    echo "  1) Native Package (.$native_pkg) - $(msg 'Recommended' 'Rekomendasi')"
-    echo "  2) AppImage"
-    read -rp "$(msg 'Choice [1/2] (default: 1): ' 'Pilihan [1/2] (default: 1): ')" pkg_choice
-    if [ "$pkg_choice" = "2" ]; then
-      pkg_ext="AppImage"
-    else
+  if [ "$req_auto" = "auto" ]; then
+    if [ -n "$native_pkg" ]; then
       pkg_ext="$native_pkg"
+    else
+      pkg_ext="AppImage"
     fi
   else
-    pkg_ext="AppImage"
-    info "$(msg "Unknown distribution. Proceeding with AppImage." "Distribusi tidak diketahui. Melanjutkan dengan AppImage.")"
+    if [ -n "$native_pkg" ]; then
+      echo "  1) Native Package (.$native_pkg) - $(msg 'Recommended' 'Rekomendasi')"
+      echo "  2) AppImage"
+      read -rp "$(msg 'Choice [1/2] (default: 1): ' 'Pilihan [1/2] (default: 1): ')" pkg_choice
+      if [ "$pkg_choice" = "2" ]; then
+        pkg_ext="AppImage"
+      else
+        pkg_ext="$native_pkg"
+      fi
+    else
+      pkg_ext="AppImage"
+      info "$(msg "Unknown distribution. Proceeding with AppImage." "Distribusi tidak diketahui. Melanjutkan dengan AppImage.")"
+    fi
   fi
 
   # 3. Select Version
-  echo ""
-  msg "Select version to download:" "Pilih versi yang ingin diunduh:"
-  echo "  1) Stable ($(msg 'Recommended' 'Rekomendasi'))"
-  echo "  2) Beta (Pre-release)"
-  echo "  3) Alpha ($(msg 'Experimental' 'Eksperimental'))"
-  read -rp "$(msg 'Choice [1/2/3] (default: 1): ' 'Pilihan [1/2/3] (default: 1): ')" ver_choice
-  
   local version_type="stable"
-  if [ "$ver_choice" = "2" ]; then
-    version_type="beta"
-  elif [ "$ver_choice" = "3" ]; then
-    version_type="alpha"
+
+  if [ -n "$req_version" ]; then
+    version_type="$req_version"
+  else
+    echo ""
+    msg "Select version to download:" "Pilih versi yang ingin diunduh:"
+    echo "  1) Stable ($(msg 'Recommended' 'Rekomendasi'))"
+    echo "  2) Beta (Pre-release)"
+    echo "  3) Alpha ($(msg 'Experimental' 'Eksperimental'))"
+    read -rp "$(msg 'Choice [1/2/3] (default: 1): ' 'Pilihan [1/2/3] (default: 1): ')" ver_choice
+    
+    if [ "$ver_choice" = "2" ]; then
+      version_type="beta"
+    elif [ "$ver_choice" = "3" ]; then
+      version_type="alpha"
+    fi
   fi
   
   echo ""
@@ -738,10 +754,23 @@ do_check_update() {
 do_update() {
   local use_beta=false
   local use_alpha=false
-  if [ "$1" = "--beta" ] || [ "$1" = "-b" ]; then
-    use_beta=true
-  elif [ "$1" = "--alpha" ] || [ "$1" = "-a" ]; then
-    use_alpha=true
+  local use_desktop=false
+
+  for arg in "$@"; do
+    case "$arg" in
+      --beta|-b) use_beta=true ;;
+      --alpha|-a) use_alpha=true ;;
+      --desktop|-d) use_desktop=true ;;
+    esac
+  done
+
+  if [ "$use_desktop" = true ]; then
+    local version_flag="stable"
+    if [ "$use_beta" = true ]; then version_flag="beta"; fi
+    if [ "$use_alpha" = true ]; then version_flag="alpha"; fi
+    
+    do_install_desktop "$version_flag" "auto"
+    return 0
   fi
 
   print_banner
@@ -817,11 +846,7 @@ do_update() {
     local external_script="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
     if [ "$external_script" != "$INSTALL_DIR/ttl.sh" ] && [ -w "$external_script" ]; then
       info "$(msg "Updating ttl.sh script outside install directory..." "Mengupdate script ttl.sh di luar direktori instalasi...")"
-      if [ "$use_beta" = true ]; then
-        curl -fsSL "https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/refs/heads/beta/ttl.sh" -o "$external_script" || cp -f "$INSTALL_DIR/ttl.sh" "$external_script"
-      else
-        curl -fsSL "https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/refs/heads/main/ttl.sh" -o "$external_script" || cp -f "$INSTALL_DIR/ttl.sh" "$external_script"
-      fi
+      cp -f "$INSTALL_DIR/ttl.sh" "$external_script"
       chmod +x "$external_script"
     fi
   fi
@@ -877,6 +902,7 @@ show_help() {
   echo "  help,     -h,  --help        $(msg 'Show this help' 'Tampilkan bantuan ini')"
   echo ""
   echo -e "${BOLD}$(msg 'Options:' 'Opsi:')${NC}"
+  echo "  update -d, --desktop          $(msg 'Update Desktop App natively' 'Update Desktop App otomatis via paket native')"
   echo "  update --beta                 $(msg 'Update to pre-release (beta)' 'Update ke pre-release (beta)')"
   echo "  update --alpha                $(msg 'Update to experimental (alpha)' 'Update ke eksperimental (alpha)')"
   echo "  -IS                           Install + setup + start"
@@ -892,7 +918,9 @@ show_help() {
   echo "  ./ttl.sh -IS                 # Install + setup + start"
   echo "  ./ttl.sh check               # $(msg 'Check update' 'Cek update')"
   echo "  ./ttl.sh update              # $(msg 'Update stable' 'Update ke stable')"
+  echo "  ./ttl.sh update -d           # $(msg 'Update Desktop App' 'Update Desktop App')"
   echo "  ./ttl.sh update --beta       # $(msg 'Update to beta' 'Update ke beta')"
+  echo "  ./ttl.sh update -d --beta    # $(msg 'Update Desktop App to beta' 'Update Desktop App ke beta')"
   echo "  ./ttl.sh update --alpha      # $(msg 'Update to alpha' 'Update ke alpha')"
   echo "  ./ttl.sh lang en             # $(msg 'Switch to English' 'Ganti ke Bahasa Inggris')"
   echo "  ./ttl.sh lang id             # $(msg 'Switch to Indonesian' 'Ganti ke Bahasa Indonesia')"
@@ -916,7 +944,7 @@ case "$1" in
   setup|--setup)              do_setup ;;
   start|-s|--start)           do_start ;;
   stop|--stop)                do_stop ;;
-  update|-u|--update)         do_update "$2" ;;
+  update|-u|--update)         shift; do_update "$@" ;;
   check|-c|--check)           do_check_update ;;
   node|-n|--node)             do_install_node ;;
   lang|--lang)                do_lang "$2" ;;
