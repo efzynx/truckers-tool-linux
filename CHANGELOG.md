@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Optimized `ttl.sh` Sync**: The external `ttl.sh` script now updates via local file copy from the installation directory instead of `curl` from GitHub, ensuring perfect version synchronization.
-- **Report Email Configuration**: Updated bug report routing settings. Changed sender (`SMTP_FROM`) to `user.report@ttl.my.id` and recipient (`ADMIN_EMAIL`) to `support@ttl.my.id`.
+- **Report Email Configuration**: Updated bug report routing settings. Changed sender (`SMTP_FROM`) and recipient (`ADMIN_EMAIL`).
 - **Enabled Linux Build Targets**: Re-enabled native Linux package targets (pacman, deb, rpm) in `electron-builder.yml`.
 
 ### Fixed
