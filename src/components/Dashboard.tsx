@@ -37,6 +37,13 @@ interface DashboardProps {
   saveFilePath?: string;
 }
 
+/** Format large numbers into compact K / M suffixes */
+const formatCompact = (value: number): string => {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
+  return value.toLocaleString();
+};
+
 /** Level calculation helpers */
 const XP_TABLE: number[] = [
   200, 500, 700, 900, 1000, 1100, 1300, 1600, 1700, 2100,
@@ -582,7 +589,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <div>
                 <p className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-0.5">Balance</p>
                 <p className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight group-hover:text-primary transition-colors truncate">
-                  €{(editableData.money / 1000).toFixed(0)}k
+                  €{formatCompact(editableData.money)}
                 </p>
               </div>
             </button>
@@ -599,7 +606,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <div>
                 <p className="text-[11px] uppercase tracking-widest text-text-muted font-bold mb-0.5">Level {level}</p>
                 <p className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors truncate">
-                  {(editableData.experiencePoints / 1000).toFixed(1)}k XP
+                  {formatCompact(editableData.experiencePoints)} XP
                 </p>
                 {/* Level Progress Bar */}
                 <div className="mt-2 h-1 w-full bg-white/10 rounded-full overflow-hidden">

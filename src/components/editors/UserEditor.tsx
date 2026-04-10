@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { GameData } from '../../types';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -18,16 +18,58 @@ const skillInfo = [
   { key: 'mechanical', label: 'ECO-DRIVE', icon: 'eco', color: 'text-green-400', bgColor: 'bg-green-400', bgHover: 'hover:bg-green-900/20', borderFocus: 'focus-within:border-green-500' },
 ];
 
-const xpPresets = [
-  { label: '5k XP', value: 5_000 },
-  { label: '50k XP', value: 50_000 },
-  { label: '100k XP', value: 100_000 },
-  { label: '500k XP', value: 500_000 },
+const XP_ADD_PRESETS = [
+  { label: '+5K XP', value: 5_000 },
+  { label: '+50K XP', value: 50_000 },
+  { label: '+100K XP', value: 100_000 },
+  { label: '+500K XP', value: 500_000 },
+  { label: '+1M XP', value: 1_000_000 },
+];
+
+const XP_SET_PRESETS = [
+  { label: '100K XP', value: 100_000 },
+  { label: '500K XP', value: 500_000 },
+  { label: '1M XP', value: 1_000_000 },
+  { label: '5M XP', value: 5_000_000 },
+  { label: '50M XP', value: 50_000_000 },
 ];
 
 export default function UserEditor({ data, onChange, onBack, hasChanges }: UserEditorProps) {
   const [xpStr, setXpStr] = useState(data.experiencePoints.toLocaleString());
+  const [xpMode, setXpMode] = useState<'add' | 'set'>('add');
+  const [customXpAmount, setCustomXpAmount] = useState('');
   const { t } = useLanguage();
+
+  const activeXpPresets = xpMode === 'add' ? XP_ADD_PRESETS : XP_SET_PRESETS;
+
+  // Drag-to-scroll for preset chips
+  const presetScrollRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const scrollStartX = useRef(0);
+  const [hasMoreRight, setHasMoreRight] = useState(true);
+
+  const checkScrollEdge = () => {
+    const el = presetScrollRef.current;
+    if (!el) return;
+    setHasMoreRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDragging.current = true;
+    dragStartX.current = e.pageX;
+    scrollStartX.current = presetScrollRef.current?.scrollLeft ?? 0;
+    document.body.style.userSelect = 'none';
+  };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || !presetScrollRef.current) return;
+    const dx = e.pageX - dragStartX.current;
+    presetScrollRef.current.scrollLeft = scrollStartX.current - dx;
+  };
+  const handleMouseUp = () => {
+    isDragging.current = false;
+    document.body.style.userSelect = '';
+  };
 
   useEffect(() => {
     if (!hasChanges) {
@@ -51,6 +93,30 @@ export default function UserEditor({ data, onChange, onBack, hasChanges }: UserE
     const newVal = (data.experiencePoints || 0) + amount;
     setXpStr(newVal.toLocaleString());
     onChange({ experiencePoints: newVal });
+  };
+
+  const setXp = (amount: number) => {
+    setXpStr(amount.toLocaleString());
+    onChange({ experiencePoints: amount });
+  };
+
+  const handleXpPreset = (value: number) => {
+    if (xpMode === 'add') addXp(value);
+    else setXp(value);
+  };
+
+  const handleCustomXpApply = () => {
+    const cleaned = customXpAmount.replace(/[^0-9]/g, '');
+    if (!cleaned) return;
+    const num = parseInt(cleaned, 10);
+    if (xpMode === 'add') addXp(num);
+    else setXp(num);
+    setCustomXpAmount('');
+  };
+
+  const resetXp = () => {
+    setXpStr('0');
+    onChange({ experiencePoints: 0 });
   };
 
   const handleSkillChange = (key: string, value: number) => {
@@ -113,21 +179,106 @@ export default function UserEditor({ data, onChange, onBack, hasChanges }: UserE
         </div>
       </section>
 
-      {/* Quick XP Add Chips */}
+      {/* Fast Inject XP */}
       <section className="mb-10 w-full overflow-hidden animate-fade-in" style={{ animationDelay: '100ms' }}>
-        <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar px-1">
-          {xpPresets.map((preset) => (
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-text-muted text-xs font-bold tracking-[0.2em] uppercase font-display">{t('Fast Inject')} XP</h3>
+
+          {/* Mode Toggle */}
+          <div className="flex items-center gap-1 p-1 bg-surface-dark border border-white/10 rounded-xl">
             <button
-              key={preset.label}
-              onClick={() => addXp(preset.value)}
-              className="flex-shrink-0 flex items-center gap-2 bg-surface hover:bg-surface/80 active:bg-blue-500/20 border border-white/10 active:border-blue-500/50 text-white px-5 py-3 rounded-xl transition-all active:scale-95 group cursor-pointer"
+              onClick={() => setXpMode('add')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold font-display tracking-widest uppercase transition-all cursor-pointer ${
+                xpMode === 'add'
+                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  : 'text-text-muted hover:text-white'
+              }`}
             >
-              <span className="material-symbols-outlined text-blue-400 group-active:scale-110 transition-transform text-lg">add_circle</span>
+              {t('inject.modeAdd')}
+            </button>
+            <button
+              onClick={() => setXpMode('set')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold font-display tracking-widest uppercase transition-all cursor-pointer ${
+                xpMode === 'set'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  : 'text-text-muted hover:text-white'
+              }`}
+            >
+              {t('inject.modeSet')}
+            </button>
+          </div>
+        </div>
+
+        {/* Preset Chips */}
+        <div className="relative">
+          {/* Fade gradient right */}
+          <div className={`pointer-events-none absolute right-0 top-0 bottom-3 w-12 bg-gradient-to-l from-surface-dark to-transparent z-10 transition-opacity duration-300 ${hasMoreRight ? 'opacity-100' : 'opacity-0'}`} />
+          <div
+            ref={presetScrollRef}
+            className="flex gap-3 overflow-x-auto pb-3 px-1 cursor-grab active:cursor-grabbing"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            onScroll={checkScrollEdge}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
+            {activeXpPresets.map((preset) => (
+              <button
+                key={preset.label}
+                onClick={() => handleXpPreset(preset.value)}
+              className={`flex-shrink-0 flex items-center gap-2 bg-surface hover:bg-surface/80 active:scale-95 border border-white/10 text-white px-5 py-3 rounded-xl transition-all group cursor-pointer ${
+                xpMode === 'add'
+                  ? 'active:bg-blue-500/20 active:border-blue-500/50'
+                  : 'active:bg-emerald-500/20 active:border-emerald-500/50'
+              }`}
+            >
+              <span className={`material-symbols-outlined group-active:scale-110 transition-transform text-lg ${
+                xpMode === 'add' ? 'text-blue-400' : 'text-emerald-400'
+              }`}>
+                {xpMode === 'add' ? 'add_circle' : 'currency_exchange'}
+              </span>
               <span className="font-mono font-bold tracking-wide">{preset.label}</span>
             </button>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Custom Amount + Reset */}
+        <div className="flex gap-2 mt-3">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 font-mono text-sm font-bold">XP</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={customXpAmount}
+              onChange={(e) => setCustomXpAmount(e.target.value.replace(/[^0-9]/g, ''))}
+              onKeyDown={(e) => e.key === 'Enter' && handleCustomXpApply()}
+              placeholder={t('inject.customPlaceholder')}
+              className="w-full bg-surface-dark border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 transition-all placeholder-text-muted/40"
+            />
+          </div>
+          <button
+            onClick={handleCustomXpApply}
+            disabled={!customXpAmount}
+            className={`px-5 py-2.5 rounded-xl text-sm font-bold font-display tracking-widest uppercase transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer ${
+              xpMode === 'add'
+                ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30'
+                : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30'
+            }`}
+          >
+            {t('inject.apply')}
+          </button>
+          <button
+            onClick={resetXp}
+            title="Reset XP to 0"
+            className="px-3 py-2.5 rounded-xl text-sm bg-surface border border-white/5 text-text-muted hover:text-red-400 hover:border-red-500/30 transition-colors cursor-pointer flex items-center gap-1"
+          >
+            <span className="material-symbols-outlined text-sm">restart_alt</span>
+          </button>
         </div>
       </section>
+
     </div>
 
     {/* Right Column: Skill Matrix */}

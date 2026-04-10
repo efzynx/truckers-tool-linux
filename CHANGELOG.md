@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.8-beta.1] - 2026-04-10
+
+### Added
+- **XP Fast Inject System**: Replaced the legacy Quick XP Add chips in the User Editor with a full Fast Inject panel. Features an Add / Set mode toggle, scrollable draggable preset chips (+5K to +1M for Add mode; 100K to 50M for Set mode), a custom XP amount input with Enter key support, and a compact Reset XP icon button. Design is consistent with the existing Money Fast Inject in Profile Editor.
+- **Compact Number Format (K/M)**: Added a `formatCompact()` helper in `Dashboard.tsx`. Stat card numbers now display as `X.XM` (≥ 1,000,000), `XK` (≥ 1,000), or raw value (< 1,000). Applied to both the Balance and XP stat cards.
+
+### Fixed
+- **AUR Pre-Release `pkgver` Convention**: Corrected the Arch Linux PKGBUILD versioning convention for pre-release builds. Pre-release suffixes (`alpha`, `beta`) must now be written without any separator (e.g. `1.1.8beta1`) instead of the previously incorrect `1.1.8_beta.1`, which was causing `pacman`/`vercmp` to rank beta builds as newer than the final stable release. The `aur-publish.md` workflow now includes a permanent CAUTION warning enforcing this rule.
+
 ## [1.1.7] - 2026-04-10
 
 ### Promoted from
