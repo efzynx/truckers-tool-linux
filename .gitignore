@@ -54,3 +54,7 @@ release/
 IMPLEMENTATION-PLAN-RESTORE.md
 DEVELOPMENT.md
 ttl-docs/
+
+# AUR Packaging
+aur/
+truckers-tool-linux-bin/
