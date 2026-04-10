@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.7] - 2026-04-10
+
+### Promoted from
+- `1.1.7-beta.1` — Arch User Repository (AUR) Native Distribution support and Antigravity workflow automation.
+- `1.1.7-alpha.2` — Desktop App CLI Auto-Updater and optimized `.sh` sync.
+- `1.1.7-alpha.1` — Native Package (`.deb`, `.rpm`, `.pacman`) integrations and automated Linux dependencies.
+
 ## [1.1.7-beta.1] - 2026-04-10
 
 ### Added
