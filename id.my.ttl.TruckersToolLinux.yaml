@@ -62,7 +62,7 @@ modules:
       # Source code dari Upstream (Git/Archive)
       - type: git
         url: https://github.com/efzynx/truckers-tool-linux.git
-        commit: 790a0539b6d4ff24d413998c648740ecff2e805a
+        commit: 8e1c282aa008bec8151bf697e20c22869636b74e
         
       # Binary Electron v40.8.5 untuk linux-x64
       - type: file
