@@ -1,9 +1,9 @@
 app-id: id.my.ttl.TruckersToolLinux
 runtime: org.freedesktop.Platform
-runtime-version: '24.08'
+runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 base: org.electronjs.Electron2.BaseApp
-base-version: '24.08'
+base-version: '25.08'
 
 command: run.sh
 separate-locales: false
@@ -12,14 +12,24 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.node20
 
 finish-args:
+  # Network access for connecting to api.ttl.my.id and checking updates
   - --share=network
   - --share=ipc
   - --socket=fallback-x11
   - --socket=wayland
   - --device=dri
-  - --filesystem=xdg-documents/Euro Truck Simulator 2:create
-  - --filesystem=~/.steam:create
-  - --filesystem=~/Games:create
+  # Filesystem permissions for ETS2 and ATS profiles (Read/Write required for editing profiles)
+  # Standard Native Linux locations
+  - --filesystem=~/.local/share/Euro Truck Simulator 2:rw
+  - --filesystem=~/.local/share/American Truck Simulator:rw
+  # Flatpak Steam locations
+  - --filesystem=~/.var/app/com.valvesoftware.Steam/data/Euro Truck Simulator 2:rw
+  - --filesystem=~/.var/app/com.valvesoftware.Steam/data/American Truck Simulator:rw
+  # Proton prefixes (Steam Play) for both Native and Flatpak Steam
+  - --filesystem=~/.steam/steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2:rw
+  - --filesystem=~/.steam/steam/steamapps/compatdata/270880/pfx/drive_c/users/steamuser/Documents/American Truck Simulator:rw
+  - --filesystem=~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2:rw
+  - --filesystem=~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/compatdata/270880/pfx/drive_c/users/steamuser/Documents/American Truck Simulator:rw
   - --env=ELECTRON_TRASH=gio
 
 build-options:
@@ -38,40 +48,31 @@ modules:
         npm_config_cache: /run/build/truckers-tool-linux/flatpak-node/npm-cache
         XDG_CACHE_HOME: /run/build/truckers-tool-linux/flatpak-node/cache
     build-commands:
-      # Build the application using npm
       - npm ci --offline
       - npm run build:all
       
-      # Use electron-builder to build linux unpacked directory
       - npx electron-builder --linux dir
       
-      # Bundling App
       - cp -a release/linux-unpacked /app/main
       
-      # Install the launch script
       - install -Dm755 flatpak/run.sh -t /app/bin/
       
-      # Install desktop file dan metadata
       - install -Dm644 flatpak/id.my.ttl.TruckersToolLinux.desktop -t /app/share/applications/
       - install -Dm644 flatpak/id.my.ttl.TruckersToolLinux.metainfo.xml -t /app/share/metainfo/
       
-      # Install ikon aplikasi (wajib untuk AppStream validator)
       - install -Dm644 build/icon.png /app/share/icons/hicolor/512x512/apps/id.my.ttl.TruckersToolLinux.png
       
     sources:
-      # Source code dari Upstream (Git/Archive)
       - type: git
         url: https://github.com/efzynx/truckers-tool-linux.git
-        commit: 8e1c282aa008bec8151bf697e20c22869636b74e
+        commit: fe329fb7e020231eab3ff83d53c65f28ef8d9e4a
         
-      # Binary Electron v40.8.5 untuk linux-x64
       - type: file
         url: https://github.com/electron/electron/releases/download/v40.8.5/electron-v40.8.5-linux-x64.zip
         sha256: 3bce6ee4e4e481f7ce6d0be384f6c539ce16e0b9b7f46115aec6516770f6c26d
         dest: electron-cache
         dest-filename: electron-v40.8.5-linux-x64.zip
 
-      # File ekstra (dikopikan otomatis oleh flatpak builder ke build directory)
       - type: file
         path: flatpak/run.sh
       - type: file
