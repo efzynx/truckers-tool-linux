@@ -128,7 +128,9 @@ export function parseGameData(content: string): ParsedGameData {
   }
   // ---- INTEGRITY CHECK END ----
 
-  const lines = content.split('\n');
+  // Normalize line endings to avoid \r causing comparison failures
+  const normalizedContent = content.replace(/\r\n/g, '\n');
+  const lines = normalizedContent.split('\n');
 
   let money = 0;
   let experiencePoints = 0;
@@ -685,7 +687,10 @@ export function applyUpdates(
     resetJobTime?: boolean;
   }
 ): string {
-  const lines = content.split('\n');
+  // Normalize line endings to avoid \r causing comparison failures
+  const isWindows = content.includes('\r\n');
+  const normalizedContent = content.replace(/\r\n/g, '\n');
+  const lines = normalizedContent.split('\n');
   const result: string[] = [];
 
   const hasAnyTruckAction = updates.truckRepairAll || updates.truckRefuelAll ||
@@ -755,6 +760,8 @@ export function applyUpdates(
   // Garage rebuild state
   let garageRebuild: string[] | null = null;
   let garageTargetStatus = 0;
+  // Map discovery: kumpulkan kota visited secara terpisah (terpisah dari garageRebuild!)
+  let citiesList: string[] | null = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -915,49 +922,59 @@ export function applyUpdates(
 
     // Economy: Map Discovery
     if (blockType === 'economy' && updates.discoverMap) {
+      // Kumpulkan semua kota dari visited_cities[] ke citiesList (terpisah dari garageRebuild)
       if (trimmed.startsWith('visited_cities:') && !trimmed.startsWith('visited_cities[')) {
-        // We only care about visited_cities[], the count is just parsed to skip
+        // Skip header count — akan ditulis ulang bersama unlocked_dealers di bawah
+        continue;
       }
       if (trimmed.startsWith('visited_cities[')) {
         const cityMatch = trimmed.match(/^visited_cities\[\d+\]:\s*(\S+)/);
-        if (cityMatch && cityMatch[1] && cityMatch[1] !== 'null') {
-          // Temporarily store the city to write later
-          if (!garageRebuild) garageRebuild = [];
-          garageRebuild.push(cityMatch[1]);
+        if (cityMatch && cityMatch[2] && cityMatch[2] !== 'null') {
+          if (!citiesList) citiesList = [];
+          citiesList.push(cityMatch[2]);
+        } else if (cityMatch && cityMatch[1] && cityMatch[1] !== 'null') {
+          // fallback: index 1 jika regex punya 2 grup
+          if (!citiesList) citiesList = [];
+          citiesList.push(cityMatch[1]);
         }
+        // Skip line ini — akan ditulis ulang seluruhnya bersama unlocked_dealers
+        continue;
       }
 
-      // 1. Rewrite unlocked_dealers
+      // Saat menemukan unlocked_dealers, tulis visited_cities + unlocked_dealers sekaligus
       if (trimmed.startsWith('unlocked_dealers:') && !trimmed.startsWith('unlocked_dealers[')) {
-        const citiesList = garageRebuild || [];
-        result.push(` unlocked_dealers: ${citiesList.length}`);
-        
-        for (let idx = 0; idx < citiesList.length; idx++) {
-          result.push(` unlocked_dealers[${idx}]: ${citiesList[idx]}`);
+        const cities = citiesList || [];
+        // Tulis ulang visited_cities header + array
+        result.push(` visited_cities: ${cities.length}`);
+        for (let idx = 0; idx < cities.length; idx++) {
+          result.push(` visited_cities[${idx}]: ${cities[idx]}`);
+        }
+        // Tulis unlocked_dealers (sama dengan visited cities)
+        result.push(` unlocked_dealers: ${cities.length}`);
+        for (let idx = 0; idx < cities.length; idx++) {
+          result.push(` unlocked_dealers[${idx}]: ${cities[idx]}`);
         }
         continue;
       }
       if (trimmed.startsWith('unlocked_dealers[')) {
-        // Skip existing elements since we completely rewrote them
+        // Skip — sudah ditulis di atas
         continue;
       }
 
-      // 2. Rewrite unlocked_recruitments
+      // Rewrite unlocked_recruitments
       if (trimmed.startsWith('unlocked_recruitments:') && !trimmed.startsWith('unlocked_recruitments[')) {
-        const citiesList = garageRebuild || [];
-        result.push(` unlocked_recruitments: ${citiesList.length}`);
-        
-        for (let idx = 0; idx < citiesList.length; idx++) {
-          result.push(` unlocked_recruitments[${idx}]: ${citiesList[idx]}`);
+        const cities = citiesList || [];
+        result.push(` unlocked_recruitments: ${cities.length}`);
+        for (let idx = 0; idx < cities.length; idx++) {
+          result.push(` unlocked_recruitments[${idx}]: ${cities[idx]}`);
         }
         continue;
       }
       if (trimmed.startsWith('unlocked_recruitments[')) {
-        // Skip existing elements
         continue;
       }
       
-      // Override visited_cities_count to 3 (visited) inside the array
+      // Override visited_cities_count to 3 (visited)
       if (trimmed.startsWith('visited_cities_count[')) {
         const colonPos = line.indexOf(':');
         result.push(line.substring(0, colonPos + 1) + ' 3');
@@ -1039,7 +1056,7 @@ export function applyUpdates(
     result.push(line);
   }
 
-  const updatedContent = result.join('\n');
+  const updatedContent = result.join(isWindows ? '\r\n' : '\n');
 
   // ---- INTEGRITY CHECK START ----
   

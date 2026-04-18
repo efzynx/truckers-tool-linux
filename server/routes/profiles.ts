@@ -263,7 +263,12 @@ router.post('/backup-profile', async (req, res) => {
       await fs.access(backupPath);
       // If it exists, remove old backup first
       await fs.rm(backupPath, { recursive: true, force: true });
-    } catch {
+    } catch (err: any) {
+      if (err.code !== 'ENOENT') {
+        // Log the actual error and throw so it's caught by the main catch block
+        console.error('Failed to remove existing backup folder:', err);
+        throw new Error(`Gagal menghapus folder backup sistem: ${err.message}`);
+      }
       // Backup doesn't exist yet — that's fine
     }
 

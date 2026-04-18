@@ -7,9 +7,10 @@ interface SaveListProps {
   onSelect: (save: Save, useBackup: boolean) => void;
   onBack: () => void;
   loading: boolean;
+  error?: string | null;
 }
 
-export default function SaveList({ saves, onSelect, onBack, loading }: SaveListProps) {
+export default function SaveList({ saves, onSelect, onBack, loading, error }: SaveListProps) {
   const [useBackup, setUseBackup] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'autosave' | 'manual'>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
@@ -88,6 +89,15 @@ export default function SaveList({ saves, onSelect, onBack, loading }: SaveListP
               </label>
             </div>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl flex items-center gap-3">
+              <span className="material-symbols-outlined text-red-500">error</span>
+              <div className="flex-1">
+                <h3 className="text-sm font-bold text-red-500 uppercase tracking-widest break-all whitespace-pre-wrap">{error}</h3>
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between pl-2 mb-1">

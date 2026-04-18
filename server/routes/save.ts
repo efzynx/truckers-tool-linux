@@ -31,7 +31,8 @@ router.post('/parse', async (req, res) => {
 /**
  * POST /api/save
  * Applies the updates to the game.sii content and overwrites the file.
- * The file is saved as PLAIN TEXT (SCS engine reads plain text natively).
+ * If the original file was encrypted (ScsC), the output is re-encrypted to the same format.
+ * If the original was plain text SiiNunit (e.g. autosave), it is saved as plain text.
  */
 router.post('/save', async (req, res) => {
   try {
@@ -70,12 +71,25 @@ router.post('/save', async (req, res) => {
     }
 
     // Apply updates using regex
+    const oldMoney = content.match(/money_account:\s*\S+/);
+    console.log(`[save_debug] old money line: ${oldMoney ? oldMoney[0] : 'not found'}`);
+    console.log(`[save_debug] updates received: ${JSON.stringify(updates)}`);
+
     const updatedContent = applyUpdates(content, updates);
 
+    const newMoney = updatedContent.match(/money_account:\s*\S+/);
+    console.log(`[save_debug] new money line: ${newMoney ? newMoney[0] : 'not found'}`);
+    
     // Write the updated plain text back to the file
+    // Note: User must have g_save_format "2" in their config.cfg so the game reads plain text manual saves
     await fs.writeFile(filePath, updatedContent, 'utf-8');
+    
+    const writtenFile = await fs.readFile(filePath, 'utf-8');
+    const writtenMoney = writtenFile.match(/money_account:\s*\S+/);
+    console.log(`[save_debug] file written checked: ${writtenMoney ? writtenMoney[0] : 'not found'}`);
+    
+    console.log(`💾 File saved (plain text): ${filePath}`);
 
-    console.log(`💾 File saved: ${filePath}`);
     res.json({ success: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

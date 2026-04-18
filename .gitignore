@@ -32,6 +32,7 @@ test.js
 parse_garage.js
 parse_garages.js
 test.cjs
+v1.55/
 
 # Temp uploads
 uploads/
@@ -58,3 +59,12 @@ ttl-docs/
 # AUR Packaging
 aur/
 truckers-tool-linux-bin/
+
+# Flatpak / Flathub Packaging
+flathub/
+.flatpak-builder/
+builddir/
+repo/
+fenv/
+com.efzynx.TruckersToolLinux.yaml
+flatpak-node-generator.py

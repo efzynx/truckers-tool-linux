@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.9] - 2026-04-18
+
+### Added
+- **UI Error Feedback**: Added red error message boxes in the Save Game selection screen for better failure visibility during backup operations.
+- **Backend Error Handling**: Improved `profiles.ts` to explicitly catch and report filesystem permission errors during backup creation.
+- **Flathub Verification Support**: Migrated App ID to `id.my.ttl.TruckersToolLinux` to support domain verification via `ttl.my.id`.
+
+### Changed
+- **Flatpak Permissions**: Granted Read-Write (`:create`) access to `xdg-documents/Euro Truck Simulator 2` and `~/Games` / `~/.steam` directories in the Flatpak manifest to fix `EROFS` (Read-only file system) errors during Safe Mode Protocol activation.
+- **ETS2 1.55 Save Support**: Recommended `g_save_format "2"` configuration for ETS2 1.55 to ensure compatibility with manual saves and prevent engine-level corruption errors.
+
+### Fixed
+- **Parser Variable Conflict**: Fixed a bug in `applyUpdates` logic where `garageRebuild` was incorrectly reused during map discovery, causing variable conflicts.
+- **Map Discovery Output**: Resolved an issue causing duplicate or misplaced `visited_cities` strings in the economy block output by properly skipping collected blocks during writing.
+
+
 ## [1.1.8] - 2026-04-10
 
 ### Promoted from

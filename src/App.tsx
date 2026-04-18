@@ -25,6 +25,7 @@ function App() {
   const [siiContent, setSiiContent] = useState<string>('');
   const [siiFilePath, setSiiFilePath] = useState<string>('');
 
+
   // ---- Upload State ----
   const [uploadedProfiles, setUploadedProfiles] = useState<UploadedProfile[]>([]);
   const [selectedUploadProfile, setSelectedUploadProfile] = useState<UploadedProfile | null>(null);
@@ -103,6 +104,7 @@ function App() {
 
       setSiiContent(decryptResult.content);
       setSiiFilePath(decryptResult.filePath);
+      // Track if the original file was encrypted (ScsC binary) so we can re-encrypt on save
 
       const parseResult = await parseContent(decryptResult.content);
       if (!parseResult.success) {
@@ -340,6 +342,7 @@ function App() {
           onSelect={handleSaveSelect}
           onBack={() => setStep('profile-select')}
           loading={backupLoading}
+          error={scanError}
         />
       );
 
