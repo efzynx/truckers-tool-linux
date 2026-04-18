@@ -4,7 +4,7 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <name>Truckers Tool Linux</name>
-  <summary>Unofficial telemetry and profile manager for Euro Truck Simulator 2 on Linux</summary>
+  <summary>Unofficial telemetry and profile manager for ETS2 and ATS on Linux</summary>
   <description>
     <p>Truckers Tool Linux is a native, modern, and open-source companion application designed for Euro Truck Simulator 2 (ETS2) and American Truck Simulator (ATS) on Linux.</p>
     <p>Features include:</p>
@@ -26,27 +26,27 @@
   </developer>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/flatpak/screenshots/1-main.png</image>
+      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/1-main.png</image>
       <caption>Main Page</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/flatpak/screenshots/2-path-selector.png</image>
+      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/2-path-selector.png</image>
       <caption>Profile Path Selector</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/flatpak/screenshots/3-profile-selector.png</image>
+      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/3-profile-selector.png</image>
       <caption>Profile Selector</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/flatpak/screenshots/4-restore-management.png</image>
+      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/4-restore-management.png</image>
       <caption>Restore Profile Management</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/flatpak/screenshots/5-save-game-selector.png</image>
+      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/5-save-game-selector.png</image>
       <caption>Save Game Selector</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/main/flatpak/screenshots/6-dashboard.png</image>
+      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/6-dashboard.png</image>
       <caption>Dashboard</caption>
     </screenshot>
   </screenshots>
