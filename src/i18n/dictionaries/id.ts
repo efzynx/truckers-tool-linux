@@ -16,6 +16,8 @@ export const id = {
   "path.scanButton": "Scan Profil",
   "path.scanning": "Scanning...",
   "path.uploadTitle": "Atau Upload Profile/Save Game",
+  "path.browseButton": "Pilih Folder",
+  "path.errorInvalidFolder": "Folder tidak valid. Pastikan folder yang Anda pilih mengandung '{game}' dan folder 'profiles'.",
   "path.uploadDesc": "Klik atau drag and drop file profile/save game di sini",
   "path.uploadLimit": "(Bisa upload file ZIP atau .sii langsung. Max upload 50MB, max diekstrak 100MB)",
   "path.backButton": "Kembali",

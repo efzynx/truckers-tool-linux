@@ -92,8 +92,50 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
                   onChange={(e) => setPath(e.target.value)}
                   disabled={loading}
                   placeholder="Enter path..."
-                  className="block w-full rounded-xl border border-surface bg-surface py-4 pl-12 pr-4 text-text-main font-mono text-base placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-neon transition-all duration-300"
+                  className="block w-full rounded-xl border border-surface bg-surface py-4 pl-12 pr-12 text-text-main font-mono text-base placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-neon transition-all duration-300"
                 />
+                
+                {/* Browse Button inside Input */}
+                <button
+                  onClick={async () => {
+                    if (loading) return;
+                    
+                    // Safe check for Electron API
+                    const electronAPI = (window as any).electronAPI;
+                    if (!electronAPI || !electronAPI.system) {
+                      console.warn('Native folder picker is only available in the Desktop App');
+                      alert('Fitur "Browse Folder" hanya tersedia di aplikasi Desktop (Electron). Jika Anda menggunakan browser, silakan masukkan path secara manual atau gunakan mode Upload.');
+                      return;
+                    }
+
+                    try {
+                      const result = await electronAPI.system.selectDirectory();
+                      if (result.success && result.path) {
+                        const selectedPath = result.path;
+                        const gameFolderName = game === 'ets2' ? 'Euro Truck Simulator 2' : 'American Truck Simulator';
+                        
+                        // Validation logic
+                        const hasGameFolder = selectedPath.includes(gameFolderName);
+                        const hasProfiles = selectedPath.toLowerCase().includes('profiles');
+
+                        if (hasGameFolder && hasProfiles) {
+                          setPath(selectedPath);
+                        } else {
+                          // Trigger error via onScan or a local error state if we want to be strict
+                          // For now, let's use the error prop by passing it through or just showing a temporary warning
+                          alert(t('path.errorInvalidFolder').replace('{game}', gameFolderName));
+                        }
+                      }
+                    } catch (err) {
+                      console.error('Failed to select directory:', err);
+                    }
+                  }}
+                  disabled={loading}
+                  title={t('path.browseButton')}
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-text-muted hover:text-primary transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-[22px]">folder_open</span>
+                </button>
               </div>
               {error && (
                 <div className="mt-2 text-red-500 font-mono text-xs uppercase flex items-center gap-1">

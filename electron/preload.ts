@@ -6,5 +6,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   network: {
     checkUpdate: () => ipcRenderer.invoke('network:checkUpdate'),
     sendBugReport: (data: any) => ipcRenderer.invoke('network:sendBugReport', data)
+  },
+  system: {
+    selectDirectory: () => ipcRenderer.invoke('system:selectDirectory')
   }
 });

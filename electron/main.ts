@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { fork, ChildProcess } from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -182,6 +182,22 @@ app.whenReady().then(() => {
     } catch (err: any) {
       return { success: false, error: 'NETWORK_ERROR', message: err.message };
     }
+  });
+
+  ipcMain.handle('system:selectDirectory', async () => {
+    if (!mainWindow) return { success: false, error: 'NO_WINDOW' };
+    
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory', 'createDirectory'],
+      title: 'Select Game Profiles Folder',
+      buttonLabel: 'Select Folder'
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false, error: 'CANCELED' };
+    }
+
+    return { success: true, path: result.filePaths[0] };
   });
 
   startBackend();

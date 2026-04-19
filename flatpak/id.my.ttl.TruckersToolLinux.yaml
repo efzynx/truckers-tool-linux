@@ -25,9 +25,7 @@ finish-args:
   # Proton prefixes (Steam Play) for Native Steam
   # (Note: Specific paths are used to minimize access)
   - --filesystem=~/.steam/steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2:rw
-  - --filesystem=~/.steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2:rw
   - --filesystem=~/.steam/steam/steamapps/compatdata/270880/pfx/drive_c/users/steamuser/Documents/American Truck Simulator:rw
-  - --filesystem=~/.steam/steamapps/compatdata/270880/pfx/drive_c/users/steamuser/Documents/American Truck Simulator:rw
   - --env=ELECTRON_TRASH=gio
 
 build-options:
@@ -71,10 +69,4 @@ modules:
         dest: electron-cache
         dest-filename: electron-v40.8.5-linux-x64.zip
 
-      - type: file
-        path: run.sh
-      - type: file
-        path: id.my.ttl.TruckersToolLinux.desktop
-      - type: file
-        path: id.my.ttl.TruckersToolLinux.metainfo.xml
-      - flatpak-node-sources.json
+      - flatpak/flatpak-node-sources.json

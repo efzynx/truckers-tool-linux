@@ -16,6 +16,8 @@ export const en: TranslationDoc = {
   "path.scanButton": "Scan Profiles",
   "path.scanning": "Scanning...",
   "path.uploadTitle": "Or Upload Profile/Save Game",
+  "path.browseButton": "Select Folder",
+  "path.errorInvalidFolder": "Invalid folder. Make sure the folder you selected contains '{game}' and the 'profiles' folder.",
   "path.uploadDesc": "Click or drag and drop profile/save game files here",
   "path.uploadLimit": "(You can upload ZIP or .sii directly. Max upload 50MB, max extracted 100MB)",
   "path.backButton": "Back",
