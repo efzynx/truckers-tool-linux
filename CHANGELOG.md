@@ -5,7 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-04-19
+
+### Fixed
+- **File Selector False Alert**: Removed overly strict pre-validation logic in `PathInput.tsx` that incorrectly showed an "Invalid folder" alert when a user selected a valid directory (e.g., `Euro Truck Simulator 2/` or a Proton prefix path) via the native folder picker. Path validation is now delegated entirely to the backend when "Scan Profiles" is triggered.
+- **Flatpak Manifest Permissions**: Removed static `--filesystem=` permissions for ETS2/ATS game paths from the Flatpak manifest. Since the app uses the XDG Desktop Portal (`dialog.showOpenDialog` via `org.electronjs.Electron2.BaseApp`), filesystem access is granted dynamically by the portal when the user selects a folder—making hardcoded permissions unnecessary and non-compliant with Flathub security policy.
+
+## [1.2.0] - 2026-04-18
+
+### Added
+- **Native XDG Desktop Portal File Picker**: Implemented a native "Browse" button in `PathInput.tsx` using Electron's `dialog.showOpenDialog`. In the Flatpak build, Electron automatically uses the XDG Desktop Portal, allowing users to select custom Steam library or Proton prefix folders without requiring broad `--filesystem=` permissions in the manifest.
+- **Flathub Submission**: Prepared the Flatpak manifest (`id.my.ttl.TruckersToolLinux.yaml`), metainfo XML, desktop entry, and `run.sh` launcher for the initial Flathub submission under App ID `id.my.ttl.TruckersToolLinux`.
+
+### Changed
+- **App ID Migration**: Migrated the Flatpak App ID from `io.github.efzynx.TruckersToolLinux` to `id.my.ttl.TruckersToolLinux` to support domain verification via `ttl.my.id`.
+
 ## [1.1.9] - 2026-04-18
+
 
 ### Added
 - **UI Error Feedback**: Added red error message boxes in the Save Game selection screen for better failure visibility during backup operations.

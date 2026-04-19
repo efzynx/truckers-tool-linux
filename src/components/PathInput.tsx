@@ -112,19 +112,13 @@ export default function PathInput({ game, onScan, onUpload, loading, error, onBa
                       const result = await electronAPI.system.selectDirectory();
                       if (result.success && result.path) {
                         const selectedPath = result.path;
-                        const gameFolderName = game === 'ets2' ? 'Euro Truck Simulator 2' : 'American Truck Simulator';
-                        
-                        // Validation logic
-                        const hasGameFolder = selectedPath.includes(gameFolderName);
-                        const hasProfiles = selectedPath.toLowerCase().includes('profiles');
 
-                        if (hasGameFolder && hasProfiles) {
-                          setPath(selectedPath);
-                        } else {
-                          // Trigger error via onScan or a local error state if we want to be strict
-                          // For now, let's use the error prop by passing it through or just showing a temporary warning
-                          alert(t('path.errorInvalidFolder').replace('{game}', gameFolderName));
-                        }
+                        // Accept any folder selected via XDG portal.
+                        // The portal already grants sandbox access to the chosen directory,
+                        // so we don't need to pre-validate here — the backend will
+                        // validate whether the folder contains valid game profiles
+                        // when the user clicks "Scan Profiles".
+                        setPath(selectedPath);
                       }
                     } catch (err) {
                       console.error('Failed to select directory:', err);
