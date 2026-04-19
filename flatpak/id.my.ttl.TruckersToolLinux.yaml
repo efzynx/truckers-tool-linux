@@ -22,14 +22,12 @@ finish-args:
   # Standard Native Linux locations
   - --filesystem=~/.local/share/Euro Truck Simulator 2:rw
   - --filesystem=~/.local/share/American Truck Simulator:rw
-  # Flatpak Steam locations
-  - --filesystem=~/.var/app/com.valvesoftware.Steam/data/Euro Truck Simulator 2:rw
-  - --filesystem=~/.var/app/com.valvesoftware.Steam/data/American Truck Simulator:rw
-  # Proton prefixes (Steam Play) for both Native and Flatpak Steam
+  # Proton prefixes (Steam Play) for Native Steam
+  # (Note: Specific paths are used to minimize access)
   - --filesystem=~/.steam/steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2:rw
+  - --filesystem=~/.steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2:rw
   - --filesystem=~/.steam/steam/steamapps/compatdata/270880/pfx/drive_c/users/steamuser/Documents/American Truck Simulator:rw
-  - --filesystem=~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2:rw
-  - --filesystem=~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/compatdata/270880/pfx/drive_c/users/steamuser/Documents/American Truck Simulator:rw
+  - --filesystem=~/.steam/steamapps/compatdata/270880/pfx/drive_c/users/steamuser/Documents/American Truck Simulator:rw
   - --env=ELECTRON_TRASH=gio
 
 build-options:
@@ -65,7 +63,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/efzynx/truckers-tool-linux.git
-        commit: fe329fb7e020231eab3ff83d53c65f28ef8d9e4a
+        commit: f51e241f3051900ca8c49d133e8507ed5e90b4ed
         
       - type: file
         url: https://github.com/electron/electron/releases/download/v40.8.5/electron-v40.8.5-linux-x64.zip
@@ -74,9 +72,9 @@ modules:
         dest-filename: electron-v40.8.5-linux-x64.zip
 
       - type: file
-        path: flatpak/run.sh
+        path: run.sh
       - type: file
-        path: flatpak/id.my.ttl.TruckersToolLinux.desktop
+        path: id.my.ttl.TruckersToolLinux.desktop
       - type: file
-        path: flatpak/id.my.ttl.TruckersToolLinux.metainfo.xml
-      - flatpak/flatpak-node-sources.json
+        path: id.my.ttl.TruckersToolLinux.metainfo.xml
+      - flatpak-node-sources.json
