@@ -4,7 +4,11 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <name>Truckers Tool Linux</name>
-  <summary>Unofficial telemetry and profile manager for ETS2 and ATS on Linux</summary>
+  <summary>Manage ATS and ETS2 profiles</summary>
+  <branding>
+    <color type="primary" scheme_preference="light">#f98c06</color>
+    <color type="primary" scheme_preference="dark">#f98c06</color>
+  </branding>
   <description>
     <p>Truckers Tool Linux is a native, modern, and open-source companion application designed for Euro Truck Simulator 2 (ETS2) and American Truck Simulator (ATS) on Linux.</p>
     <p>Features include:</p>
@@ -53,6 +57,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.2.3" date="2026-04-21">
+      <description>
+        <p>Fixed document portal validation and resolved XDG portal FUSE mount paths for reliable sandbox integration.</p>
+      </description>
+    </release>
     <release version="1.2.0" date="2026-04-19">
       <description>
         <p>Added Native Portal Folder Picker for better Flatpak sandbox compatibility and custom game paths (Lutris, Flatpak Steam, etc).</p>
