@@ -67,4 +67,4 @@ builddir/
 repo/
 fenv/
 com.efzynx.TruckersToolLinux.yaml
-flatpak-node-generator.py
+flatpak-node-generator.pyflatpak/*.local.yaml
