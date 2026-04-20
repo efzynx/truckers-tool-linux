@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-04-20
+
+### Fixed
+- **Flatpak Path Picker (XDG Portal)**: Fixed a bug in the Flatpak version where selecting a folder via the native file picker would display an obfuscated path like `/run/user/1000/doc/<hash>/profiles` instead of the real filesystem path (e.g. `/home/user/Documents/Euro Truck Simulator 2/profiles`). Root cause: when running inside the Flatpak sandbox, Electron's `dialog.showOpenDialog` routes through the XDG Desktop Portal, which returns a FUSE-mounted document portal path (symlink). Added `fs.realpathSync()` in `electron/main.ts` to resolve the symlink to the actual path before returning it to the renderer.
+
 ## [1.2.1] - 2026-04-19
 
 ### Fixed

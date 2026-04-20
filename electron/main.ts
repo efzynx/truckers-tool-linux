@@ -197,7 +197,17 @@ app.whenReady().then(() => {
       return { success: false, error: 'CANCELED' };
     }
 
-    return { success: true, path: result.filePaths[0] };
+    // In Flatpak, the XDG Desktop Portal returns a fuse-mounted path like
+    // /run/user/1000/doc/<hash>/... instead of the real path.
+    // fs.realpathSync resolves the symlink to the actual filesystem path.
+    let selectedPath = result.filePaths[0];
+    try {
+      selectedPath = fs.realpathSync(selectedPath);
+    } catch {
+      // If realpath fails (e.g. path doesn't exist yet), keep original
+    }
+
+    return { success: true, path: selectedPath };
   });
 
   startBackend();
