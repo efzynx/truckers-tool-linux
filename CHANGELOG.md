@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Flatpak Path Picker (XDG Portal) — Backend Validator**: Fixed the root cause of the "directory access blocked" error when selecting a game profiles folder via the native file picker in the Flatpak version. The XDG Desktop Portal returns a FUSE-mounted path (`/run/flatpak/doc/<hash>/...` or `/run/user/<uid>/doc/<hash>/...`), which is not a symlink and cannot be resolved with `fs.realpathSync`. The backend's `isSafePath` validator in `pathValidator.ts` was blocking these portal paths. Fixed by adding explicit portal path detection as a trusted allow-list entry — since the portal itself is the security boundary and the path was explicitly granted by the user via the native file chooser dialog.
 - **Reverted incorrect fix from v1.2.2**: Removed `fs.realpathSync` call in `electron/main.ts` that was added in v1.2.2, which had no effect on FUSE mounts.
 - **Flatpak Local Test Workflow**: Added `flatpak/id.my.ttl.TruckersToolLinux.local.yaml` manifest using `type: dir` local source and `--filesystem=home` for rapid local iteration without needing to push to GitHub or update the Flathub PR.
+- **Flatpak Manifest Permissions**: Removed redundant Steam prefix filesystem paths to restore the "Probably safe" status on Flathub, as the XDG Desktop Portal handles path selection.
 
 ## [1.2.2] - 2026-04-20
 
