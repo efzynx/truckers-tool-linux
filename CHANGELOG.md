@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4-alpha.1] - 2026-04-25
+
+### Added
+- **Profile Name Decoding**: Implemented `decodeProfileName` utility in `server/utils/parser.ts` to convert Hexadecimal profile folder names (e.g., `45667A796E`) into human-readable UTF-8 display names.
+- **Enhanced UI Display**: Updated `ProfileList.tsx` and `Dashboard.tsx` to prioritize displaying decoded profile names while maintaining original folder names as fallback.
+- **Decoded Names in Dashboard**: Updated `App.tsx` to pass the decoded `displayName` to the Dashboard component for a more personalized experience.
+
+### Changed
+- **API Response Update**: Modified `/api/scan-profiles` and `/api/upload-profile` (ZIP upload) routes to return decoded display names.
+- **Standardized Documentation**: Converted all Header Documentation to English and updated `SYSTEM_MAP.md` to comply with project architectural standards (`[/refine-project]`).
+- **Type Definitions**: Updated `Profile` and `UploadedProfile` interfaces in `src/types/index.ts` to support the new `displayName` property.
+
 ## [1.2.3] - 2026-04-20
 
 ### Fixed

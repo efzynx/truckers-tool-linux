@@ -1,6 +1,9 @@
 /**
- * Parser & updater for the decrypted game.sii file.
- * Uses single-pass line scanning for reliable handling of large (5MB+) files.
+ * Purpose: Parser & updater for the decrypted game.sii file.
+ * Caller: server/routes/save.ts, server/routes/profiles.ts, server/routes/upload.ts.
+ * Dependencies: None (Pure logic).
+ * Main Functions: parseGameData, applyUpdates, validateSiiStructure, decodeProfileName.
+ * Side Effects: None (Operates on strings/objects in memory).
  */
 
 export interface ParsedGarageData {
@@ -98,6 +101,32 @@ export interface ParsedTrailerData {
   bodyWear: number;
   isPrivate: boolean;
   sourceGarage: string | null;
+}
+
+/**
+ * Mendekode nama folder profil dari format Hexadecimal ke teks biasa (UTF-8).
+ * ETS2/ATS menyimpan nama profil sebagai string hex pada nama foldernya.
+ */
+export function decodeProfileName(folderName: string): string {
+  let hex = folderName;
+  let isBackup = false;
+
+  if (hex.endsWith('-backup.bak')) {
+    hex = hex.replace('-backup.bak', '');
+    isBackup = true;
+  }
+
+  // Validasi: Pastikan hanya karakter Hex yang didekode
+  if (/^[0-9A-Fa-f]+$/.test(hex)) {
+    try {
+      const decoded = Buffer.from(hex, 'hex').toString('utf8');
+      return isBackup ? `${decoded} (Backup)` : decoded;
+    } catch (e) {
+      return folderName;
+    }
+  }
+
+  return folderName;
 }
 
 function parseHexFloat(val: string): number {

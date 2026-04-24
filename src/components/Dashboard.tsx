@@ -1,3 +1,10 @@
+/**
+ * Purpose: Main control panel after a save file is successfully parsed. Allows editing money, XP, skills, garages, etc.
+ * Caller: App.tsx (Step: dashboard).
+ * Dependencies: Editor components, useLanguage, SupportModal, AboutModal.
+ * Main Functions: Dashboard component, handleChange, handleSaveClick, handleUndo.
+ * Side Effects: Tracking changes (changeLog) and managing the undo stack.
+ */
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { GameData } from '../types';
 import ProfileEditor from './editors/ProfileEditor';
