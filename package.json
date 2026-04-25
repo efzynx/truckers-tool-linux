@@ -1,13 +1,12 @@
 {
   "name": "truckers-tool-linux",
   "private": true,
-  "version": "1.2.4-alpha.1",
+  "version": "1.2.4-alpha.2",
   "type": "module",
   "author": "efzyn <me@efzyn.my.id>",
   "main": "dist-electron/main.cjs",
   "homepage": "./",
   "scripts": {
-
     "dev": "concurrently -n \"next,api\" -c \"cyan,yellow\" \"next dev -p 3214\" \"tsx watch server/index.ts\"",
     "dev:frontend": "next dev -p 3214",
     "dev:backend": "tsx watch server/index.ts",

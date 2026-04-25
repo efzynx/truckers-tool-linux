@@ -24,7 +24,8 @@
     <category>Utility</category>
   </categories>
   <launchable type="desktop-id">id.my.ttl.TruckersToolLinux.desktop</launchable>
-  <url type="homepage">https://github.com/efzynx/truckers-tool-linux</url>
+  <url type="homepage">https://ttl.my.id</url>
+  <url type="help">https://docs.ttl.my.id</url>
   <url type="vcs-browser">https://github.com/efzynx/truckers-tool-linux</url>
   <url type="bugtracker">https://github.com/efzynx/truckers-tool-linux/issues</url>
   <developer id="com.efzynx">

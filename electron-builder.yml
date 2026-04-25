@@ -11,13 +11,15 @@ files:
 extraResources:
   - from: "settings.example.yml"
     to: "settings.yml"
-  - from: "build/icon.png"
-    to: "build/icon.png"
+  - from: "build/id.my.ttl.TruckersToolLinux.png"
+    to: "build/id.my.ttl.TruckersToolLinux.png"
+  - from: "build/id.my.ttl.TruckersToolLinux.svg"
+    to: "build/id.my.ttl.TruckersToolLinux.svg"
 win:
   target: 
     - nsis
     - portable
-  icon: build/icon.ico
+  icon: build/id.my.ttl.TruckersToolLinux.png
 linux:
   target: 
     - dir
@@ -27,7 +29,7 @@ linux:
     - rpm
   category: Utility
   maintainer: "efzyn <me@efzyn.my.id>"
-  icon: build/icon.png
+  icon: build/id.my.ttl.TruckersToolLinux.png
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true

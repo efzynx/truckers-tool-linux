@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Truckers Tool Linux | 4All',
   description: 'Save Editor for Euro Truck Simulator 2 and American Truck Simulator',
   icons: {
-    icon: '/icon.webp'
+    icon: '/id.my.ttl.TruckersToolLinux.svg'
   }
 }
 

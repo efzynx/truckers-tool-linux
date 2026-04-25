@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4-alpha.2] - 2026-04-25
+
+### Changed
+- **Icon Update**: Updated application icons to new versions: `id.my.ttl.TruckersToolLinux.svg` (primary) and `id.my.ttl.TruckersToolLinux.png` (backup). Removed old legacy icon files.
+- **Electron Build**: Updated `electron-builder.yml` and Electron main process to use the new standardized icon naming scheme.
+- **Flatpak Integration**: Updated official and local Flatpak manifests to properly install both PNG and SVG icons.
+- **Next.js UI**: Updated Next.js layout to use the new SVG icon as the favicon.
+- **Metadata Links**: Updated project website links to `https://ttl.my.id` and added documentation links to `https://docs.ttl.my.id` for Flathub display metadata.
+
 ## [1.2.4-alpha.1] - 2026-04-25
 
 ### Added
