@@ -62,9 +62,9 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="1.2.4-beta.1" date="2026-04-25">
+    <release version="1.2.4" date="2026-04-25">
       <description>
-        <p>First beta release for 1.2.4. Features interactive Profit Analytics and improved UI aesthetics.</p>
+        <p>Official stable release for 1.2.4. Features interactive Profit Analytics and improved UI aesthetics.</p>
         <ul>
           <li>Interactive SVG Profit Trend Chart</li>
           <li>Enhanced Financial Dashboard</li>
