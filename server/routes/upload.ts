@@ -1,6 +1,9 @@
 /**
- * Upload Route — Handles file upload for SII and ZIP files.
- * Supports both direct SII file upload and ZIP archive containing profile/save structure.
+ * Purpose: Handles file upload for SII and ZIP files (Web Mode).
+ * Caller: Frontend (useApi.ts) -> App.tsx.
+ * Dependencies: multer, adm-zip, SIIDecryptor, parser.ts.
+ * Main Functions: /upload-profile, /decrypt-uploaded, /cleanup-upload.
+ * Side Effects: Saves temporary files to disk, extracts ZIP archives.
  */
 import { Router } from 'express';
 import multer from 'multer';
@@ -9,6 +12,7 @@ import * as path from 'path';
 import * as os from 'os';
 import AdmZip from 'adm-zip';
 import { SIIDecryptor } from '@trucky/sii-decrypt-ts';
+import { decodeProfileName } from '../utils/parser.js';
 import {
   validateFileExtension,
   validateFileSize,
@@ -171,6 +175,7 @@ router.post('/upload-profile', upload.single('file'), async (req, res) => {
 
       const profiles = Object.entries(profileMap).map(([name, profileSaves]) => ({
         name,
+        displayName: decodeProfileName(name),
         saves: profileSaves,
         saveCount: profileSaves.length,
       }));

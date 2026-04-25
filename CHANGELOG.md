@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4] - 2026-04-25
+
+### Added
+- **Stable Release**: Official stable release for the 1.2.4 feature set.
+
+## [1.2.4-alpha.3] - 2026-04-25
+
+### Added
+- **Profit Analytics SVG Chart**: Replaced the static profit summary with a fully interactive, progressive SVG Area Chart (Trend Line Chart). Features a glowing neon-green gradient, interactive vertical crosshairs, and a glassmorphism floating tooltip on hover to display exact details (Revenue, Expenses, and Net Profit).
+- **History Filters**: Added dynamic filter options (10, 25, 50, All) to toggle how many days of profit history are displayed on both the chart and KPI cards.
+- **Maximize Profit History**: Added a "Max Profit" quick action to instantly boost revenue and zero out expenses (Fuel, Maintenance, Wages) across the selected history range.
+- **Dashboard Integration**: Added a "Keuangan" (Financial) dashboard widget with real-time stats and a direct link to the full analytics view.
+
+### Changed
+- **Unified Navigation**: Consolidated "Profit Analytics" into a dedicated tab within the "Financial" (Keuangan) menu for a cleaner sidebar experience.
+- **Consistent Naming**: Renamed the sidebar menu and dashboard widgets to "Financial" (Keuangan) while maintaining "Profit Analytic" as the technical header label.
+- **Improved Tooltip Logic**: Enhanced chart tooltip positioning to prevent edge clipping and improved visual density for a more premium feel.
+- **New Screenshots**: Updated AppStream metadata with high-quality screenshots showcasing the latest UI features, including the new Financial Analytics dashboard. Simplified file naming scheme to use underscores.
+
+### Fixed
+- **Build Error**: Resolved "Unexpected token" and "Expression expected" JSX syntax errors in `ProfileEditor.tsx` and `MoneyEditor.tsx`.
+- **Reactivity Bug**: Fixed an issue where the profit chart wouldn't re-render when switching history limits due to missing React dependencies.
+- **TypeScript Interface**: Fixed a type error in `parser.ts` where `profitLogs` was missing from the `ParsedGameData` interface.
+- **Missing Translations**: Added multiple missing i18n keys for the new financial features in both English and Indonesian.
+
+## [1.2.4-alpha.2] - 2026-04-25
+
+### Changed
+- **Icon Update**: Updated application icons to new versions: `id.my.ttl.TruckersToolLinux.svg` (primary) and `id.my.ttl.TruckersToolLinux.png` (backup). Removed old legacy icon files.
+- **Electron Build**: Updated `electron-builder.yml` and Electron main process to use the new standardized icon naming scheme.
+- **Flatpak Integration**: Updated official and local Flatpak manifests to properly install both PNG and SVG icons.
+- **Next.js UI**: Updated Next.js layout to use the new SVG icon as the favicon.
+- **Metadata Links**: Updated project website links to `https://ttl.my.id` and added documentation links to `https://docs.ttl.my.id` for Flathub display metadata.
+
+## [1.2.4-alpha.1] - 2026-04-25
+
+### Added
+- **Profile Name Decoding**: Implemented `decodeProfileName` utility in `server/utils/parser.ts` to convert Hexadecimal profile folder names (e.g., `45667A796E`) into human-readable UTF-8 display names.
+- **Enhanced UI Display**: Updated `ProfileList.tsx` and `Dashboard.tsx` to prioritize displaying decoded profile names while maintaining original folder names as fallback.
+- **Decoded Names in Dashboard**: Updated `App.tsx` to pass the decoded `displayName` to the Dashboard component for a more personalized experience.
+
+### Changed
+- **API Response Update**: Modified `/api/scan-profiles` and `/api/upload-profile` (ZIP upload) routes to return decoded display names.
+- **Standardized Documentation**: Converted all Header Documentation to English and updated `SYSTEM_MAP.md` to comply with project architectural standards (`[/refine-project]`).
+- **Type Definitions**: Updated `Profile` and `UploadedProfile` interfaces in `src/types/index.ts` to support the new `displayName` property.
+
 ## [1.2.3] - 2026-04-20
 
 ### Fixed

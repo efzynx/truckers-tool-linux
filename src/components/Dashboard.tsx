@@ -1,3 +1,10 @@
+/**
+ * Purpose: Main control panel after a save file is successfully parsed. Allows editing money, XP, skills, garages, etc.
+ * Caller: App.tsx (Step: dashboard).
+ * Dependencies: Editor components, useLanguage, SupportModal, AboutModal.
+ * Main Functions: Dashboard component, handleChange, handleSaveClick, handleUndo.
+ * Side Effects: Tracking changes (changeLog) and managing the undo stack.
+ */
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { GameData } from '../types';
 import ProfileEditor from './editors/ProfileEditor';
@@ -15,7 +22,7 @@ import ModInspectorModal from './ModInspectorModal';
 import SaveConfirmModal from './SaveConfirmModal';
 import type { ChangeEntry } from './SaveConfirmModal';
 
-export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage' | 'driver' | 'trailer' | 'map' | 'job';
+export type DashboardView = 'home' | 'profile' | 'user' | 'truck' | 'garage' | 'driver' | 'trailer' | 'map' | 'job' | 'money';
 
 export interface UploadContext {
   isUploadMode: boolean;
@@ -79,6 +86,7 @@ function makeChangeId() { return `chg_${++_changeIdCounter}`; }
 
 export default function Dashboard({ data, onSave, onDownload, saving, downloading, onBack, profileId, uploadContext, saveFilePath }: DashboardProps) {
   const [view, setView] = useState<DashboardView>('home');
+  const [profileInitialTab, setProfileInitialTab] = useState<'general' | 'profit'>('general');
   const [editableData, setEditableData] = useState<GameData>({ ...data });
   const [hasChanges, setHasChanges] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
@@ -102,6 +110,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     discoverMap: boolean;
     clearLoans: boolean;
     economyReset: boolean;
+    maximizeProfit: boolean;
     customLicensePlates: { id: string; plate: string }[];
     resetJobTime: boolean;
   };
@@ -135,6 +144,9 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
   // Track economy reset
   const [economyReset, setEconomyReset] = useState(false);
 
+  // Track maximize profit
+  const [maximizeProfit, setMaximizeProfit] = useState(false);
+
   // Track custom license plates
   const [customLicensePlates, setCustomLicensePlates] = useState<{ id: string; plate: string }[]>([]);
 
@@ -159,12 +171,13 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
         discoverMap,
         clearLoans,
         economyReset,
+        maximizeProfit,
         customLicensePlates: [...customLicensePlates],
         resetJobTime,
       },
     ];
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editableData, changeLog, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, customLicensePlates, resetJobTime]);
+  }, [editableData, changeLog, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, maximizeProfit, customLicensePlates, resetJobTime]);
 
   /** Tambah entry ke change log */
   const addChange = useCallback((entry: Omit<ChangeEntry, 'id'>) => {
@@ -183,6 +196,13 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     pushUndo();
     setEconomyReset(true);
     addChange({ labelKey: 'Economy Reset', icon: 'currency_exchange', color: 'text-amber-400' });
+    setHasChanges(true);
+  };
+
+  const handleMaximizeProfit = () => {
+    pushUndo();
+    setMaximizeProfit(true);
+    addChange({ labelKey: 'MAX PROFIT LOGS', icon: 'trending_up', color: 'text-green-400' });
     setHasChanges(true);
   };
 
@@ -370,6 +390,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
       discoverMap,
       clearLoans,
       economyReset,
+      maximizeProfit,
       customLicensePlates,
       resetJobTime,
     };
@@ -387,13 +408,14 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setDiscoverMap(false);
     setClearLoans(false);
     setEconomyReset(false);
+    setMaximizeProfit(false);
     setCustomLicensePlates([]);
     setResetJobTime(false);
     // Tampilkan notifikasi sukses
     if (successTimer.current) clearTimeout(successTimer.current);
     setShowSuccessNotif(true);
     successTimer.current = setTimeout(() => setShowSuccessNotif(false), 3000);
-  }, [editableData, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, customLicensePlates, resetJobTime, onSave]);
+  }, [editableData, targetGarages, truckRepairAll, truckRefuelAll, truckRepairIds, truckRefuelIds, trailerRepairAll, trailerRepairIds, discoverMap, clearLoans, economyReset, maximizeProfit, customLicensePlates, resetJobTime, onSave]);
 
   // ──────────────────────────── Undo ────────────────────────────
   const handleUndo = useCallback(() => {
@@ -413,6 +435,7 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     setDiscoverMap(prev.discoverMap);
     setClearLoans(prev.clearLoans);
     setEconomyReset(prev.economyReset);
+    setMaximizeProfit(prev.maximizeProfit);
     setCustomLicensePlates(prev.customLicensePlates);
     setResetJobTime(prev.resetJobTime);
     setHasChanges(prev.changeLog.length > 0 || Object.keys(prev.targetGarages).length > 0);
@@ -434,6 +457,31 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
     const current = (editableData.experiencePoints || 0) - currentLevelXp;
     return Math.min(100, Math.max(0, (current / range) * 100));
   }, [editableData.experiencePoints, level, currentLevelXp, nextLevelXp]);
+
+  // Profit Stats
+  const profitStats = useMemo(() => {
+    let totalRev = 0;
+    let totalExp = 0;
+    const logs = editableData.profitLogs || [];
+    const count = logs.length;
+    
+    if (maximizeProfit) {
+      totalRev = count * 9999999;
+      totalExp = 0;
+    } else {
+      for (const log of logs) {
+        totalRev += log.revenue;
+        totalExp += (log.wage + log.maintenance + log.fuel);
+      }
+    }
+    
+    return {
+      revenue: totalRev,
+      expenses: totalExp,
+      net: totalRev - totalExp,
+      count
+    };
+  }, [editableData.profitLogs, maximizeProfit]);
 
   const handleDownload = () => {
     onDownload(editableData);
@@ -498,7 +546,10 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <span className="material-symbols-outlined">speed</span>
               <span className="font-display tracking-widest uppercase text-xs font-bold">Dashboard</span>
             </button>
-            <button onClick={() => setView('profile')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'profile' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
+            <button onClick={() => {
+              setProfileInitialTab('profit');
+              setView('profile');
+            }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === 'profile' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-muted hover:bg-white/5 hover:text-white'}`}>
               <span className="material-symbols-outlined">account_balance_wallet</span>
               <span className="font-display tracking-widest uppercase text-xs font-bold">{t('dashboard.tabMoney')}</span>
             </button>
@@ -693,6 +744,72 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
            </div>
           )}
 
+          {/* Profit History Chart/Stats */}
+          {profitStats.count > 0 && (
+            <div className="animate-fade-in cursor-pointer" onClick={() => {
+              setProfileInitialTab('profit');
+              setView('profile');
+            }}>
+              <div className="flex items-center justify-between mb-3">
+                 <h3 className="text-xs uppercase font-display font-bold tracking-widest text-text-main opacity-60 flex items-center gap-2">
+                    {t('profit.analytics')} ({t('profit.historyCount').replace('{count}', profitStats.count.toString())})
+                    <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                 </h3>
+              </div>
+              <div className="bg-surface hover:bg-[#1a1f2b] rounded-2xl p-5 border border-white/5 hover:border-primary/30 relative overflow-hidden group mb-6 transition-all duration-300">
+                 {/* Visual Background Pattern */}
+                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                 
+                 <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-10">
+                    <div className="flex-1 w-full space-y-4">
+                       <div className="flex justify-between items-end">
+                         <span className="text-xs font-mono uppercase text-text-muted">Total Revenue</span>
+                         <span className="text-sm font-bold text-green-400 font-mono">€{formatCompact(profitStats.revenue)}</span>
+                       </div>
+                       <div className="w-full bg-background-dark h-2 rounded-full overflow-hidden border border-white/5">
+                         <div className="bg-green-500 h-full rounded-full transition-all duration-1000" style={{ width: profitStats.revenue > 0 ? '100%' : '0%' }}></div>
+                       </div>
+                       
+                       <div className="flex justify-between items-end">
+                         <span className="text-xs font-mono uppercase text-text-muted">Total Expenses</span>
+                         <span className="text-sm font-bold text-red-400 font-mono">€{formatCompact(profitStats.expenses)}</span>
+                       </div>
+                       <div className="w-full bg-background-dark h-2 rounded-full overflow-hidden border border-white/5">
+                         <div className="bg-red-500 h-full rounded-full transition-all duration-1000" style={{ width: profitStats.revenue > 0 ? `${Math.min(100, (profitStats.expenses / profitStats.revenue) * 100)}%` : '0%' }}></div>
+                       </div>
+                    </div>
+                    
+                    {/* Net Profit Circle */}
+                    <div className="shrink-0 relative size-28 flex items-center justify-center">
+                       <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
+                         <path
+                           className="text-background-dark"
+                           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                           fill="none"
+                           stroke="currentColor"
+                           strokeWidth="3"
+                         />
+                         <path
+                           className={`${profitStats.net >= 0 ? 'text-green-500' : 'text-red-500'} transition-all duration-1000`}
+                           strokeDasharray={`${Math.min(100, Math.max(0, profitStats.revenue > 0 ? ((Math.abs(profitStats.net)) / profitStats.revenue) * 100 : 0))}, 100`}
+                           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                           fill="none"
+                           stroke="currentColor"
+                           strokeWidth="3"
+                         />
+                       </svg>
+                       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                          <span className="text-[10px] text-text-muted uppercase font-bold tracking-widest">Net Profit</span>
+                          <span className={`text-sm font-mono font-bold ${profitStats.net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {profitStats.net >= 0 ? '+' : ''}€{formatCompact(profitStats.net)}
+                          </span>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+            </div>
+          )}
+
           {/* Quick Actions Label */}
           <div className="flex items-center gap-3 opacity-60">
             <div className="h-px bg-white/20 flex-1"></div>
@@ -754,6 +871,17 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
               <div className="flex flex-col items-start z-10 text-left">
                 <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">ECONOMY RESET</span>
                 <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-amber-400/80 transition-colors">Refresh Job Market</span>
+              </div>
+            </button>
+
+            <button onClick={handleMaximizeProfit} className="group bg-surface hover:bg-[#1a1f2b] active:scale-[0.98] border border-white/5 hover:border-green-400/40 rounded-2xl p-4 flex flex-row items-center justify-start gap-4 transition-all duration-200 relative shadow-lg cursor-pointer">
+              <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
+              <div className="size-12 shrink-0 rounded-full bg-background-dark border border-white/10 flex items-center justify-center shadow-inner group-hover:border-green-500/50 group-hover:shadow-[0_0_8px_rgba(74,222,128,0.6)] transition-all duration-300">
+                <span className="material-symbols-outlined text-2xl text-text-main group-hover:text-green-400 transition-colors">trending_up</span>
+              </div>
+              <div className="flex flex-col items-start z-10 text-left">
+                <span className="font-display font-bold text-sm tracking-wide text-text-main group-hover:text-white">MAX PROFIT HISTORY</span>
+                <span className="text-[10px] text-text-muted uppercase tracking-widest font-mono group-hover:text-green-400/80 transition-colors">Max Revenue, 0 Expenses</span>
               </div>
             </button>
 
@@ -824,9 +952,15 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
              <ProfileEditor 
                data={editableData} 
                onChange={handleChange} 
-               onBack={() => setView('home')} 
+               onBack={() => {
+                 setView('home');
+                 setProfileInitialTab('general');
+               }} 
                hasChanges={hasChanges}
                onClearLoans={handleClearLoans}
+               maximizeProfit={maximizeProfit}
+               onMaximizeProfit={handleMaximizeProfit}
+               initialTab={profileInitialTab}
              />
           )}
           {view === 'user' && (
@@ -1011,6 +1145,8 @@ export default function Dashboard({ data, onSave, onDownload, saving, downloadin
            />
          </div>
       )}
+
+
 
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
       {isAboutOpen && <AboutModal onClose={() => setIsAboutOpen(false)} />}

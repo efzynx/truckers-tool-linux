@@ -24,7 +24,8 @@
     <category>Utility</category>
   </categories>
   <launchable type="desktop-id">id.my.ttl.TruckersToolLinux.desktop</launchable>
-  <url type="homepage">https://github.com/efzynx/truckers-tool-linux</url>
+  <url type="homepage">https://ttl.my.id</url>
+  <url type="help">https://docs.ttl.my.id</url>
   <url type="vcs-browser">https://github.com/efzynx/truckers-tool-linux</url>
   <url type="bugtracker">https://github.com/efzynx/truckers-tool-linux/issues</url>
   <developer id="com.efzynx">
@@ -32,31 +33,51 @@
   </developer>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/1-main.png</image>
+      <image>https://github.com/user-attachments/assets/11c7b8c6-1bb1-4e94-9175-c498d8a1e4c7</image>
       <caption>Main Page</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/2-path-selector.png</image>
+      <image>https://github.com/user-attachments/assets/142eb93f-a2d3-489d-9f73-cc3076a041fc</image>
       <caption>Profile Path Selector</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/3-profile-selector.png</image>
-      <caption>Profile Selector</caption>
-    </screenshot>
-    <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/4-restore-management.png</image>
+      <image>https://github.com/user-attachments/assets/59fbc533-b2e9-4c91-9b34-1b4b83c07f31</image>
       <caption>Restore Profile Management</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/5-save-game-selector.png</image>
+      <image>https://github.com/user-attachments/assets/982f41d9-cad0-464e-bf81-44b2541ffeb7</image>
+      <caption>Profile Selector</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/35a44c75-b852-4cf1-ae9a-26e2371ad779</image>
       <caption>Save Game Selector</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/efzynx/truckers-tool-linux/fe329fb7e020231eab3ff83d53c65f28ef8d9e4a/flatpak/screenshots/6-dashboard.png</image>
+      <image>https://github.com/user-attachments/assets/79867a00-c130-4739-84cf-de2d1986d3d3</image>
       <caption>Dashboard</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/06a2eb74-71a1-48ec-bdfc-adeec4726181</image>
+      <caption>Financial Analytics</caption>
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.2.4" date="2026-04-25">
+      <description>
+        <p>Official stable release for 1.2.4. Features interactive Profit Analytics and improved UI aesthetics.</p>
+        <ul>
+          <li>Interactive SVG Profit Trend Chart</li>
+          <li>Enhanced Financial Dashboard</li>
+          <li>New high-quality screenshots</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.2.4-alpha.3" date="2026-04-25">
+      <description>
+        <p>Introduced Profit Analytics with interactive SVG Area Charts, history filtering (10-50 days), and Profit Maximization features.</p>
+        <p>Unified financial management under the new "Financial" (Keuangan) menu.</p>
+      </description>
+    </release>
     <release version="1.2.3" date="2026-04-21">
       <description>
         <p>Fixed document portal validation and resolved XDG portal FUSE mount paths for reliable sandbox integration.</p>

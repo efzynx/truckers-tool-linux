@@ -1,6 +1,9 @@
 /**
- * Parser & updater for the decrypted game.sii file.
- * Uses single-pass line scanning for reliable handling of large (5MB+) files.
+ * Purpose: Parser & updater for the decrypted game.sii file.
+ * Caller: server/routes/save.ts, server/routes/profiles.ts, server/routes/upload.ts.
+ * Dependencies: None (Pure logic).
+ * Main Functions: parseGameData, applyUpdates, validateSiiStructure, decodeProfileName.
+ * Side Effects: None (Operates on strings/objects in memory).
  */
 
 export interface ParsedGarageData {
@@ -82,6 +85,12 @@ export interface ParsedGameData {
     unlockedDealers: number;
     unlockedRecruitments: number;
   };
+  profitLogs: {
+    revenue: number;
+    wage: number;
+    maintenance: number;
+    fuel: number;
+  }[];
 }
 
 export interface ParsedLoanData {
@@ -100,6 +109,32 @@ export interface ParsedTrailerData {
   sourceGarage: string | null;
 }
 
+/**
+ * Mendekode nama folder profil dari format Hexadecimal ke teks biasa (UTF-8).
+ * ETS2/ATS menyimpan nama profil sebagai string hex pada nama foldernya.
+ */
+export function decodeProfileName(folderName: string): string {
+  let hex = folderName;
+  let isBackup = false;
+
+  if (hex.endsWith('-backup.bak')) {
+    hex = hex.replace('-backup.bak', '');
+    isBackup = true;
+  }
+
+  // Validasi: Pastikan hanya karakter Hex yang didekode
+  if (/^[0-9A-Fa-f]+$/.test(hex)) {
+    try {
+      const decoded = Buffer.from(hex, 'hex').toString('utf8');
+      return isBackup ? `${decoded} (Backup)` : decoded;
+    } catch (e) {
+      return folderName;
+    }
+  }
+
+  return folderName;
+}
+
 function parseHexFloat(val: string): number {
   if (!val) return 0;
   if (val.startsWith('&')) {
@@ -114,7 +149,7 @@ function parseHexFloat(val: string): number {
 }
 
 // Targeted block types we care about
-const TRACKED_TYPES = new Set(['bank', 'economy', 'player', 'garage', 'vehicle', 'vehicle_accessory', 'driver_ai', 'bank_loan', 'trailer', 'job_info', 'player_job']);
+const TRACKED_TYPES = new Set(['bank', 'economy', 'player', 'garage', 'vehicle', 'vehicle_accessory', 'driver_ai', 'bank_loan', 'trailer', 'job_info', 'player_job', 'profit_log_entry']);
 
 /**
  * Parse the decrypted game.sii content using single-pass line scanning.
@@ -146,6 +181,8 @@ export function parseGameData(content: string): ParsedGameData {
   let currentJobId = '';
   let parsedCurrentJob: ParsedJobData | null = null;
   const jobInfoMap = new Map<string, ParsedJobData>(); // job_info._nameless -> job data
+  const profitLogs: { revenue: number; wage: number; maintenance: number; fuel: number }[] = [];
+  let curProfitLog: { revenue: number; wage: number; maintenance: number; fuel: number } | null = null;
 
   // Player data
   let myTruckId = '';
@@ -228,6 +265,10 @@ export function parseGameData(content: string): ParsedGameData {
         loanMap.set(curLoan.id, curLoan);
         curLoan = null;
       }
+      if (blockType === 'profit_log_entry' && curProfitLog) {
+        profitLogs.push(curProfitLog);
+        curProfitLog = null;
+      }
       blockType = '';
       blockId = '';
       inBlock = false;
@@ -294,6 +335,9 @@ export function parseGameData(content: string): ParsedGameData {
           }
           if (type === 'bank_loan') {
             curLoan = { id: blockId, amount: 0, originalAmount: 0, interestRate: 0, duration: 0 };
+          }
+          if (type === 'profit_log_entry') {
+            curProfitLog = { revenue: 0, wage: 0, maintenance: 0, fuel: 0 };
           }
         }
         continue;
@@ -549,6 +593,14 @@ export function parseGameData(content: string): ParsedGameData {
         }
       }
     }
+
+    // ---- profit_log_entry ----
+    if (blockType === 'profit_log_entry' && curProfitLog) {
+      if (trimmed.startsWith('revenue:')) curProfitLog.revenue = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+      if (trimmed.startsWith('wage:')) curProfitLog.wage = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+      if (trimmed.startsWith('maintenance:')) curProfitLog.maintenance = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+      if (trimmed.startsWith('fuel:')) curProfitLog.fuel = parseInt(trimmed.split(':')[1].trim(), 10) || 0;
+    }
   } // end of main for loop
 
   // ---- Build hired driver list — only from player.drivers[] (skip drivers[0] = player) ----
@@ -625,7 +677,7 @@ export function parseGameData(content: string): ParsedGameData {
     parsedCurrentJob = jobInfoMap.get(currentJobId) || null;
   }
 
-  return { money, experiencePoints, skills, currentJob: parsedCurrentJob, garages, trucks, trailers, drivers, loans, mapDiscovery: { visitedCities: visitedCitiesCount, unlockedDealers: unlockedDealersCount, unlockedRecruitments: unlockedRecruitmentsCount } };
+  return { money, experiencePoints, skills, currentJob: parsedCurrentJob, garages, trucks, trailers, drivers, loans, mapDiscovery: { visitedCities: visitedCitiesCount, unlockedDealers: unlockedDealersCount, unlockedRecruitments: unlockedRecruitmentsCount }, profitLogs };
 }
 
 /**
@@ -685,6 +737,7 @@ export function applyUpdates(
     economyReset?: boolean;
     customLicensePlates?: { id: string; plate: string }[];
     resetJobTime?: boolean;
+    maximizeProfit?: boolean;
   }
 ): string {
   // Normalize line endings to avoid \r causing comparison failures
@@ -1051,6 +1104,20 @@ export function applyUpdates(
             result.push(line.substring(0, colonPos + 1) + ' ' + gameTimeValue);
             continue;
         }
+    }
+
+    // Profit Log Maximizer
+    if (blockType === 'profit_log_entry' && updates.maximizeProfit) {
+      if (trimmed.startsWith('revenue:')) {
+        const colonPos = line.indexOf(':');
+        result.push(line.substring(0, colonPos + 1) + ' 9999999');
+        continue;
+      }
+      if (trimmed.startsWith('wage:') || trimmed.startsWith('maintenance:') || trimmed.startsWith('fuel:')) {
+        const colonPos = line.indexOf(':');
+        result.push(line.substring(0, colonPos + 1) + ' 0');
+        continue;
+      }
     }
 
     result.push(line);

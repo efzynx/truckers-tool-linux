@@ -52,7 +52,8 @@ modules:
       - install -Dm644 flatpak/id.my.ttl.TruckersToolLinux.desktop -t /app/share/applications/
       - install -Dm644 flatpak/id.my.ttl.TruckersToolLinux.metainfo.xml -t /app/share/metainfo/
       
-      - install -Dm644 build/icon.png /app/share/icons/hicolor/512x512/apps/id.my.ttl.TruckersToolLinux.png
+      - install -Dm644 build/id.my.ttl.TruckersToolLinux.png /app/share/icons/hicolor/512x512/apps/id.my.ttl.TruckersToolLinux.png
+      - install -Dm644 build/id.my.ttl.TruckersToolLinux.svg /app/share/icons/hicolor/scalable/apps/id.my.ttl.TruckersToolLinux.svg
       
     sources:
       - type: git

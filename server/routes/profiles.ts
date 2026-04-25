@@ -1,9 +1,17 @@
+/**
+ * Purpose: Manage profile folders and ETS2/ATS save games operations.
+ * Caller: Frontend (useApi.ts) -> Dashboard/ProfileList.
+ * Dependencies: fs/promises, path, SIIDecryptor.
+ * Main Functions: /scan-profiles, /backup-profile, /restore-profile, /scan-saves.
+ * Side Effects: Reads and writes to the local filesystem (game folders).
+ */
+
 import { Router } from 'express';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { getSettings } from '../utils/settings.js';
 import { isSafePath } from '../utils/pathValidator.js';
-import { parseGameData } from '../utils/parser.js';
+import { parseGameData, decodeProfileName } from '../utils/parser.js';
 import { SIIDecryptor } from '@trucky/sii-decrypt-ts';
 
 const router = Router();
@@ -216,6 +224,7 @@ router.post('/scan-profiles', async (req, res) => {
       .filter(entry => entry.isDirectory())
       .map(entry => ({
         name: entry.name,
+        displayName: decodeProfileName(entry.name),
         path: path.join(profilesPath, entry.name),
         isBackup: entry.name.endsWith('-backup.bak'),
       }));

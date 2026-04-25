@@ -1,3 +1,10 @@
+/**
+ * Purpose: Application root component (State Machine). Manages navigation between screens (Welcome, PathInput, List, Dashboard).
+ * Caller: main.tsx / index.tsx.
+ * Dependencies: useApi hooks, LanguageProvider, UI Components.
+ * Main Functions: App component, handleScanProfiles, handleSaveSelect, handleFileUpload.
+ * Side Effects: Synchronizes application state with the backend API.
+ */
 "use client";
 
 import { useState, useCallback } from 'react';
@@ -376,13 +383,13 @@ function App() {
           saving={saving}
           downloading={downloading}
           onBack={handleExit}
-          profileId={selectedProfile?.name || ''}
+          profileId={selectedProfile?.displayName || selectedProfile?.name || ''}
           saveFilePath={siiFilePath}
           uploadContext={{
             isUploadMode,
             isZipUpload,
             gameType: selectedGame,
-            profileName: selectedUploadProfile?.name || selectedProfile?.name || '',
+            profileName: selectedUploadProfile?.displayName || selectedUploadProfile?.name || selectedProfile?.displayName || selectedProfile?.name || '',
             saveName: selectedUploadSaveName,
           }}
         />

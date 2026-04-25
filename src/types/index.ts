@@ -1,5 +1,13 @@
+/**
+ * Purpose: Centralized TypeScript interface and type definitions for the entire application.
+ * Caller: Used by almost all frontend and backend modules.
+ * Dependencies: None.
+ * Main Functions: Profile, Save, GameData, AppStep interfaces.
+ * Side Effects: None.
+ */
 export interface Profile {
   name: string;
+  displayName?: string;
   path: string;
   isBackup: boolean;
   saveTime?: string;
@@ -128,6 +136,13 @@ export interface JobData {
   urgency: number;
 }
 
+export interface ProfitLog {
+  revenue: number;
+  wage: number;
+  maintenance: number;
+  fuel: number;
+}
+
 export interface GameData {
   money: number;
   experiencePoints: number;
@@ -150,6 +165,7 @@ export interface GameData {
     unlockedDealers: number;
     unlockedRecruitments: number;
   };
+  profitLogs: ProfitLog[];
 }
 
 export interface SaveRequest {
@@ -167,6 +183,7 @@ export interface SaveRequest {
     economyReset?: boolean;
     customLicensePlates?: { id: string; plate: string }[];
     resetJobTime?: boolean;
+    maximizeProfit?: boolean;
   };
 }
 
@@ -189,6 +206,7 @@ export interface UploadedSave {
 
 export interface UploadedProfile {
   name: string;
+  displayName?: string;
   saves: UploadedSave[];
   saveCount: number;
 }

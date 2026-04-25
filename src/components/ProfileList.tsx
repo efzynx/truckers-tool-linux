@@ -1,3 +1,10 @@
+/**
+ * Purpose: Display the list of driver profiles found in the local system.
+ * Caller: App.tsx (Step: profile-select).
+ * Dependencies: useApi.ts, i18n, RestoreCompareModal.
+ * Main Functions: ProfileList component, handleRestoreClick, handleCompareAction.
+ * Side Effects: Fetches comparison data and triggers profile restoration.
+ */
 import React, { useState, useRef, useEffect } from 'react';
 import type { Profile } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -157,13 +164,13 @@ export default function ProfileList({ profiles, onSelect, onBack, loading: paren
                       <div className={`relative shrink-0 mr-4 ml-2 ${!isActive && 'opacity-70 group-hover:opacity-100 transition-opacity'}`}>
                         <div className={`w-14 h-14 bg-background-dark hexagon-mask flex items-center justify-center relative ring-1 ${isActive ? 'ring-primary/30' : 'ring-white/10'}`}>
                           {profile.imagePath ? (
-                             <img alt={profile.name} className={`w-full h-full object-cover ${!isActive ? 'grayscale group-hover:grayscale-0 transition-all' : 'opacity-90'}`} src={`file://${profile.imagePath}`} onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }} />
+                             <img alt={profile.displayName || profile.name} className={`w-full h-full object-cover ${!isActive ? 'grayscale group-hover:grayscale-0 transition-all' : 'opacity-90'}`} src={`file://${profile.imagePath}`} onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }} />
                           ) : ( <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black"></div> )}
                           <span className={`material-symbols-outlined ${profile.imagePath ? 'hidden absolute' : 'text-text-muted'} `} style={{ fontSize: '28px' }}>person</span>
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
-                        <div className="flex justify-between items-baseline mb-1"><h3 className={`text-lg font-bold text-white truncate pr-2 group-hover:text-primary transition-colors`}>{profile.name || 'Unknown Profile'}</h3></div>
+                        <div className="flex justify-between items-baseline mb-1"><h3 className={`text-lg font-bold text-white truncate pr-2 group-hover:text-primary transition-colors`}>{profile.displayName || profile.name || 'Unknown Profile'}</h3></div>
                         <div className={`flex items-center gap-3 text-xs text-text-muted transition-colors`}><div className="flex items-center gap-1"><span className="material-symbols-outlined" style={{ fontSize: '14px' }}>history</span><span>{profile.saveTime ? new Date(profile.saveTime).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) : 'Unknown Date'}</span></div></div>
                       </div>
                       <div className="ml-2 flex items-center gap-2 relative z-20">
@@ -187,7 +194,7 @@ export default function ProfileList({ profiles, onSelect, onBack, loading: paren
           onCompare={handleCompareAction}
           loading={loading}
           data={compareData}
-          profileName={selectedProfileForRestore?.name || ''}
+          profileName={selectedProfileForRestore?.displayName || selectedProfileForRestore?.name || ''}
           profilePath={selectedProfileForRestore?.path || ''}
         />
       </div>

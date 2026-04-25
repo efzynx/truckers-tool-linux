@@ -45,8 +45,8 @@ const loadURL = serve({ directory: path.join(__dirname, '..', 'out') });
 // ...
 function createWindow() {
   const iconPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'build', 'icon.png')
-    : path.join(__dirname, '..', 'build', 'icon.png');
+    ? path.join(process.resourcesPath, 'build', 'id.my.ttl.TruckersToolLinux.png')
+    : path.join(__dirname, '..', 'build', 'id.my.ttl.TruckersToolLinux.png');
 
   mainWindow = new BrowserWindow({
     width: 1200,
