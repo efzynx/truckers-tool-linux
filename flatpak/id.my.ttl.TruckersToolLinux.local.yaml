@@ -22,10 +22,6 @@ finish-args:
   # Standard Native Linux locations
   - --filesystem=~/.local/share/Euro Truck Simulator 2:rw
   - --filesystem=~/.local/share/American Truck Simulator:rw
-  # Proton prefixes (Steam Play) for Native Steam
-  # (Note: Specific paths are used to minimize access)
-  - --filesystem=~/.steam/steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2:rw
-  - --filesystem=~/.steam/steam/steamapps/compatdata/270880/pfx/drive_c/users/steamuser/Documents/American Truck Simulator:rw
   - --env=ELECTRON_TRASH=gio
 
 build-options:

@@ -72,18 +72,12 @@
         </ul>
       </description>
     </release>
-    <release version="1.2.4-alpha.3" date="2026-04-25">
-      <description>
-        <p>Introduced Profit Analytics with interactive SVG Area Charts, history filtering (10-50 days), and Profit Maximization features.</p>
-        <p>Unified financial management under the new "Financial" (Keuangan) menu.</p>
-      </description>
-    </release>
-    <release version="1.2.3" date="2026-04-21">
+    <release version="1.2.3" date="2026-04-20">
       <description>
         <p>Fixed document portal validation and resolved XDG portal FUSE mount paths for reliable sandbox integration.</p>
       </description>
     </release>
-    <release version="1.2.0" date="2026-04-19">
+    <release version="1.2.0" date="2026-04-18">
       <description>
         <p>Added Native Portal Folder Picker for better Flatpak sandbox compatibility and custom game paths (Lutris, Flatpak Steam, etc).</p>
         <p>Fixed AppStream metadata validation errors and improved UI/UX for profile management.</p>
