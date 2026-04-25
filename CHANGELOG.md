@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4-alpha.3] - 2026-04-25
+
+### Added
+- **Profit Analytics SVG Chart**: Replaced the static profit summary with a fully interactive, progressive SVG Area Chart (Trend Line Chart). Features a glowing neon-green gradient, interactive vertical crosshairs, and a glassmorphism floating tooltip on hover to display exact details (Revenue, Expenses, and Net Profit).
+- **History Filters**: Added dynamic filter options (10, 25, 50, All) to toggle how many days of profit history are displayed on both the chart and KPI cards.
+- **Maximize Profit History**: Added a "Max Profit" quick action to instantly boost revenue and zero out expenses (Fuel, Maintenance, Wages) across the selected history range.
+- **Dashboard Integration**: Added a "Keuangan" (Financial) dashboard widget with real-time stats and a direct link to the full analytics view.
+
+### Changed
+- **Unified Navigation**: Consolidated "Profit Analytics" into a dedicated tab within the "Financial" (Keuangan) menu for a cleaner sidebar experience.
+- **Consistent Naming**: Renamed the sidebar menu and dashboard widgets to "Financial" (Keuangan) while maintaining "Profit Analytic" as the technical header label.
+- **Improved Tooltip Logic**: Enhanced chart tooltip positioning to prevent edge clipping and improved visual density for a more premium feel.
+
+### Fixed
+- **Build Error**: Resolved "Unexpected token" and "Expression expected" JSX syntax errors in `ProfileEditor.tsx` and `MoneyEditor.tsx`.
+- **Reactivity Bug**: Fixed an issue where the profit chart wouldn't re-render when switching history limits due to missing React dependencies.
+- **TypeScript Interface**: Fixed a type error in `parser.ts` where `profitLogs` was missing from the `ParsedGameData` interface.
+- **Missing Translations**: Added multiple missing i18n keys for the new financial features in both English and Indonesian.
+
 ## [1.2.4-alpha.2] - 2026-04-25
 
 ### Changed

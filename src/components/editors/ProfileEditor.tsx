@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { GameData } from '../../types';
 import { useLanguage } from '../../i18n/LanguageContext';
+import MoneyEditor from './MoneyEditor';
 
 interface ProfileEditorProps {
   data: GameData;
@@ -8,6 +9,9 @@ interface ProfileEditorProps {
   onBack: () => void;
   hasChanges: boolean;
   onClearLoans: () => void;
+  maximizeProfit: boolean;
+  onMaximizeProfit: () => void;
+  initialTab?: 'general' | 'profit';
 }
 
 const ADD_PRESETS = [
@@ -26,7 +30,8 @@ const SET_PRESETS = [
   { label: '€50M', value: 50_000_000 },
 ];
 
-export default function ProfileEditor({ data, onChange, onBack, hasChanges, onClearLoans }: ProfileEditorProps) {
+export default function ProfileEditor({ data, onChange, onBack, hasChanges, onClearLoans, maximizeProfit, onMaximizeProfit, initialTab = 'general' }: ProfileEditorProps) {
+  const [activeTab, setActiveTab] = useState<'general' | 'profit'>(initialTab);
   const [moneyStr, setMoneyStr] = useState(data.money.toLocaleString());
   const [injectMode, setInjectMode] = useState<'add' | 'set'>('add');
   const [customAmount, setCustomAmount] = useState('');
@@ -114,14 +119,31 @@ export default function ProfileEditor({ data, onChange, onBack, hasChanges, onCl
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 md:left-64 lg:left-80 z-40 glass-panel">
-        <div className="flex items-center justify-between px-4 py-4 md:px-10 lg:px-20 mx-auto w-full">
+        <div className="flex items-center justify-between px-4 pt-4 pb-2 md:px-10 lg:px-20 mx-auto w-full">
           <button
             onClick={onBack}
             className="flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
           >
             <span className="material-symbols-outlined text-3xl">chevron_left</span>
           </button>
-          <h1 className="text-xl font-bold tracking-tight text-white uppercase font-display">{t('Money')}</h1>
+          <div className="flex bg-background-dark/50 p-1 rounded-xl border border-white/5">
+            <button
+              onClick={() => setActiveTab('general')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold font-display tracking-widest uppercase transition-all cursor-pointer ${
+                activeTab === 'general' ? 'bg-primary/20 text-primary border border-primary/30' : 'text-text-muted hover:text-white'
+              }`}
+            >
+              {t('user.tabGeneral')}
+            </button>
+            <button
+              onClick={() => setActiveTab('profit')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold font-display tracking-widest uppercase transition-all cursor-pointer ${
+                activeTab === 'profit' ? 'bg-primary/20 text-primary border border-primary/30' : 'text-text-muted hover:text-white'
+              }`}
+            >
+              {t('user.tabProfit')}
+            </button>
+          </div>
           <div className="w-10" />
         </div>
       </header>
@@ -129,12 +151,17 @@ export default function ProfileEditor({ data, onChange, onBack, hasChanges, onCl
       {/* Profile Summary */}
       <div className="flex items-center justify-start mb-8 opacity-70">
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-dark border border-white/5">
-          <span className="material-symbols-outlined text-primary text-sm">person</span>
-          <span className="text-xs font-medium tracking-wide text-text-muted uppercase font-mono">{t('Financial Override')}</span>
+          <span className="material-symbols-outlined text-primary text-sm">
+            {activeTab === 'general' ? 'person' : 'analytics'}
+          </span>
+          <span className="text-xs font-medium tracking-wide text-text-muted uppercase font-mono">
+            {activeTab === 'general' ? t('Financial Override') : t('profit.analytics')}
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 w-full max-w-7xl mx-auto">
+      {activeTab === 'general' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 w-full max-w-7xl mx-auto">
 
         {/* Left: Funds */}
         <div className="flex flex-col gap-8">
@@ -323,11 +350,12 @@ export default function ProfileEditor({ data, onChange, onBack, hasChanges, onCl
             </div>
           </section>
         </div>
-
       </div>
-
-
-
+      ) : (
+        <div className={activeTab === 'profit' ? 'block' : 'hidden'}>
+          <MoneyEditor data={data} maximizeProfit={maximizeProfit} onMaximizeProfit={onMaximizeProfit} />
+        </div>
+      )}
 
       <div className="fixed bottom-0 left-0 w-full h-1/2 pointer-events-none z-0 opacity-10">
         <div className="w-full h-full bg-gradient-to-t from-primary/20 via-transparent to-transparent" />
