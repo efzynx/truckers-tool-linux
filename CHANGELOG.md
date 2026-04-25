@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4-beta.1] - 2026-04-25
+
+### Added
+- **Beta Channel Launch**: Migrated from alpha to beta testing phase for the 1.2.4 feature set.
+
 ## [1.2.4-alpha.3] - 2026-04-25
 
 ### Added
@@ -17,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unified Navigation**: Consolidated "Profit Analytics" into a dedicated tab within the "Financial" (Keuangan) menu for a cleaner sidebar experience.
 - **Consistent Naming**: Renamed the sidebar menu and dashboard widgets to "Financial" (Keuangan) while maintaining "Profit Analytic" as the technical header label.
 - **Improved Tooltip Logic**: Enhanced chart tooltip positioning to prevent edge clipping and improved visual density for a more premium feel.
+- **New Screenshots**: Updated AppStream metadata with high-quality screenshots showcasing the latest UI features, including the new Financial Analytics dashboard. Simplified file naming scheme to use underscores.
 
 ### Fixed
 - **Build Error**: Resolved "Unexpected token" and "Expression expected" JSX syntax errors in `ProfileEditor.tsx` and `MoneyEditor.tsx`.

@@ -12,14 +12,21 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.node20
 
 finish-args:
+  # Network access for connecting to api.ttl.my.id and checking updates
   - --share=network
   - --share=ipc
   - --socket=fallback-x11
   - --socket=wayland
   - --device=dri
+  # Filesystem permissions for ETS2 and ATS profiles (Read/Write required for editing profiles)
+  # Standard Native Linux locations
+  - --filesystem=~/.local/share/Euro Truck Simulator 2:rw
+  - --filesystem=~/.local/share/American Truck Simulator:rw
+  # Proton prefixes (Steam Play) for Native Steam
+  # (Note: Specific paths are used to minimize access)
+  - --filesystem=~/.steam/steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2:rw
+  - --filesystem=~/.steam/steam/steamapps/compatdata/270880/pfx/drive_c/users/steamuser/Documents/American Truck Simulator:rw
   - --env=ELECTRON_TRASH=gio
-  # Allow home dir for local testing convenience (NOT used in real Flathub submission)
-  - --filesystem=home
 
 build-options:
   append-path: /usr/lib/sdk/node20/bin
@@ -39,24 +46,23 @@ modules:
     build-commands:
       - npm ci --offline
       - npm run build:all
-
+      
       - npx electron-builder --linux dir
-
+      
       - cp -a release/linux-unpacked /app/main
-
+      
       - install -Dm755 flatpak/run.sh -t /app/bin/
-
+      
       - install -Dm644 flatpak/id.my.ttl.TruckersToolLinux.desktop -t /app/share/applications/
       - install -Dm644 flatpak/id.my.ttl.TruckersToolLinux.metainfo.xml -t /app/share/metainfo/
-
+      
       - install -Dm644 build/id.my.ttl.TruckersToolLinux.png /app/share/icons/hicolor/512x512/apps/id.my.ttl.TruckersToolLinux.png
       - install -Dm644 build/id.my.ttl.TruckersToolLinux.svg /app/share/icons/hicolor/scalable/apps/id.my.ttl.TruckersToolLinux.svg
-
+      
     sources:
-      # LOCAL SOURCE — points to working directory. No git push needed to test.
       - type: dir
         path: /home/efzyn/Project/truckers-tool-linux
-
+        
       - type: file
         url: https://github.com/electron/electron/releases/download/v40.8.5/electron-v40.8.5-linux-x64.zip
         sha256: 3bce6ee4e4e481f7ce6d0be384f6c539ce16e0b9b7f46115aec6516770f6c26d

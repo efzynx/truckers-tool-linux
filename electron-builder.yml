@@ -22,11 +22,11 @@ win:
   icon: build/id.my.ttl.TruckersToolLinux.png
 linux:
   target: 
-    - dir
+    # - dir
     - pacman
-    - AppImage
-    - deb
-    - rpm
+    # - AppImage
+    # - deb
+    # - rpm
   category: Utility
   maintainer: "efzyn <me@efzyn.my.id>"
   icon: build/id.my.ttl.TruckersToolLinux.png
